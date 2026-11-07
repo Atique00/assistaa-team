@@ -3,8 +3,8 @@ importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
 importScripts('js/config.js');
 
-const CACHE = 'assistaa-v2';
-const SHELL = ['./', 'index.html', 'css/app.css?v=2', 'js/app.js?v=2', 'js/config.js?v=2', 'assets/mark.svg', 'assets/wordmark.svg', 'icons/icon-192.png', 'icons/badge-96.png'];
+const CACHE = 'assistaa-v3';
+const SHELL = ['./', 'index.html', 'css/app.css?v=3', 'js/app.js?v=3', 'js/config.js?v=3', 'assets/mark.svg', 'assets/wordmark.svg', 'icons/icon-192.png', 'icons/badge-96.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}));

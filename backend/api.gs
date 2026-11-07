@@ -1,5 +1,5 @@
 /* ====================================================================
- * Assistaa Team API v1 (for team.assistaa.com)
+ * Assistaa Team API v1 (for team.assistaa.com) · rev 3
  * Paste at the END of the existing script in BOTH sheets.
  * Everything above keeps working; the new app calls doPost().
  * ==================================================================== */
@@ -17,13 +17,40 @@ function doPost(e) {
   return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
 }
 
+const READS_ = ['login', 'info', 'me', 'boss', 'history', 'pinFree'];
+
 function api_(b) {
   const n = String(b.name || '').trim(), p = String(b.pin || '').trim();
+  const out = route_(b, n, p);
+  if (READS_.indexOf(b.action) < 0) bump_();
+  return out;
+}
+
+/* ---------- speed: remember answers for 45 s; any change clears them ---------- */
+function ver_() { return CacheService.getScriptCache().get('ver') || '0'; }
+function bump_() { CacheService.getScriptCache().put('ver', String(Date.now()), 21600); }
+function cached_(key, fn) {
+  const c = CacheService.getScriptCache();
+  const k = key + '|' + ver_();
+  const hit = c.get(k);
+  if (hit) return JSON.parse(hit);
+  const v = fn();
+  try { c.put(k, JSON.stringify(v), 45); } catch (e) {}
+  return v;
+}
+
+function route_(b, n, p) {
   switch (b.action) {
-    case 'login': return login_(p);
+    case 'login': {
+      const who = login_(p);
+      if (b.withData) who.data = who.role === 'owner' ? cached_('boss', boss_) : cached_('me:' + who.name, () => me_(who.name, p));
+      return who;
+    }
+    case 'pinFree': return { free: pinFree_(p) };
+    case 'changePin': return changePin_(n, p, String(b.newPin || '').trim());
     case 'info':
       return { team: ss_().getName().replace('Assistaa – ', ''), support: isSupport_(), names: getTeamNames(), owner: OWNER_NAME };
-    case 'me': return me_(n, p);
+    case 'me': check_(n, p); return cached_('me:' + n, () => me_(n, p));
     case 'act': doAction(n, p, b.act, b.text, b.amount);
       if (b.act === 'message') push_([OWNER_NAME], n + ' · ' + (b.amount || 'Message'), String(b.text || '').slice(0, 140), '/#inbox');
       return me_(n, p);
@@ -38,7 +65,7 @@ function api_(b) {
       return me_(n, p);
     case 'seen': check_(n, p); seenInbox_(n, b.ids || []); return { ok: true };
     case 'profile': check_(n, p); saveProfile_(n, b); return me_(n, p);
-    case 'boss': owner_(p); return boss_();
+    case 'boss': owner_(p); return cached_('boss', boss_);
     case 'send': owner_(p); sendInbox_(b.to, b.text, b.kind); return boss_();
     case 'saveTask': owner_(p); {
       const t = b.task || {};
@@ -51,6 +78,34 @@ function api_(b) {
     case 'testPush': owner_(p); return { sent: push_([b.to || OWNER_NAME], 'Assistaa', 'Notifications are working 🎉', '/') };
     default: throw new Error('Unknown action.');
   }
+}
+
+/* ---------- change PIN (from the profile screen) ---------- */
+function pinFree_(pin) {
+  const own = String(settings_().owner_pin || '').trim();
+  return pin !== own && !team_().some(t => t.pin === pin);
+}
+function changePin_(name, oldPin, newPin) {
+  if (name === OWNER_NAME) {
+    owner_(oldPin);
+    if (!/^\d{6}$/.test(newPin)) throw new Error('Your manager PIN must be 6 digits.');
+    if (team_().some(t => t.pin === newPin)) throw new Error('That PIN is already used. Pick another one.');
+    const sh = sheet_('Settings'); const v = sh.getDataRange().getValues();
+    const i = v.findIndex(r => String(r[0]).trim() === 'owner_pin');
+    if (i < 0) throw new Error('owner_pin is missing in Settings.');
+    sh.getRange(i + 1, 2).setValue("'" + newPin);
+    return { changed: true };
+  }
+  check_(name, oldPin);
+  if (!/^\d{4}$/.test(newPin)) throw new Error('Your PIN must be 4 digits.');
+  if (/^(\d)\1{3}$/.test(newPin) || ['1234', '4321', '0000', '1111'].indexOf(newPin) >= 0) throw new Error('That PIN is too easy to guess. Pick another one.');
+  if (!pinFree_(newPin)) throw new Error('That PIN is already used. Pick another one.');
+  const sh = sheet_('Team'); const v = sh.getDataRange().getValues();
+  const col = v[0].map(h => String(h).trim().toUpperCase()).indexOf('PIN');
+  const row = v.findIndex((r, k) => k > 0 && String(r[0]).trim() === name);
+  if (col < 0 || row < 1) throw new Error('Could not find you in the Team tab.');
+  sh.getRange(row + 1, col + 1).setValue("'" + newPin);
+  return { changed: true };
 }
 
 /* PIN-only login: the PIN alone tells us who it is. Too many wrong PINs pause logins for 10 minutes. */

@@ -36,6 +36,7 @@
     refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
     megaphone: '<path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2z"/><path d="M16 8a5 5 0 0 1 0 8"/>',
     phone: '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
     share: '<path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v8h14v-8"/>'
   };
   const I = (n, cls = '') => `<svg class="icon ${cls}" viewBox="0 0 24 24">${P[n] || ''}</svg>`;
@@ -160,7 +161,7 @@
       const p = pin;
       busyLogin = true; dots.style.opacity = 0.55;
       const teams = Object.keys(C.backends).filter((k) => C.backends[k].url);
-      const res = await Promise.all(teams.map((k) => api(k, { action: 'login', pin: p }).then((r) => ({ k, r })).catch((e) => ({ k, e }))));
+      const res = await Promise.all(teams.map((k) => api(k, { action: 'login', pin: p, withData: true }).then((r) => ({ k, r })).catch((e) => ({ k, e }))));
       busyLogin = false; dots.style.opacity = '';
       if (p !== pin) { if (pin.length === 6) tryIt(true); return; } // they kept typing
       const owner = res.find((x) => x.r && x.r.role === 'owner');
@@ -171,6 +172,8 @@
         if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
         $('#perr').innerHTML = `<span style="color:var(--green)">Welcome, ${esc(hit.name)} ✨</span>`;
         S = { team: hit.team, name: hit.name, pin: p }; store.set('session', S);
+        if (owner) res.forEach((x) => { if (x.r && x.r.role === 'owner' && x.r.data) B[x.k] = x.r.data; });
+        else if (mem.r.data) store.set('cache.' + mem.k + '.' + mem.r.name, mem.r.data);
         setTimeout(start, 650);
         return;
       }
@@ -315,6 +318,8 @@
       <div class="card"><h3>${I('bell')} Settings</h3>
         <div class="setting">${I('bell')}<div><b>Notifications</b><div class="small muted">Tasks and messages from ${esc(C.owner)}</div></div><div class="sp"></div><button class="switch ${notif ? 'on' : ''}" id="pushSw" aria-label="Notifications"></button></div>
         <div class="setting">${I('phone')}<div><b>Install the app</b><div class="small muted">Add Assistaa to your home screen</div></div><div class="sp"></div><button class="btn sm ghost" id="install">How</button></div>
+        <div class="setting">${I('lock')}<div><b>Change PIN</b><div class="small muted">Pick a new 4-digit PIN</div></div><div class="sp"></div><button class="btn sm ghost" id="pinBtn">Change</button></div>
+        ${S.team === 'store' && ['Rashed', 'Sabuj'].includes(S.name) ? `<div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Issue sheet and top-5 checks</div></div><div class="sp"></div><a class="btn sm ghost" href="${C.backends.store.url}?view=issues" target="_blank" rel="noopener">Open</a></div>` : ''}
         <div class="setting">${I('history')}<div><b>History</b><div class="small muted">Reports, fines and scores</div></div><div class="sp"></div><button class="btn sm ghost" id="hist">Open</button></div>
         <div class="setting">${I('out')}<div><b>Sign out</b><div class="small muted">Use another account</div></div><div class="sp"></div><button class="btn sm ghost" id="logout">Sign out</button></div>
       </div></div>`;
@@ -351,6 +356,7 @@
     if (ps) ps.onclick = () => enablePush(true);
     const ins = $('#install'); if (ins) ins.onclick = sheetInstall;
     const hi = $('#hist'); if (hi) hi.onclick = sheetHistory;
+    const pb = $('#pinBtn'); if (pb) pb.onclick = sheetPin;
     const lo = $('#logout'); if (lo) lo.onclick = () => { logout(); toast('Signed out', '', 'ok'); };
   }
 
@@ -403,13 +409,48 @@
     });
   }
 
-  async function sheetHistory() {
-    openSheet(`<h2>History</h2><p class="lead">Last 90 days</p><div id="hlist"><div class="sk" style="height:200px"></div></div>`);
-    try {
-      const h = await api(S.team, { action: 'history', name: S.name, pin: S.pin });
-      $('#hlist').innerHTML = (h.totals ? `<div class="stats" style="margin-bottom:10px"><div class="stat"><span>Messages</span><b>${h.totals.messages}</b></div><div class="stat"><span>Closed</span><b>${h.totals.closed}</b></div></div>` : '') +
-        (h.items.map((x) => `<div class="item"><span class="dot ${x.kind === 'Fine' ? 'bad' : x.kind === 'Score' ? 'ok' : ''}"></span><div class="body"><div class="t">${esc(x.kind)} <span class="muted small">· ${esc(x.when)}</span></div><div class="s">${esc(x.text)}</div>${x.reply ? `<div class="reply">${esc(x.reply)}</div>` : ''}</div></div>`).join('') || emptyBox('history', 'Nothing yet.'));
-    } catch (e) { $('#hlist').innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+  function sheetHistory() {
+    const iso = (d) => d.toISOString().slice(0, 10);
+    const to = iso(new Date()), from = iso(new Date(Date.now() - 89 * 864e5));
+    openSheet(`<h2>History</h2><p class="lead">Your reports, activity, fines and scores.</p>
+      <div class="row"><div><label class="fl">From</label><input class="field" type="date" id="hf" value="${from}"></div><div><label class="fl">To</label><input class="field" type="date" id="ht" value="${to}"></div></div>
+      <button class="btn" id="hgo" style="margin:12px 0">${I('history')} Show</button><div id="hlist"></div>`, (sh) => {
+      const load = () => busy($('#hgo', sh), async () => {
+        $('#hlist', sh).innerHTML = '<div class="sk" style="height:200px"></div>';
+        try {
+          const h = await api(S.team, { action: 'history', name: S.name, pin: S.pin, from: $('#hf', sh).value, to: $('#ht', sh).value });
+          $('#hlist', sh).innerHTML = (h.totals ? `<div class="stats" style="margin-bottom:10px"><div class="stat"><span>Messages</span><b>${h.totals.messages}</b></div><div class="stat"><span>Closed</span><b>${h.totals.closed}</b></div></div>` : '') +
+            (h.items.map((x) => `<div class="item"><span class="dot ${x.kind === 'Fine' ? 'bad' : x.kind === 'Score' ? 'ok' : ''}"></span><div class="body"><div class="t">${esc(x.kind)} <span class="muted small">· ${esc(x.when)}</span></div><div class="s">${esc(x.text)}</div>${x.reply ? `<div class="reply">${esc(x.reply)}</div>` : ''}</div></div>`).join('') || emptyBox('history', 'Nothing in these dates.'));
+        } catch (e) { $('#hlist', sh).innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+      });
+      $('#hgo', sh).onclick = load; load();
+    });
+  }
+
+  function sheetPin() {
+    const boss = S.team === 'boss', len = boss ? 6 : 4;
+    openSheet(`<h2>Change PIN</h2><p class="lead">${boss ? 'Your manager PIN (6 digits). It changes for both teams.' : 'Pick a new 4-digit PIN that is easy for you to remember.'}</p>
+      <label class="fl">Current PIN</label><input class="field" id="p0" type="password" inputmode="numeric" maxlength="${len}" autocomplete="off">
+      <label class="fl">New PIN</label><input class="field" id="p1" type="password" inputmode="numeric" maxlength="${len}" autocomplete="off">
+      <label class="fl">New PIN again</label><input class="field" id="p2" type="password" inputmode="numeric" maxlength="${len}" autocomplete="off">
+      <div class="err" id="perr2"></div><button class="btn" id="pgo">${I('lock')} Save new PIN</button>`, (sh) => {
+      $('#pgo', sh).onclick = () => {
+        const o = $('#p0', sh).value.trim(), n1 = $('#p1', sh).value.trim(), n2 = $('#p2', sh).value.trim(), err = $('#perr2', sh);
+        if (o !== S.pin) { err.textContent = 'Your current PIN is not right.'; return; }
+        if (!new RegExp('^\\d{' + len + '}$').test(n1)) { err.textContent = 'The new PIN must be ' + len + ' digits.'; return; }
+        if (n1 !== n2) { err.textContent = 'The two new PINs are not the same.'; return; }
+        if (n1 === o) { err.textContent = 'That is your current PIN. Pick a new one.'; return; }
+        busy($('#pgo', sh), async () => {
+          const teams = Object.keys(C.backends).filter((k) => C.backends[k].url);
+          const free = await Promise.all(teams.map((k) => api(k, { action: 'pinFree', pin: n1 })));
+          if (free.some((f) => !f.free)) throw new Error('That PIN is already used. Pick another one.');
+          if (boss) await Promise.all(teams.map((k) => api(k, { action: 'changePin', name: C.owner, pin: o, newPin: n1 })));
+          else await api(S.team, { action: 'changePin', name: S.name, pin: o, newPin: n1 });
+          S.pin = n1; store.set('session', S);
+          closeSheet(); confetti(); toast('PIN changed 🔐', 'Use your new PIN next time you sign in.', 'ok');
+        }).catch((e) => { err.textContent = e.message; });
+      };
+    });
   }
 
   function sheetInstall() {
@@ -456,11 +497,12 @@
   let bossTeam = store.get('bossTeam', 'store');
   let bossTab = 'team';
   async function loadBoss(quiet) {
-    const teams = Object.keys(C.backends).filter((k) => C.backends[k].url);
-    await Promise.all(teams.map(async (k) => {
-      try { B[k] = await api(k, { action: 'boss', pin: S.pin }); } catch (e) { if (!quiet) toast('Could not load ' + C.backends[k].label, e.message, 'bad'); }
-    }));
-    render(quiet);
+    const teams = Object.keys(C.backends).filter((k) => C.backends[k].url).sort((a, b) => (a === bossTeam ? -1 : b === bossTeam ? 1 : 0));
+    const one = async (k) => {
+      try { B[k] = await api(k, { action: 'boss', pin: S.pin }); store.set('bossCache.' + k, B[k]); if (k === bossTeam) render(true); }
+      catch (e) { if (/PIN/i.test(e.message)) { logout(); toast('Please sign in again', '', 'bad'); } else if (!quiet) toast('Could not load ' + C.backends[k].label, e.message, 'bad'); }
+    };
+    await Promise.all(teams.map(one));
   }
   function renderBoss(soft) {
     const d = B[bossTeam];
@@ -473,7 +515,7 @@
     requestAnimationFrame(() => { const on = $('#nav button.on'), hl = $('#nav .hl'); if (on) { hl.style.left = on.offsetLeft + 'px'; hl.style.width = on.offsetWidth + 'px'; } });
     void pendingReplies;
     const teams = Object.keys(C.backends).filter((k) => C.backends[k].url);
-    const head = `<div class="top">${avatar(C.owner, '', 52)}<div><div class="sub">${greet()},</div><h1>${esc(C.owner)} <span style="font-size:18px">👑</span></h1></div><div class="sp"></div><button class="iconbtn" id="refresh">${I('refresh')}</button><button class="iconbtn" id="bellB" style="margin-left:8px">${I('bell')}</button></div>
+    const head = `<div class="top">${avatar(C.owner, '', 52)}<div><div class="sub">${greet()},</div><h1>${esc(C.owner)} <span style="font-size:18px">👑</span></h1></div><div class="sp"></div><button class="iconbtn" id="refresh">${I('refresh')}</button><button class="iconbtn" id="bellB" style="margin-left:8px" aria-label="Notifications">${I('bell')}</button><button class="iconbtn" id="moreB" style="margin-left:8px" aria-label="Settings">${I('user')}</button></div>
       <div class="tabs">${teams.map((k) => `<button data-bt="${k}" class="${k === bossTeam ? 'on' : ''}">${esc(C.backends[k].label)}</button>`).join('')}</div>`;
     let body = '';
     if (!d) body = `<div class="sk" style="height:120px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`;
@@ -487,6 +529,15 @@
     $$('[data-bt]').forEach((b) => b.onclick = () => { bossTeam = b.dataset.bt; store.set('bossTeam', bossTeam); renderBoss(); });
     $('#refresh').onclick = () => loadBoss();
     $('#bellB').onclick = () => enablePush(true);
+    $('#moreB').onclick = () => openSheet(`<h2>Settings</h2><p class="lead">Manager account</p>
+      <div class="setting">${I('lock')}<div><b>Change PIN</b><div class="small muted">Changes it for both teams</div></div><div class="sp"></div><button class="btn sm ghost" id="pinBtn2">Change</button></div>
+      <div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Store issue sheet</div></div><div class="sp"></div><a class="btn sm ghost" href="${C.backends.store.url}?view=issues" target="_blank" rel="noopener">Open</a></div>
+      <div class="setting">${I('bell')}<div><b>Notifications</b><div class="small muted">Replies and reports from the team</div></div><div class="sp"></div><button class="btn sm ghost" id="pushB2">Turn on</button></div>
+      <div class="setting">${I('out')}<div><b>Sign out</b></div><div class="sp"></div><button class="btn sm ghost" id="lo2">Sign out</button></div>`, (sh) => {
+      $('#pinBtn2', sh).onclick = () => { closeSheet(); setTimeout(sheetPin, 420); };
+      $('#pushB2', sh).onclick = () => { closeSheet(); enablePush(true); };
+      $('#lo2', sh).onclick = () => { closeSheet(); logout(); };
+    });
     $$('[data-person]').forEach((b) => b.onclick = () => sheetPerson(b.dataset.person));
     $$('[data-newtask]').forEach((b) => b.onclick = () => sheetTask({ owner: b.dataset.newtask || '' }));
     $$('[data-edit]').forEach((b) => b.onclick = () => sheetTask(d.tasks.find((t) => String(t.row) === b.dataset.edit)));
@@ -631,7 +682,8 @@
     const h = location.hash.slice(1);
     if (S.team === 'boss') {
       bossTab = ['team', 'btasks', 'bmsg', 'breports'].includes(h) ? h : (h === 'boss' ? 'team' : 'team');
-      renderBoss(); loadBoss();
+      Object.keys(C.backends).forEach((k) => { if (!B[k]) { const c = store.get('bossCache.' + k, null); if (c) B[k] = c; } });
+      renderBoss(); loadBoss(true);
       timer = setInterval(() => { if (!document.hidden) loadBoss(true); }, 60000);
     } else {
       tab = ['home', 'tasks', 'inbox', 'me'].includes(h) ? h : 'home';
@@ -653,5 +705,6 @@
     else if (S.team !== 'boss' && ['home', 'tasks', 'inbox', 'me'].includes(h) && h !== tab) { tab = h; render(); }
   });
 
-  setTimeout(() => { hideSplash(); if (S) start(); else viewWelcome(); }, 2300);
+  let seen = false; try { seen = sessionStorage.getItem('assistaa.splash') === '1'; sessionStorage.setItem('assistaa.splash', '1'); } catch (e) {}
+  setTimeout(() => { hideSplash(); if (S) start(); else viewWelcome(); }, seen ? 700 : 1900);
 })();

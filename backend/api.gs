@@ -20,6 +20,7 @@ function doPost(e) {
 function api_(b) {
   const n = String(b.name || '').trim(), p = String(b.pin || '').trim();
   switch (b.action) {
+    case 'login': return login_(p);
     case 'info':
       return { team: ss_().getName().replace('Assistaa – ', ''), support: isSupport_(), names: getTeamNames(), owner: OWNER_NAME };
     case 'me': return me_(n, p);
@@ -50,6 +51,21 @@ function api_(b) {
     case 'testPush': owner_(p); return { sent: push_([b.to || OWNER_NAME], 'Assistaa', 'Notifications are working 🎉', '/') };
     default: throw new Error('Unknown action.');
   }
+}
+
+/* PIN-only login: the PIN alone tells us who it is. Too many wrong PINs pause logins for 10 minutes. */
+function login_(pin) {
+  const cache = CacheService.getScriptCache();
+  const fails = Number(cache.get('login-fails') || 0);
+  if (fails >= 40) throw new Error('Too many wrong PINs. Wait 10 minutes and try again.');
+  if (/^\d{4,8}$/.test(pin)) {
+    const own = String(settings_().owner_pin || '').trim();
+    if (own && pin === own) return { role: 'owner', name: OWNER_NAME, team: ss_().getName().replace('Assistaa – ', ''), support: isSupport_() };
+    const m = team_().find(t => t.pin && t.pin === pin);
+    if (m) return { role: 'member', name: m.name, team: ss_().getName().replace('Assistaa – ', ''), support: isSupport_() };
+  }
+  cache.put('login-fails', String(fails + 1), 600);
+  throw new Error('Wrong PIN');
 }
 
 function me_(n, p) {

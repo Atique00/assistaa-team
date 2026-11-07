@@ -131,72 +131,59 @@
   /* =========================================================
    *  LOGIN
    * ========================================================= */
+  /* One screen: type your PIN and the app knows who you are. */
   function viewWelcome() {
     $('#nav').hidden = true; $('#fabSlot').innerHTML = '';
-    app.innerHTML = `<div class="view">
-      <div class="hero stagger">
+    let pin = '', waitT = null, busyLogin = false;
+    app.innerHTML = `<div class="view pin-wrap">
+      <div class="hero stagger" style="padding-bottom:6px">
         <img class="mk" src="assets/mark.svg" alt="">
         <h1>Welcome to <b>Assistaa</b></h1>
-        <p>Your workday, tasks and team in one place.</p>
+        <p>Enter your PIN to open your profile</p>
       </div>
-      <div class="label" style="margin:0 4px 10px">Choose your team</div>
-      <div class="stagger">
-        ${Object.entries(C.backends).filter(([, b]) => b.url).map(([k, b]) => `
-          <button class="choice" data-team="${k}"><div class="ic">${I(b.icon)}</div><div><b>${esc(b.label)}</b><span>${esc(b.sub)}</span></div>${I('chev', 'chev')}</button>`).join('')}
-        <button class="choice" data-team="boss"><div class="ic" style="color:#ffd56b">${I('crown')}</div><div><b>I'm ${esc(C.owner)}</b><span>Manager view for both teams</span></div>${I('chev', 'chev')}</button>
-      </div></div>`;
-    $$('[data-team]').forEach((b) => b.onclick = () => b.dataset.team === 'boss' ? viewPin('boss', C.owner) : viewNames(b.dataset.team));
-  }
-
-  async function viewNames(team) {
-    app.innerHTML = `<div class="view">
-      <button class="iconbtn" id="back">${I('back')}</button>
-      <div class="hero" style="padding-top:8px"><h1 style="font-size:26px">Who's this?</h1><p>${esc(C.backends[team].label)}</p></div>
-      <div class="people" id="ppl">${'<div class="sk" style="height:150px"></div>'.repeat(4)}</div></div>`;
-    $('#back').onclick = viewWelcome;
-    try {
-      const info = await api(team, { action: 'info' });
-      $('#ppl').innerHTML = info.names.map((n) => `<button class="person" data-n="${esc(n)}">${avatar(n, '', 64)}<b>${esc(n)}</b><small>${esc(info.team)}</small></button>`).join('');
-      $('#ppl').classList.add('stagger');
-      $$('#ppl [data-n]').forEach((b) => b.onclick = () => viewPin(team, b.dataset.n));
-    } catch (e) { toast('Could not load the team', e.message, 'bad'); }
-  }
-
-  function viewPin(team, name) {
-    let pin = '';
-    app.innerHTML = `<div class="view pin-wrap">
-      <div style="text-align:left"><button class="iconbtn" id="back">${I('back')}</button></div>
-      ${avatar(name, '', 84)}
-      <h1 style="font-size:26px">Hi ${esc(name)}</h1>
-      <p class="muted" style="margin:4px 0 0">${team === 'boss' ? 'Enter your manager PIN' : 'Enter your 4-digit PIN'}</p>
-      <div class="dots" id="dots">${'<i></i>'.repeat(team === 'boss' ? 6 : 4)}</div>
+      <div class="dots" id="dots">${'<i></i>'.repeat(4)}</div>
       <div class="pinerr" id="perr"></div>
       <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button data-k="${n}">${n}</button>`).join('')}<button class="fn" data-k="c">Clear</button><button data-k="0">0</button><button class="fn" data-k="b">⌫</button></div>
     </div>`;
-    $('#back').onclick = () => team === 'boss' ? viewWelcome() : viewNames(team);
-    const len = team === 'boss' ? 6 : 4;
     const dots = $('#dots');
-    const paint = () => $$('i', dots).forEach((d, i) => d.classList.toggle('on', i < pin.length));
-    const tryIt = async () => {
-      try {
-        if (team === 'boss') await api('store', { action: 'boss', pin });
-        else await api(team, { action: 'me', name, pin });
+    const paint = () => {
+      const n = Math.max(4, pin.length);
+      if (dots.children.length !== n) dots.innerHTML = '<i></i>'.repeat(n);
+      $$('i', dots).forEach((d, i) => d.classList.toggle('on', i < pin.length));
+    };
+    const fail = (msg) => {
+      dots.classList.add('bad'); $('#perr').textContent = msg;
+      if (navigator.vibrate) navigator.vibrate([40, 50, 40]);
+      setTimeout(() => { dots.classList.remove('bad'); pin = ''; paint(); }, 650);
+    };
+    const tryIt = async (final) => {
+      const p = pin;
+      busyLogin = true; dots.style.opacity = 0.55;
+      const teams = Object.keys(C.backends).filter((k) => C.backends[k].url);
+      const res = await Promise.all(teams.map((k) => api(k, { action: 'login', pin: p }).then((r) => ({ k, r })).catch((e) => ({ k, e }))));
+      busyLogin = false; dots.style.opacity = '';
+      if (p !== pin) { if (pin.length === 6) tryIt(true); return; } // they kept typing
+      const owner = res.find((x) => x.r && x.r.role === 'owner');
+      const mem = res.find((x) => x.r && x.r.role === 'member');
+      const hit = owner ? { team: 'boss', name: C.owner } : mem ? { team: mem.k, name: mem.r.name } : null;
+      if (hit) {
         dots.classList.add('ok');
         if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
-        S = { team, name, pin }; store.set('session', S);
-        setTimeout(start, 450);
-      } catch (e) {
-        dots.classList.add('bad'); $('#perr').textContent = /PIN/i.test(e.message) ? 'Wrong PIN. Try again.' : e.message;
-        if (navigator.vibrate) navigator.vibrate([40, 50, 40]);
-        setTimeout(() => { dots.classList.remove('bad'); pin = ''; paint(); }, 650);
+        $('#perr').innerHTML = `<span style="color:var(--green)">Welcome, ${esc(hit.name)} ✨</span>`;
+        S = { team: hit.team, name: hit.name, pin: p }; store.set('session', S);
+        setTimeout(start, 650);
+        return;
       }
+      const other = res.find((x) => x.e && !/PIN/i.test(x.e.message));
+      if (final || pin.length >= 6) fail(other ? other.e.message : 'Wrong PIN. Try again.');
+      else waitT = setTimeout(() => { if (pin === p) fail(other ? other.e.message : 'Wrong PIN. Try again.'); }, 1400);
     };
     $$('.pad button').forEach((b) => b.onclick = () => {
       const k = b.dataset.k;
-      $('#perr').textContent = '';
-      if (k === 'c') pin = ''; else if (k === 'b') pin = pin.slice(0, -1); else if (pin.length < len) pin += k;
+      clearTimeout(waitT); $('#perr').textContent = '';
+      if (k === 'c') pin = ''; else if (k === 'b') pin = pin.slice(0, -1); else if (pin.length < 8) pin += k;
       paint();
-      if (pin.length === len) tryIt();
+      if (/\d/.test(k) && !busyLogin && (pin.length === 4 || pin.length === 6)) tryIt(pin.length === 6);
     });
   }
 

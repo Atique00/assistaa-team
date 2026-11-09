@@ -1,7 +1,7 @@
 # Assistaa on Supabase — Phase 1 status
 
 Project: **assistaa** · ref `zciuchdximmzwiisdkqu` · region Singapore · Free plan
-API: `https://zciuchdximmzwiisdkqu.supabase.co` · publishable key in `js/config.js` (safe to be public; RLS protects data)
+API: `https://zciuchdximmzwiisdkqu.supabase.co` · publishable key `sb_publishable_WMggW823F5JaQWI5tZUn3A_2RCcqKcA` (safe to be public; RLS protects data) goes into `js/config.js` for the test version
 
 ## What is live (9 Nov 2026)
 | Piece | State |

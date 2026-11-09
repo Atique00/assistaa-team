@@ -629,26 +629,29 @@
   /* =========================================================
    *  PUSH NOTIFICATIONS
    * ========================================================= */
-  let messaging = null, swReg = null;
-  async function setupFirebase() {
-    if (!('serviceWorker' in navigator) || !window.firebase) return;
+  let messaging = null, swReg = null, pushErr = '', setupP = null;
+  function setupFirebase() { if (!setupP) setupP = setupFirebase_(); return setupP; }
+  async function setupFirebase_() {
+    if (!('serviceWorker' in navigator)) { pushErr = 'This browser has no service worker support.'; return; }
+    if (!window.firebase) { pushErr = 'Firebase did not load. Check the internet connection and reopen the app.'; return; }
     try {
       swReg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
       if (!firebase.apps.length) firebase.initializeApp(C.firebase);
-      if (firebase.messaging.isSupported && !(await firebase.messaging.isSupported())) return;
+      if (firebase.messaging.isSupported && !(await firebase.messaging.isSupported())) { pushErr = 'This browser does not support push. Use Chrome on Android, or install the app on iPhone.'; return; }
       messaging = firebase.messaging();
       messaging.onMessage((p) => {
         const d = p.data || {};
         toast(d.title || 'Assistaa', d.body || '', '', 'bell');
         if (S && S.team === 'boss') loadBoss(true); else if (S) loadMe(true);
       });
-    } catch (e) { console.log('push setup', e); }
+    } catch (e) { pushErr = 'Setup failed: ' + (e && e.message || e); setupP = null; console.log('push setup', e); }
   }
   async function enablePush(ask) {
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     if (ios && !standalone) { sheetInstall(); return; }
-    if (!('Notification' in window) || !messaging) { toast('Notifications not supported', 'Open the app in Chrome (Android) or install it on iPhone.', 'bad'); return; }
+    if (!messaging) await setupFirebase();
+    if (!('Notification' in window) || !messaging) { toast('Notifications could not start', pushErr || 'Open the app in Chrome (Android) or install it on iPhone.', 'bad'); return; }
     if (Notification.permission !== 'granted') {
       if (!ask) return;
       const r = await Notification.requestPermission();
@@ -656,7 +659,7 @@
     }
     try {
       const token = await messaging.getToken({ vapidKey: C.vapidKey, serviceWorkerRegistration: swReg });
-      if (!token) throw new Error('No token');
+      if (!token) throw new Error('Google gave no token. Try again in a minute.');
       const device = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
       if (S.team === 'boss') {
         await Promise.all(Object.keys(C.backends).filter((k) => C.backends[k].url).map((k) => api(k, { action: 'token', name: C.owner, pin: S.pin, token, device, origin: BASE })));
@@ -664,8 +667,12 @@
         await api(S.team, { action: 'token', name: S.name, pin: S.pin, token, device, origin: BASE });
       }
       store.set('pushOn.' + S.team + '.' + S.name, true);
-      if (ask) { toast('Notifications on 🔔', 'You will get a ping for new tasks and messages.', 'ok'); if (tab === 'me') render(true); }
-    } catch (e) { if (ask) toast('Could not turn on notifications', e.message, 'bad'); }
+      if (ask) {
+        toast('Notifications on 🔔', 'You will get a ping for new tasks and messages.', 'ok');
+        if (S.team === 'boss') api('store', { action: 'testPush', pin: S.pin, to: C.owner }).catch(() => {});
+        if (tab === 'me') render(true);
+      }
+    } catch (e) { if (ask) toast('Could not turn on notifications', (e && (e.code || e.message)) || String(e), 'bad'); }
   }
   function nudgePush() {
     if (!messaging || !('Notification' in window) || Notification.permission === 'granted' || store.get('nudged', false)) return;

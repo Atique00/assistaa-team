@@ -1,5 +1,5 @@
 /* Assistaa Team app settings. Safe to be public: no passwords or secrets here. */
-window.ASSISTAA = {
+self.ASSISTAA = {
   owner: 'Atiq',
   backends: {
     store: {

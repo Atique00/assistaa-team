@@ -1,0 +1,56 @@
+# Nightly backup of the Assistaa Supabase database.
+# The dump is ENCRYPTED (AES-256, passphrase only Atiq knows) before it leaves the
+# runner, then kept as a private workflow artifact for 30 days.
+# Needs two repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL      the "Session pooler" connection string from Supabase → Connect
+#   BACKUP_PASSPHRASE    any long passphrase; keep it in your password manager
+# Restore:  gpg -d assistaa-YYYY-MM-DD.dump.gpg > db.dump && pg_restore -d "$NEW_DB_URL" --no-owner db.dump
+name: db-backup
+
+on:
+  schedule:
+    - cron: "47 20 * * *"   # 02:47 Dhaka time, every night
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    container: postgres:17
+    steps:
+      - name: Check secrets
+        id: chk
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PW: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$DB" ] || [ -z "$PW" ]; then
+            echo "Secrets not set yet — skipping backup."; echo "ok=false" >> "$GITHUB_OUTPUT"
+          else echo "ok=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Dump and encrypt
+        if: steps.chk.outputs.ok == 'true'
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+          PW: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          apt-get update -qq && apt-get install -y -qq gnupg >/dev/null
+          D=$(date -u +%F)
+          pg_dump "$DB" --format=custom --no-owner --no-privileges \
+            --schema=public --schema=private --schema=auth --file=db.dump
+          ls -lh db.dump
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$PW" \
+              --symmetric --cipher-algo AES256 -o "assistaa-$D.dump.gpg" db.dump
+          rm db.dump
+          echo "D=$D" >> "$GITHUB_ENV"
+
+      - name: Keep the encrypted file
+        if: steps.chk.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: assistaa-db-${{ env.D }}
+          path: assistaa-*.dump.gpg
+          retention-days: 30
+          if-no-files-found: error

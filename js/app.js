@@ -135,7 +135,7 @@
   /* One screen: type your PIN and the app knows who you are. */
   function viewWelcome() {
     $('#nav').hidden = true; $('#fabSlot').innerHTML = '';
-    let pin = '', waitT = null, busyLogin = false;
+    let pin = '', waitT = null, busyLogin = false, wantGo = false;
     app.innerHTML = `<div class="view pin-wrap">
       <div class="hero stagger" style="padding-bottom:6px">
         <img class="mk" src="assets/mark.svg" alt="">
@@ -144,7 +144,8 @@
       </div>
       <div class="dots" id="dots">${'<i></i>'.repeat(4)}</div>
       <div class="pinerr" id="perr"></div>
-      <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button data-k="${n}">${n}</button>`).join('')}<button class="fn" data-k="c">Clear</button><button data-k="0">0</button><button class="fn" data-k="b">⌫</button></div>
+      <div class="pad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `<button data-k="${n}">${n}</button>`).join('')}<button class="fn" data-k="b" aria-label="Delete">⌫</button><button data-k="0">0</button><button class="fn ok" data-k="go" aria-label="Sign in">${I('check')}</button></div>
+      <p class="muted small" style="margin-top:14px">4-digit PIN for the team · 6-digit PIN for the manager</p>
     </div>`;
     const dots = $('#dots');
     const paint = () => {
@@ -163,6 +164,8 @@
       const teams = Object.keys(C.backends).filter((k) => C.backends[k].url);
       const res = await Promise.all(teams.map((k) => api(k, { action: 'login', pin: p, withData: true }).then((r) => ({ k, r })).catch((e) => ({ k, e }))));
       busyLogin = false; dots.style.opacity = '';
+      if (wantGo && p === pin) final = true;
+      wantGo = false;
       if (p !== pin) { if (pin.length === 6) tryIt(true); return; } // they kept typing
       const owner = res.find((x) => x.r && x.r.role === 'owner');
       const mem = res.find((x) => x.r && x.r.role === 'member');
@@ -178,15 +181,20 @@
         return;
       }
       const other = res.find((x) => x.e && !/PIN/i.test(x.e.message));
+      // a 4-digit miss may be the start of a 6-digit manager PIN: stay quiet unless they pressed ✓ or reached 6
       if (final || pin.length >= 6) fail(other ? other.e.message : 'Wrong PIN. Try again.');
-      else waitT = setTimeout(() => { if (pin === p) fail(other ? other.e.message : 'Wrong PIN. Try again.'); }, 1400);
     };
     $$('.pad button').forEach((b) => b.onclick = () => {
       const k = b.dataset.k;
       clearTimeout(waitT); $('#perr').textContent = '';
-      if (k === 'c') pin = ''; else if (k === 'b') pin = pin.slice(0, -1); else if (pin.length < 8) pin += k;
+      if (k === 'go') {
+        if (pin.length < 4) { fail('Enter at least 4 digits.'); return; }
+        if (busyLogin) wantGo = true; else tryIt(true);
+        return;
+      }
+      if (k === 'b') pin = pin.slice(0, -1); else if (pin.length < 6) pin += k;
       paint();
-      if (/\d/.test(k) && !busyLogin && (pin.length === 4 || pin.length === 6)) tryIt(pin.length === 6);
+      if (!busyLogin && (pin.length === 4 || pin.length === 6)) tryIt(pin.length === 6);
     });
   }
 

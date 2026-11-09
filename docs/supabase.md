@@ -6,7 +6,7 @@ API: `https://zciuchdximmzwiisdkqu.supabase.co` · publishable key in `js/config
 ## What is live (9 Nov 2026)
 | Piece | State |
 |---|---|
-| Schema `supabase/migrations/0001_core.sql` | applied — 55 tables, RLS on every table |
+| Schema `supabase/migrations/0001_core.sql` | applied — 51 tables in the API schema + 1 private PIN table, RLS on every table |
 | PIN helpers `0002_pin_functions` | applied — server-only (`service_role`) |
 | Data copied from both Google Sheets | team (9 people), settings, rules, stores, 30 activity events, 26 reports, 8 tasks (+5 owners), 30 support person-days of stats, ticket split |
 | PINs | bcrypt hashes in `private.employee_pins`; plain PINs are **not** in Supabase |

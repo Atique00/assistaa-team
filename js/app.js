@@ -623,7 +623,7 @@
     return `
       ${sup ? `<div class="card"><h3>${I('headset')} Ticket split <span class="cnt">from ${esc(sp.from_date || '—')}</span></h3>
         ${Object.entries(sp.shares || {}).map(([n, v]) => `<div class="item"><span class="dot ok"></span><div class="body"><div class="t">${esc(n)} · ${esc(v)}</div><div class="s">≈ ${Math.round(v / shareSum * 100)}% of new tickets${given[n] != null ? ' · ' + given[n] + ' given today' : ''}</div></div></div>`).join('')}
-        <div class="item"><span class="dot"></span><div class="body"><div class="t">Dipon · ${esc(sp.dipon_tickets || 0)} tickets a day</div><div class="s">Fixed number, never automatic</div></div></div>
+        ${sp.dipon_tickets ? `<div class="item"><span class="dot"></span><div class="body"><div class="t">Dipon extra · ${esc(sp.dipon_tickets)} tickets a day</div><div class="s">On top of his share</div></div></div>` : ''}
         <div class="small muted" style="margin:8px 0">New tickets are split at about 10:05, 13:05 and 16:05 (not Friday), oldest first.</div>
         <button class="btn ghost" id="aSplit">${I('refresh')} Change split</button></div>` : ''}
       <div class="card"><h3>${I('team')} People <span class="cnt">${people.filter((p) => p.active).length}</span></h3>
@@ -725,10 +725,10 @@
   }
   function sheetAdminSplit() {
     const sp = A.split || { shares: {}, dipon_tickets: 0 };
-    const names = A.people.filter((p) => p.team === 'support' && p.active && p.name !== 'Dipon').map((p) => p.name);
+    const names = A.people.filter((p) => p.team === 'support' && p.active).map((p) => p.name);
     openSheet(`<h2>Ticket split</h2><p class="lead">Share of new tickets for each person. The numbers are scaled to 100%, so 30 / 25 / 22 works too. Put 0 to give someone none.</p>
       ${names.map((n) => `<label class="fl">${esc(n)}</label><input class="field" data-share="${esc(n)}" type="number" inputmode="numeric" min="0" max="100" value="${esc((sp.shares || {})[n] ?? 0)}">`).join('')}
-      <label class="fl">Dipon (fixed tickets per day)</label><input class="field" id="sd" type="number" inputmode="numeric" min="0" max="500" value="${esc(sp.dipon_tickets || 0)}">
+      <label class="fl">Dipon extra (fixed tickets per day on top of his %, usually 0)</label><input class="field" id="sd" type="number" inputmode="numeric" min="0" max="500" value="${esc(sp.dipon_tickets || 0)}">
       <label class="fl">Note (optional)</label><input class="field" id="sn" maxlength="200">
       <div class="err" id="serr2"></div><button class="btn" id="sgo2">${I('check')} Save split</button>`, (sh) => {
       $('#sgo2', sh).onclick = () => busy($('#sgo2', sh), async () => {
@@ -890,7 +890,7 @@
     });
   }
   /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
-  const APP_VERSION = '11';
+  const APP_VERSION = '12';
   let lastVersionCheck = 0;
   async function checkVersion() {
     if (Date.now() - lastVersionCheck < 5 * 60000) return;

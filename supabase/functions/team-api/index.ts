@@ -74,7 +74,7 @@ async function pinOk(empId: string, pin: string) {
 async function tooMany(ip: string) {
   const [r] = await sql`select count(*) filter (where ip_hash = ${ip})::int mine, count(*)::int total
     from public.login_attempts where not ok and at > now() - interval '10 minutes'`;
-  if (r.mine >= 30 || r.total >= 100) fail("Too many wrong PINs. Wait 10 minutes and try again.");
+  if (r.mine >= 30 || r.total >= 300) fail("Too many wrong PINs. Wait 10 minutes and try again.");
 }
 const logTry = (empId: string | null, ok: boolean, ip: string) =>
   sql`insert into public.login_attempts (employee_id, ok, ip_hash) values (${empId}, ${ok}, ${ip})`;
@@ -445,7 +445,7 @@ async function sendInbox(team: Team, o: Emp, to: string, text: string, kind: str
   const people = await members(team.id);
   const targets = to === "all" ? people : people.filter((p) => p.display_name === String(to || "").trim());
   if (!targets.length) fail("Pick a person.");
-  const k = kind || "Message";
+  const k = String(kind || "Message").slice(0, 30);
   const rows = targets.map((p) => ({ to_id: p.id, from_id: o.id, body: msg, kind: k }));
   await sql`insert into public.inbox_messages ${sql(rows, "to_id", "from_id", "body", "kind")}`;
   push(targets.map((p) => p.id), `${k} from ${OWNER}`, msg.slice(0, 140), "/#inbox");
@@ -458,6 +458,7 @@ async function changePin(team: Team, name: string, oldPin: string, newPin: strin
     owner_pin_6_digits: "Your manager PIN must be 6 digits.", pin_4_digits: "Your PIN must be 4 digits.",
     pin_too_easy: "That PIN is too easy to guess. Pick another one.", pin_taken: "That PIN is already used. Pick another one.",
   };
+  if (r.res === "pin_taken") await logTry(who.id, false, ip);
   if (r.res !== "ok") fail(msg[r.res] || "Could not change the PIN.");
   await sql`insert into public.audit_logs (actor_id, table_name, row_id, action) values (${who.id}, 'employee_pins', ${who.id}, 'update')`;
   return { changed: true };
@@ -484,8 +485,14 @@ async function route(teamKey: string, b: Record<string, any>, ip: string) {
       return who;
     }
     case "pinFree": {
-      const [r] = await sql`select public.pin_find(${p}) id`;
-      return { free: !r?.id };
+      // only a signed-in person may ask, and every "taken" answer counts as a failed try (no PIN guessing)
+      const who = n === OWNER ? await checkOwner(p, ip) : await checkMember(team, n, p, ip);
+      const want = String(b.newPin || "").trim();
+      if (!/^\d{4,8}$/.test(want)) return { free: false };
+      const [r] = await sql`select public.pin_find(${want})::text id`;
+      const free = !r?.id || r.id === who.id;
+      if (!free) await logTry(who.id, false, ip);
+      return { free };
     }
     case "changePin": return changePin(team, n, p, String(b.newPin || "").trim(), ip);
     case "info": return { team: team.name, support: team.key === "support", names: (await members(team.id)).map((x) => x.display_name), owner: OWNER };

@@ -454,11 +454,12 @@
         if (n1 !== n2) { err.textContent = 'The two new PINs are not the same.'; return; }
         if (n1 === o) { err.textContent = 'That is your current PIN. Pick a new one.'; return; }
         busy($('#pgo', sh), async () => {
-          const teams = Object.keys(C.backends).filter((k) => C.backends[k].url);
-          const free = await Promise.all(teams.map((k) => api(k, { action: 'pinFree', pin: n1 })));
-          if (free.some((f) => !f.free)) throw new Error('That PIN is already used. Pick another one.');
-          if (boss) await Promise.all(teams.map((k) => api(k, { action: 'changePin', name: C.owner, pin: o, newPin: n1 })));
-          else await api(S.team, { action: 'changePin', name: S.name, pin: o, newPin: n1 });
+          // one backend holds every PIN now: ask once, change once
+          const team = boss ? Object.keys(C.backends).find((k) => C.backends[k].url) : S.team;
+          const who = boss ? C.owner : S.name;
+          const free = await api(team, { action: 'pinFree', name: who, pin: o, newPin: n1 });
+          if (!free.free) throw new Error('That PIN is already used. Pick another one.');
+          await api(team, { action: 'changePin', name: who, pin: o, newPin: n1 });
           S.pin = n1; store.set('session', S);
           closeSheet(); confetti(); toast('PIN changed 🔐', 'Use your new PIN next time you sign in.', 'ok');
         }).catch((e) => { err.textContent = e.message; });
@@ -721,7 +722,7 @@
     });
   }
   /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
-  const APP_VERSION = '9';
+  const APP_VERSION = '10';
   let lastVersionCheck = 0;
   async function checkVersion() {
     if (Date.now() - lastVersionCheck < 5 * 60000) return;

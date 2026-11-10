@@ -16,7 +16,7 @@ API: `https://zciuchdximmzwiisdkqu.supabase.co` · publishable key `sb_publishab
 | Test app | https://team.assistaa.com/next/ — built by `tools/build-next.sh`, own storage (`assistaa-next.`), TEST label |
 | Push from Supabase | waits for secret `FIREBASE_SERVICE_ACCOUNT`; until then saved to `notifications` |
 
-Not copied (on purpose): `owner_pin` (hashed instead), Sabuj's profile photo (moves to Storage at switch-over), "Issue Seen" (a cache the issue portal rebuilds), empty tabs (Inbox, Fines, Scores, Push Tokens, Client Messages, Tickets Waiting).
+Not copied (on purpose): `owner_pin` (hashed instead), "Issue Seen" (a cache the issue portal rebuilds), empty tabs (Inbox, Fines, Scores, Push Tokens, Client Messages, Tickets Waiting).
 
 ## Access rules (tested with real sessions)
 - Owner/admin: everything.

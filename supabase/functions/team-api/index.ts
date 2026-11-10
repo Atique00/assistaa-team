@@ -233,6 +233,7 @@ async function me(team: Team, m: Emp) {
     support ? Promise.resolve([] as Task[]) : teamTasks(team.id),
     support ? sql`select ticket_no, hours::float8, link from public.tickets_waiting where employee_id = ${m.id} order by hours desc` : Promise.resolve([]),
   ]);
+  const [assigned] = support ? await sql`select count(*)::int n from public.ticket_assign_log where employee_id = ${m.id} and day = ${today}::date` : [{ n: 0 }];
   const quiet = !!s.silent_until && today <= String(s.silent_until);
   const t = stateOf(evs[m.id] ?? []);
   const sum = (metric: string, day?: string) => stats.filter((r) => r.metric === metric && (!day || r.day === day)).reduce((a, r) => a + Number(r.v), 0);
@@ -241,6 +242,7 @@ async function me(team: Team, m: Emp) {
   const startRep = todayRep("Start report"), endRep = todayRep("End report");
   const statList = support
     ? [{ label: "Start report", value: startRep ? hm(startRep.created_at) : "Not yet" },
+       { label: "Tickets given today", value: String(assigned.n) },
        { label: "Messages today", value: String(sum("messages_sent", today)) },
        { label: "Messages this month", value: String(sum("messages_sent")) },
        { label: "Earned (৳)", value: (sum("messages_sent") * Number(m.rate_per_unit ?? 0)).toLocaleString("en-US") },
@@ -357,10 +359,14 @@ async function act(team: Team, m: Emp, a: string, text: string, amount: unknown)
       if (t.state === "off") fail("Start your day first.");
       if (t.state === "done") fail("You already finished today.");
       if (txt.length < 5) fail("Write what you did today and what is still pending.");
+      const prod = support || amount === undefined || amount === null || amount === "" ? null : Math.round(Number(amount));
+      if (prod !== null && !(prod >= 0 && prod <= 2000)) fail("Products listed must be a number from 0 to 2000.");
       await sql.begin((tx) => [
         ...(t.state === "break" ? [tx`insert into public.work_events (employee_id, event) values (${m.id}, 'break_end')`] : []),
         tx`insert into public.work_events (employee_id, event) values (${m.id}, 'done')`,
-        tx`insert into public.reports (employee_id, kind, body) values (${m.id}, 'End report', ${txt})`]);
+        tx`insert into public.reports (employee_id, kind, body) values (${m.id}, 'End report', ${prod === null ? txt : txt + "\n\nProducts listed today: " + prod})`,
+        ...(prod === null ? [] : [tx`insert into public.daily_stats (day, employee_id, metric, value) values (${ymd(new Date())}::date, ${m.id}, 'products_listed', ${prod})
+            on conflict (day, employee_id, metric) do update set value = excluded.value`])]);
       push([o.id], `${m.display_name} finished`, txt.slice(0, 140), "/#breports");
       break;
     case "break":
@@ -464,6 +470,148 @@ async function changePin(team: Team, name: string, oldPin: string, newPin: strin
   return { changed: true };
 }
 
+/* ---------------- admin (owner only) ---------------- */
+const SETTING_KEYS = ["silent_until", "work_start", "missed_update_fine_tk", "client_wait_fine_tk", "client_wait_minutes", "start_grace_min",
+  "missed_report_fine_tickets", "break_fine_after_min", "break_fine_per_min", "break_fine_max", "wait20_fine", "wait24_fine",
+  "wait_fine_per_hour_after24", "wait_fine_max_per_ticket", "daily_fine_cap_tickets", "ticket_value_tk"];
+async function adminData() {
+  const today = ymd(new Date()), month0 = today.slice(0, 8) + "01";
+  const [people, split, fines, leave, sets, scores, assigned] = await Promise.all([
+    sql`select e.id::text, e.display_name name, t.key team, e.job_title title, e.rate_per_unit::float8 rate, e.active, e.joined_on::text joined,
+          (e.photo_data is not null) has_photo from public.employees e join public.teams t on t.id = e.team_id order by t.key, e.created_at`,
+    sql`select from_date::text, shares, dipon_tickets, note from public.current_split`,
+    sql`select f.id::int, f.day::text, e.display_name name, t.key team, f.rule, f.amount::float8, f.unit, f.status, f.note, coalesce(f.ref, '') ref
+          from public.fines f join public.employees e on e.id = f.employee_id join public.teams t on t.id = e.team_id
+          where f.day >= ${month0}::date order by f.day desc, e.display_name`,
+    sql`select l.id::int, e.display_name name, l.starts_on::text "from", l.ends_on::text "to", coalesce(l.reason, '') reason
+          from public.leave_requests l join public.employees e on e.id = l.employee_id
+          where l.state = 'approved' and l.ends_on >= ${today}::date - 7 order by l.starts_on`,
+    sql`select scope, key, value, coalesce(meaning, '') meaning from public.settings where key in ${sql(SETTING_KEYS)} order by scope, key`,
+    sql`select e.display_name name, s.day::text, s.score::float8, coalesce(s.why, '') why from public.scores s join public.employees e on e.id = s.employee_id
+          where s.day >= ${addDays(today, -1)}::date order by s.day desc, e.display_name`,
+    sql`select e.display_name name, count(*)::int n from public.ticket_assign_log a join public.employees e on e.id = a.employee_id where a.day = ${today}::date group by 1`,
+  ]);
+  return {
+    people, split: split[0] ?? null, fines, leave, scores, assigned,
+    settings: sets.map((r) => ({ scope: r.scope, key: r.key, value: typeof r.value === "string" ? r.value : JSON.stringify(r.value), meaning: r.meaning })),
+    fineRules: { support: ["Idle too long", "Fake start (no work after start report)", "Refund promised but not done", "Refund done but not logged", "Promised follow-up missed (48 h)", "Said done, then kept working", "Other"],
+                 store: ["Client not answered within 15 min", "Other"] },
+  };
+}
+async function personById(id: string) {
+  if (!/^[0-9a-f-]{36}$/.test(id)) fail("Pick a person.");
+  const [p] = await sql`select e.id::text, e.display_name, e.role::text, t.key team from public.employees e left join public.teams t on t.id = e.team_id where e.id = ${id}`;
+  if (!p || p.role === "owner") fail("Pick a team member.");
+  return p;
+}
+async function newPinFor(empId: string): Promise<string> {
+  for (let i = 0; i < 60; i++) {
+    const pin = String(crypto.getRandomValues(new Uint16Array(1))[0] % 10000).padStart(4, "0");
+    const [r] = await sql`select public.pin_set(${empId}::uuid, ${pin}) res`;
+    if (r.res === "ok") return pin;
+  }
+  fail("Could not make a new PIN. Try again.");
+  return "";
+}
+async function recalc(day: string) {
+  await sql`select public.run_daily_fines(${day}::date), public.run_daily_scores(${day}::date)`;
+}
+async function admin(o: Emp, b: Record<string, any>) {
+  const today = ymd(new Date());
+  switch (b.op) {
+    case "data": return adminData();
+    case "addPerson": {
+      const name = String(b.name || "").trim().slice(0, 40), teamKey = String(b.team || "");
+      if (!/^[\p{L} .'-]{2,40}$/u.test(name)) fail("Write the person's name (letters only).");
+      const [t] = await sql`select id from public.teams where key = ${teamKey}`;
+      if (!t) fail("Pick a team.");
+      const [dup] = await sql`select 1 from public.employees where team_id = ${t.id} and lower(display_name) = lower(${name})`;
+      if (dup) fail("That name is already in the team.");
+      const rate = b.rate === "" || b.rate == null ? null : Number(b.rate);
+      const [e] = await sql`insert into public.employees (full_name, display_name, team_id, manager_id, job_title, rate_per_unit, pay_model, day_off, joined_on)
+        values (${name}, ${name}, ${t.id}, ${o.id}, ${String(b.title || "").slice(0, 80) || null}, ${rate}, ${teamKey === "support" ? "per_message" : "fixed"}, 5, ${today}::date)
+        returning id::text`;
+      const pin = await newPinFor(e.id);
+      forget("people:");
+      await sql`insert into public.audit_logs (actor_id, table_name, row_id, action, after) values (${o.id}, 'employees', ${e.id}, 'insert', ${sql.json({ name, team: teamKey })})`;
+      return { pin, name, data: await adminData() };
+    }
+    case "updatePerson": {
+      const p = await personById(String(b.id || ""));
+      const rate = b.rate === "" || b.rate == null ? null : Number(b.rate);
+      if (rate !== null && !(rate >= 0 && rate <= 1000)) fail("Rate must be a number.");
+      await sql`update public.employees set job_title = ${String(b.title || "").slice(0, 80) || null}, rate_per_unit = ${rate},
+        active = ${b.active !== false} where id = ${p.id}`;
+      forget("people:");
+      await sql`insert into public.audit_logs (actor_id, table_name, row_id, action, after) values (${o.id}, 'employees', ${p.id}, 'update', ${sql.json({ title: b.title ?? null, rate, active: b.active !== false })})`;
+      return { data: await adminData() };
+    }
+    case "resetPin": {
+      const p = await personById(String(b.id || ""));
+      const pin = await newPinFor(p.id);
+      await sql`insert into public.audit_logs (actor_id, table_name, row_id, action) values (${o.id}, 'employee_pins', ${p.id}, 'update')`;
+      return { pin, name: p.display_name };
+    }
+    case "saveSplit": {
+      const shares: Record<string, number> = {};
+      for (const [k, v] of Object.entries(b.shares || {})) { const n = Math.round(Number(v)); if (n >= 0 && n <= 100) shares[k] = n; }
+      if (!Object.values(shares).some((n) => n > 0)) fail("Give at least one person a share.");
+      const dipon = Math.max(0, Math.min(500, Math.round(Number(b.dipon || 0))));
+      await sql`insert into public.ticket_splits (from_date, shares, dipon_tickets, set_by, note) values (${today}::date, ${sql.json(shares)}, ${dipon}, ${o.id}, ${String(b.note || "").slice(0, 200) || null})`;
+      return { data: await adminData() };
+    }
+    case "addFine": {
+      const p = await personById(String(b.id || ""));
+      const day = /^\d{4}-\d{2}-\d{2}$/.test(b.day || "") ? b.day : today;
+      const amount = Number(b.amount);
+      if (!(amount > 0 && amount <= 1000)) fail("Amount must be more than 0.");
+      const rule = String(b.rule || "").trim().slice(0, 120);
+      if (!rule) fail("Pick a rule.");
+      const quality = /refund|follow-up/i.test(rule);
+      await sql`insert into public.fines (day, employee_id, rule, ref, amount, unit, note)
+        values (${day}::date, ${p.id}, ${rule}, ${quality ? "manual:quality" : "manual:other"}, ${amount}, ${p.team === "support" ? "tickets" : "bdt"}, ${String(b.note || "").slice(0, 200) || null})`;
+      await recalc(day);
+      return { data: await adminData() };
+    }
+    case "waiveFine": {
+      const id = Number(b.fine) || 0;
+      const [f] = await sql`update public.fines set status = case when status = 'active' then 'waived' else 'active' end,
+        waived_by = case when status = 'active' then ${o.id}::uuid else null end where id = ${id} returning day::text`;
+      if (!f) fail("Fine not found.");
+      await recalc(f.day);
+      return { data: await adminData() };
+    }
+    case "addLeave": {
+      const p = await personById(String(b.id || ""));
+      const from = String(b.from || ""), to = String(b.to || b.from || "");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || to < from) fail("Pick the leave dates.");
+      await sql`insert into public.leave_requests (employee_id, starts_on, ends_on, reason, state, decided_by, decided_at)
+        values (${p.id}, ${from}::date, ${to}::date, ${String(b.reason || "").slice(0, 200) || null}, 'approved', ${o.id}, now())`;
+      if (from <= today) await recalc(from < today ? from : today);
+      push([p.id], "Leave approved", from === to ? from : `${from} to ${to}`, "/#home");
+      return { data: await adminData() };
+    }
+    case "cancelLeave": {
+      await sql`update public.leave_requests set state = 'cancelled', decided_by = ${o.id}, decided_at = now() where id = ${Number(b.leave) || 0}`;
+      return { data: await adminData() };
+    }
+    case "saveSetting": {
+      const key = String(b.key || ""), scope = String(b.scope || "");
+      if (!SETTING_KEYS.includes(key) || !["store", "support", "global"].includes(scope)) fail("Unknown setting.");
+      const raw = String(b.value ?? "").trim();
+      const value = key === "silent_until" ? (/^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : fail("Use a date like 2026-11-13."))
+        : key === "work_start" ? (/^\d{2}:\d{2}$/.test(raw) ? raw : fail("Use a time like 10:00."))
+        : (Number.isFinite(Number(raw)) && Number(raw) >= 0 ? Number(raw) : fail("Use a number."));
+      await sql`update public.settings set value = ${sql.json(value)}, updated_by = ${o.id}, updated_at = now() where scope = ${scope} and key = ${key}`;
+      forget("settings:");
+      await recalc(today);
+      return { data: await adminData() };
+    }
+    case "recalc": { await recalc(today); return { data: await adminData() }; }
+    default: fail("Unknown admin action.");
+  }
+}
+
 /* ---------------- router ---------------- */
 async function route(teamKey: string, b: Record<string, any>, ip: string) {
   const team = await teamRow(teamKey);
@@ -546,6 +694,7 @@ async function route(teamKey: string, b: Record<string, any>, ip: string) {
       return me(team, fresh as Emp);
     }
     case "boss": return authedRead(await owner(), p, ip, () => boss(team));
+    case "admin": { const o = await checkOwner(p, ip); return admin(o, b); }
     case "send": { const o = await checkOwner(p, ip); await sendInbox(team, o, String(b.to || ""), b.text, b.kind); return boss(team); }
     case "saveTask": { const o = await checkOwner(p, ip); await saveTask(team, o, b.task || {}); return boss(team); }
     case "testPush": {

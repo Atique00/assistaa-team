@@ -382,20 +382,23 @@
     openSheet(`<h2>${isStart ? 'Start your day' : 'Done for today'}</h2>
       <p class="lead">${isStart ? 'Optional: what will you work on today?' : 'Your end report: what you did, and what is still pending.'}</p>
       <textarea class="field" id="wtext" placeholder="${isStart ? 'Glamstadt – 20 products, Sophia Fashion – 20 products' : 'Glamstadt – 20 products done\nSophia Fashion – 20 products done\nPending: none'}"></textarea>
+      ${!isStart && !D.support ? `<label class="fl">Products listed today (total number)</label><input class="field" id="wprod" type="number" inputmode="numeric" min="0" max="2000" placeholder="e.g. 40">` : ''}
       <div class="err" id="werr"></div>
       <button class="btn ${isStart ? '' : 'amber'}" id="wgo">${I(isStart ? 'play' : 'check')} ${isStart ? 'Start now' : 'Send end report'}</button>`, (sh) => {
       setTimeout(() => $('#wtext', sh).focus(), 350);
       $('#wgo', sh).onclick = () => {
         const txt = $('#wtext', sh).value.trim();
         if (!isStart && txt.length < 5) { $('#werr', sh).textContent = 'Write what you did today and what is still pending.'; return; }
-        busy($('#wgo', sh), () => run(act, txt, isStart ? 'Have a great day! 🚀' : 'Great work today! 🎉')).catch(() => {});
+        const pe = $('#wprod', sh); let prod;
+        if (pe) { prod = pe.value.trim(); if (!/^\d{1,4}$/.test(prod) || +prod > 2000) { $('#werr', sh).textContent = 'Write how many products you listed today (0 if none).'; pe.focus(); return; } prod = +prod; }
+        busy($('#wgo', sh), () => run(act, txt, isStart ? 'Have a great day! 🚀' : 'Great work today! 🎉', prod)).catch(() => {});
       };
     });
     void t;
   }
-  async function run(act, text, okMsg) {
+  async function run(act, text, okMsg, amount) {
     try {
-      D = await api(S.team, { action: 'act', name: S.name, pin: S.pin, act, text });
+      D = await api(S.team, { action: 'act', name: S.name, pin: S.pin, act, text, amount });
       closeSheet();
       if (act === 'done' || act === 'start') confetti();
       toast(okMsg, '', 'ok');
@@ -523,7 +526,7 @@
     $('#fabSlot').innerHTML = `<button class="fab" id="fab" aria-label="Announcement">${I('megaphone')}</button>`;
     $('#fab').onclick = () => sheetSend('all');
     const pendingReplies = Object.values(B).reduce((a, x) => a + (x.inbox || []).filter((m) => m.reply).length, 0);
-    nav([{ id: 'team', icon: 'team', label: 'Team' }, { id: 'btasks', icon: 'tasks', label: 'Tasks' }, { id: 'bmsg', icon: 'inbox', label: 'Messages' }, { id: 'breports', icon: 'history', label: 'Reports' }]);
+    nav([{ id: 'team', icon: 'team', label: 'Team' }, { id: 'btasks', icon: 'tasks', label: 'Tasks' }, { id: 'bmsg', icon: 'inbox', label: 'Messages' }, { id: 'breports', icon: 'history', label: 'Reports' }, { id: 'badmin', icon: 'crown', label: 'Admin' }]);
     $$('#nav button').forEach((b) => b.onclick = () => { bossTab = b.dataset.tab; tab = bossTab; renderBoss(); });
     $$('#nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === bossTab));
     requestAnimationFrame(() => { const on = $('#nav button.on'), hl = $('#nav .hl'); if (on) { hl.style.left = on.offsetLeft + 'px'; hl.style.width = on.offsetWidth + 'px'; } });
@@ -532,16 +535,17 @@
     const head = `<div class="top">${avatar(C.owner, '', 52)}<div><div class="sub">${greet()},</div><h1>${esc(C.owner)} <span style="font-size:18px">👑</span></h1></div><div class="sp"></div><button class="iconbtn" id="refresh">${I('refresh')}</button><button class="iconbtn" id="bellB" style="margin-left:8px" aria-label="Notifications">${I('bell')}</button><button class="iconbtn" id="moreB" style="margin-left:8px" aria-label="Settings">${I('user')}</button></div>
       <div class="tabs">${teams.map((k) => `<button data-bt="${k}" class="${k === bossTeam ? 'on' : ''}">${esc(C.backends[k].label)}</button>`).join('')}</div>`;
     let body = '';
-    if (!d) body = `<div class="sk" style="height:120px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`;
+    if (!d && bossTab !== 'badmin') body = `<div class="sk" style="height:120px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`;
     else if (bossTab === 'btasks') body = bossTasks(d);
     else if (bossTab === 'bmsg') body = bossMsgs(d);
     else if (bossTab === 'breports') body = bossReports(d);
+    else if (bossTab === 'badmin') body = bossAdmin();
     else body = bossTeamView(d);
     const scroll = window.scrollY;
     app.innerHTML = `<div class="${soft ? '' : 'view'}">${head}<div class="stagger">${body}</div></div>`;
     if (soft) window.scrollTo(0, scroll);
     $$('[data-bt]').forEach((b) => b.onclick = () => { bossTeam = b.dataset.bt; store.set('bossTeam', bossTeam); renderBoss(); });
-    $('#refresh').onclick = () => loadBoss();
+    $('#refresh').onclick = () => { loadBoss(); if (bossTab === 'badmin') loadAdmin(); };
     $('#bellB').onclick = () => enablePush(true);
     $('#moreB').onclick = () => openSheet(`<h2>Settings</h2><p class="lead">Manager account</p>
       <div class="setting">${I('lock')}<div><b>Change PIN</b><div class="small muted">Changes it for both teams</div></div><div class="sp"></div><button class="btn sm ghost" id="pinBtn2">Change</button></div>
@@ -555,6 +559,7 @@
     $$('[data-person]').forEach((b) => b.onclick = () => sheetPerson(b.dataset.person));
     $$('[data-newtask]').forEach((b) => b.onclick = () => sheetTask({ owner: b.dataset.newtask || '' }));
     $$('[data-edit]').forEach((b) => b.onclick = () => sheetTask(d.tasks.find((t) => String(t.row) === b.dataset.edit)));
+    if (bossTab === 'badmin') bindAdmin();
   }
   const stLabel = { off: 'Not started', working: 'Working', break: 'On break', done: 'Done' };
   function bossTeamView(d) {
@@ -582,6 +587,169 @@
   }
   function bossReports(d) {
     return `<div class="card"><h3>${I('history')} Reports from the team</h3>${(d.reports || []).map((r) => `<div class="item"><span class="dot ${r.reply ? 'ok' : 'amber'}"></span><div class="body"><div class="t">${esc(r.name)} · ${esc(r.type)}</div><div class="s">${esc(r.time)}</div><div style="margin-top:4px;white-space:pre-wrap">${esc(r.msg)}</div>${r.reply ? `<div class="reply">${esc(r.reply)}</div>` : ''}</div></div>`).join('') || emptyBox('history', 'No reports yet.')}</div>`;
+  }
+
+  /* ---------- Admin (manager only): people, PINs, ticket split, fines, leave, rules ---------- */
+  let A = store.get('adminCache', null), adminLoading = false;
+  const adm = (op, extra) => api('store', Object.assign({ action: 'admin', pin: S.pin, op }, extra || {}));
+  async function loadAdmin() {
+    if (adminLoading) return; adminLoading = true;
+    try { A = await adm('data'); store.set('adminCache', A); if (bossTab === 'badmin' && !$('#sheet.on')) renderBoss(true); }
+    catch (e) { toast('Could not load admin', e.message, 'bad'); } finally { adminLoading = false; }
+  }
+  function setA(r) { if (r && r.data) { A = r.data; store.set('adminCache', A); } }
+  const setLabel = {
+    silent_until: 'Quiet until (fines and scores hidden from the team)', work_start: 'Work start time', missed_update_fine_tk: 'Missed start/end update fine (৳)',
+    client_wait_fine_tk: 'Client waited too long fine (৳)', client_wait_minutes: 'Client must be answered within (min)', start_grace_min: 'Start report grace (min)',
+    missed_report_fine_tickets: 'Missed start report fine (tickets)', break_fine_after_min: 'Break fine starts after (min)', break_fine_per_min: 'Break fine per extra minute (tickets)',
+    break_fine_max: 'Break fine max (tickets)', wait20_fine: 'Ticket waiting 20 h fine (tickets)', wait24_fine: 'Ticket waiting 24 h fine (tickets)',
+    wait_fine_per_hour_after24: 'Each extra hour after 24 h (tickets)', wait_fine_max_per_ticket: 'Max fine per waiting ticket (tickets)',
+    daily_fine_cap_tickets: 'Daily fine cap (tickets)', ticket_value_tk: 'Value of one ticket (৳)'
+  };
+  const dhakaToday = () => new Date(Date.now() + 6 * 36e5).toISOString().slice(0, 10);
+  function bossAdmin() {
+    if (!A) { loadAdmin(); return `<div class="sk" style="height:160px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`; }
+    const sup = bossTeam === 'support';
+    const people = A.people.filter((p) => p.team === bossTeam);
+    const unit = sup ? 'tickets' : '৳';
+    const fines = A.fines.filter((f) => f.team === bossTeam);
+    const activeTotal = (n) => fines.filter((f) => f.name === n && f.status === 'active').reduce((a, f) => a + f.amount, 0);
+    const given = Object.fromEntries((A.assigned || []).map((x) => [x.name, x.n]));
+    const sp = A.split || { shares: {}, dipon_tickets: 0 };
+    const shareSum = Object.values(sp.shares || {}).reduce((a, n) => a + Number(n), 0) || 1;
+    const scoreDay = (A.scores || [])[0] && A.scores[0].day;
+    const scores = (A.scores || []).filter((s) => s.day === scoreDay && people.some((p) => p.name === s.name));
+    const sets = (A.settings || []).filter((s) => s.scope === bossTeam || s.scope === 'global');
+    return `
+      ${sup ? `<div class="card"><h3>${I('headset')} Ticket split <span class="cnt">from ${esc(sp.from_date || '—')}</span></h3>
+        ${Object.entries(sp.shares || {}).map(([n, v]) => `<div class="item"><span class="dot ok"></span><div class="body"><div class="t">${esc(n)} · ${esc(v)}</div><div class="s">≈ ${Math.round(v / shareSum * 100)}% of new tickets${given[n] != null ? ' · ' + given[n] + ' given today' : ''}</div></div></div>`).join('')}
+        <div class="item"><span class="dot"></span><div class="body"><div class="t">Dipon · ${esc(sp.dipon_tickets || 0)} tickets a day</div><div class="s">Fixed number, never automatic</div></div></div>
+        <div class="small muted" style="margin:8px 0">New tickets are split at about 10:05, 13:05 and 16:05 (not Friday), oldest first.</div>
+        <button class="btn ghost" id="aSplit">${I('refresh')} Change split</button></div>` : ''}
+      <div class="card"><h3>${I('team')} People <span class="cnt">${people.filter((p) => p.active).length}</span></h3>
+        ${people.map((p) => `<div class="item"${p.active ? '' : ' style="opacity:.5"'}>${avatar(p.name, '', 34)}<div class="body"><div class="t">${esc(p.name)}${p.active ? '' : ' · access off'}</div><div class="s">${esc([p.title, p.rate != null && sup ? '৳' + p.rate + ' per message' : '', p.joined ? 'joined ' + p.joined : ''].filter(Boolean).join(' · '))}</div></div><button class="iconbtn" data-aperson="${esc(p.id)}" aria-label="Edit">${I('chev')}</button></div>`).join('')}
+        <button class="btn" id="aAdd" style="margin-top:10px">${I('plus')} Add person</button></div>
+      <div class="card"><h3>${I('warn')} Fines this month <span class="cnt">${fines.filter((f) => f.status === 'active').length}</span></h3>
+        <div class="small muted" style="margin-bottom:8px">${people.filter((p) => p.active).map((p) => `${esc(p.name)} ${activeTotal(p.name)} ${unit}`).join(' · ')}</div>
+        ${fines.slice(0, 40).map((f) => `<div class="item"${f.status === 'active' ? '' : ' style="opacity:.5"'}><span class="dot ${f.status === 'active' ? 'bad' : ''}"></span><div class="body"><div class="t">${esc(f.name)} · ${f.amount} ${f.unit === 'bdt' ? '৳' : esc(f.unit)}${f.status === 'active' ? '' : ' · waived'}</div><div class="s">${esc(f.day)} · ${esc(f.rule)}${f.note ? ' · ' + esc(f.note) : ''}${/^auto:/.test(f.ref) ? ' · automatic' : ''}</div></div><button class="btn sm ghost" data-waive="${f.id}">${f.status === 'active' ? 'Waive' : 'Undo'}</button></div>`).join('') || emptyBox('check', 'No fines this month.')}
+        <button class="btn ghost" id="aFine" style="margin-top:10px">${I('plus')} Add a fine</button></div>
+      <div class="card"><h3>${I('spark')} Scores <span class="cnt">${esc(scoreDay || '')}</span></h3>
+        ${scores.map((s) => `<div class="item"><span class="dot ${s.score >= 8 ? 'ok' : s.score >= 6 ? 'amber' : 'bad'}"></span><div class="body"><div class="t">${esc(s.name)} · ${s.score}/10</div><div class="s">${esc(s.why || 'All good')}</div></div></div>`).join('') || emptyBox('spark', 'Scores appear after 22:00.')}
+        <button class="btn ghost" id="aRecalc" style="margin-top:10px">${I('refresh')} Recalculate today</button></div>
+      <div class="card"><h3>${I('clock')} Leave</h3>
+        ${A.leave.filter((l) => people.some((p) => p.name === l.name)).map((l) => `<div class="item"><span class="dot ok"></span><div class="body"><div class="t">${esc(l.name)}</div><div class="s">${esc(l.from === l.to ? l.from : l.from + ' to ' + l.to)}${l.reason ? ' · ' + esc(l.reason) : ''}</div></div><button class="btn sm ghost" data-cancelleave="${l.id}">Cancel</button></div>`).join('') || emptyBox('clock', 'No leave booked.')}
+        <button class="btn ghost" id="aLeave" style="margin-top:10px">${I('plus')} Add leave</button>
+        <div class="small muted" style="margin-top:8px">No fines and no score on leave days.</div></div>
+      <div class="card"><h3>${I('lock')} Rules and amounts</h3>
+        ${sets.map((s) => `<div class="item"><div class="body"><div class="t">${esc(setLabel[s.key] || s.key)}</div><div class="s">${esc(String(s.value).replace(/"/g, ''))}${s.scope === 'global' ? ' · both teams' : ''}</div></div><button class="btn sm ghost" data-aset="${esc(s.scope + '|' + s.key)}">Edit</button></div>`).join('')}</div>`;
+  }
+  function bindAdmin() {
+    if (!A) return;
+    const run = (btn, op, extra, msg) => busy(btn, async () => { setA(await adm(op, extra)); if (msg) toast(msg, '', 'ok'); }).then(() => renderBoss(true)).catch((e) => toast('Could not save', e.message, 'bad'));
+    $$('[data-waive]').forEach((b) => b.onclick = () => run(b, 'waiveFine', { fine: Number(b.dataset.waive) }, 'Fine updated'));
+    $$('[data-cancelleave]').forEach((b) => b.onclick = () => run(b, 'cancelLeave', { leave: Number(b.dataset.cancelleave) }, 'Leave cancelled'));
+    $$('[data-aperson]').forEach((b) => b.onclick = () => sheetAdminPerson(A.people.find((p) => p.id === b.dataset.aperson)));
+    $$('[data-aset]').forEach((b) => b.onclick = () => { const [scope, key] = b.dataset.aset.split('|'); sheetAdminSetting(A.settings.find((s) => s.scope === scope && s.key === key)); });
+    const on = (id, fn) => { const b = $('#' + id); if (b) b.onclick = () => fn(b); };
+    on('aAdd', () => sheetAdminPerson(null));
+    on('aFine', () => sheetAdminFine());
+    on('aLeave', () => sheetAdminLeave());
+    on('aSplit', () => sheetAdminSplit());
+    on('aRecalc', (b) => run(b, 'recalc', {}, 'Fines and scores recalculated'));
+  }
+  function teamPeople() { return A.people.filter((p) => p.team === bossTeam && p.active); }
+  function done(msg, sub) { closeSheet(); toast(msg, sub || '', 'ok'); setTimeout(() => renderBoss(true), 420); }
+  function showPin(name, pin) {
+    openSheet(`<div style="text-align:center"><div class="avatar" style="--s:76px">${I('lock')}</div><h2 style="margin-top:12px">${esc(name)}'s new PIN</h2>
+      <div style="font:800 44px/1.2 Inter,sans-serif;letter-spacing:.3em;margin:14px 0">${esc(pin)}</div>
+      <p class="lead">Tell ${esc(name)} this PIN in person or on a call. It is shown only now. They can change it later from Me → Change PIN.</p></div>
+      <button class="btn" id="pinOk">${I('check')} Done</button>`, (sh) => { $('#pinOk', sh).onclick = () => { closeSheet(); setTimeout(() => renderBoss(true), 420); }; });
+  }
+  function sheetAdminPerson(p) {
+    const sup = bossTeam === 'support';
+    openSheet(`<h2>${p ? esc(p.name) : 'Add a person'}</h2><p class="lead">${p ? 'Edit details, reset a forgotten PIN, or turn off access.' : 'They get a 4-digit PIN to sign in to ' + esc(C.backends[bossTeam].label) + '.'}</p>
+      ${p ? '' : `<label class="fl">Name (as shown in the app)</label><input class="field" id="an" maxlength="40" placeholder="First name">`}
+      <label class="fl">Job title</label><input class="field" id="at" maxlength="80" value="${esc(p ? p.title || '' : sup ? 'Support agent' : 'Product listings')}">
+      ${sup ? `<label class="fl">Pay per message (৳)</label><input class="field" id="ar" type="number" inputmode="decimal" min="0" value="${esc(p ? (p.rate == null ? '' : p.rate) : '10')}">` : ''}
+      <div class="err" id="aerr"></div>
+      <button class="btn" id="ago">${I('check')} ${p ? 'Save' : 'Add and make PIN'}</button>
+      ${p ? `<button class="btn ghost" id="apin" style="margin-top:10px">${I('lock')} Reset PIN</button>
+        <button class="btn ghost" id="aact" style="margin-top:10px">${p.active ? 'Turn off access' : 'Turn access back on'}</button>` : ''}`, (sh) => {
+      const err = $('#aerr', sh), rate = () => { const r = $('#ar', sh); return r ? r.value.trim() : (p && p.rate != null ? p.rate : ''); };
+      $('#ago', sh).onclick = () => busy($('#ago', sh), async () => {
+        if (p) { setA(await adm('updatePerson', { id: p.id, title: $('#at', sh).value, rate: rate(), active: p.active })); done('Saved'); }
+        else {
+          const r = await adm('addPerson', { name: $('#an', sh).value.trim(), team: bossTeam, title: $('#at', sh).value, rate: rate() });
+          setA(r); loadBoss(true);
+          closeSheet(); setTimeout(() => showPin(r.name, r.pin), 420);
+        }
+      }).catch((e) => { err.textContent = e.message; });
+      const ap = $('#apin', sh);
+      if (ap) ap.onclick = () => {
+        if (ap.dataset.sure !== '1') { ap.dataset.sure = '1'; ap.textContent = 'Tap again to reset ' + p.name + "'s PIN"; return; }
+        busy(ap, async () => { const r = await adm('resetPin', { id: p.id }); closeSheet(); setTimeout(() => showPin(r.name, r.pin), 420); }).catch((e) => { err.textContent = e.message; });
+      };
+      const aa = $('#aact', sh);
+      if (aa) aa.onclick = () => {
+        if (aa.dataset.sure !== '1' && p.active) { aa.dataset.sure = '1'; aa.textContent = 'Tap again: ' + p.name + ' can no longer sign in'; return; }
+        busy(aa, async () => { setA(await adm('updatePerson', { id: p.id, title: p.title || '', rate: p.rate == null ? '' : p.rate, active: !p.active })); loadBoss(true); done(p.active ? 'Access turned off' : 'Access back on', p.name); }).catch((e) => { err.textContent = e.message; });
+      };
+    });
+  }
+  function sheetAdminFine() {
+    const sup = bossTeam === 'support', rules = (A.fineRules || {})[bossTeam] || ['Other'];
+    openSheet(`<h2>Add a fine</h2><p class="lead">Automatic fines (missed reports, long breaks, waiting tickets) are added by the system. Use this for the rest.</p>
+      <div class="row"><div><label class="fl">Person</label><select class="field" id="fp">${teamPeople().map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('')}</select></div>
+      <div><label class="fl">Date</label><input class="field" id="fd" type="date" value="${dhakaToday()}"></div></div>
+      <label class="fl">Rule</label><select class="field" id="fr">${rules.map((r) => `<option>${esc(r)}</option>`).join('')}</select>
+      <label class="fl">Amount (${sup ? 'tickets' : '৳'})</label><input class="field" id="fa" type="number" inputmode="numeric" min="1" value="${sup ? 10 : 50}">
+      <label class="fl">Note (ticket number, what happened)</label><input class="field" id="fn" maxlength="200">
+      <div class="err" id="ferr"></div><button class="btn amber" id="fgo">${I('warn')} Add fine</button>`, (sh) => {
+      $('#fgo', sh).onclick = () => busy($('#fgo', sh), async () => {
+        setA(await adm('addFine', { id: $('#fp', sh).value, day: $('#fd', sh).value, rule: $('#fr', sh).value, amount: $('#fa', sh).value, note: $('#fn', sh).value }));
+        done('Fine added');
+      }).catch((e) => { $('#ferr', sh).textContent = e.message; });
+    });
+  }
+  function sheetAdminLeave() {
+    openSheet(`<h2>Add leave</h2><p class="lead">Approved leave. No fines and no score on these days. The person gets a notification.</p>
+      <label class="fl">Person</label><select class="field" id="lp">${teamPeople().map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('')}</select>
+      <div class="row"><div><label class="fl">From</label><input class="field" id="lf" type="date" value="${dhakaToday()}"></div><div><label class="fl">To</label><input class="field" id="lt" type="date" value="${dhakaToday()}"></div></div>
+      <label class="fl">Reason (optional)</label><input class="field" id="lr" maxlength="200">
+      <div class="err" id="lerr"></div><button class="btn" id="lgo">${I('check')} Save leave</button>`, (sh) => {
+      $('#lgo', sh).onclick = () => busy($('#lgo', sh), async () => {
+        setA(await adm('addLeave', { id: $('#lp', sh).value, from: $('#lf', sh).value, to: $('#lt', sh).value, reason: $('#lr', sh).value }));
+        done('Leave saved');
+      }).catch((e) => { $('#lerr', sh).textContent = e.message; });
+    });
+  }
+  function sheetAdminSplit() {
+    const sp = A.split || { shares: {}, dipon_tickets: 0 };
+    const names = A.people.filter((p) => p.team === 'support' && p.active && p.name !== 'Dipon').map((p) => p.name);
+    openSheet(`<h2>Ticket split</h2><p class="lead">Share of new tickets for each person. The numbers are scaled to 100%, so 30 / 25 / 22 works too. Put 0 to give someone none.</p>
+      ${names.map((n) => `<label class="fl">${esc(n)}</label><input class="field" data-share="${esc(n)}" type="number" inputmode="numeric" min="0" max="100" value="${esc((sp.shares || {})[n] ?? 0)}">`).join('')}
+      <label class="fl">Dipon (fixed tickets per day)</label><input class="field" id="sd" type="number" inputmode="numeric" min="0" max="500" value="${esc(sp.dipon_tickets || 0)}">
+      <label class="fl">Note (optional)</label><input class="field" id="sn" maxlength="200">
+      <div class="err" id="serr2"></div><button class="btn" id="sgo2">${I('check')} Save split</button>`, (sh) => {
+      $('#sgo2', sh).onclick = () => busy($('#sgo2', sh), async () => {
+        const shares = {}; $$('[data-share]', sh).forEach((i) => { shares[i.dataset.share] = Number(i.value || 0); });
+        setA(await adm('saveSplit', { shares, dipon: $('#sd', sh).value, note: $('#sn', sh).value }));
+        done('Split saved', 'Used from the next run.');
+      }).catch((e) => { $('#serr2', sh).textContent = e.message; });
+    });
+  }
+  function sheetAdminSetting(s) {
+    if (!s) return;
+    const v = String(s.value).replace(/"/g, '');
+    const type = s.key === 'silent_until' ? 'date' : s.key === 'work_start' ? 'time' : 'number';
+    openSheet(`<h2>${esc(setLabel[s.key] || s.key)}</h2><p class="lead">${esc(s.meaning || '')}${s.scope === 'global' ? ' Applies to both teams.' : ''}</p>
+      <input class="field" id="sv" type="${type}" ${type === 'number' ? 'inputmode="decimal" min="0" step="any"' : ''} value="${esc(v)}">
+      <div class="err" id="sverr"></div><button class="btn" id="svgo">${I('check')} Save</button>`, (sh) => {
+      $('#svgo', sh).onclick = () => busy($('#svgo', sh), async () => {
+        setA(await adm('saveSetting', { scope: s.scope, key: s.key, value: $('#sv', sh).value }));
+        done('Saved', "Today's fines and scores were recalculated.");
+      }).catch((e) => { $('#sverr', sh).textContent = e.message; });
+    });
   }
   function sheetPerson(name) {
     const d = B[bossTeam];
@@ -699,13 +867,13 @@
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; });
 
   /* ---------- lifecycle ---------- */
-  function logout() { S = null; D = null; B = {}; store.del('session'); clearInterval(timer); tab = 'home'; location.hash = ''; viewWelcome(); }
+  function logout() { S = null; D = null; B = {}; A = null; store.del('session'); store.del('adminCache'); clearInterval(timer); tab = 'home'; location.hash = ''; viewWelcome(); }
 
   function start() {
     clearInterval(timer);
     const h = location.hash.slice(1);
     if (S.team === 'boss') {
-      bossTab = ['team', 'btasks', 'bmsg', 'breports'].includes(h) ? h : (h === 'boss' ? 'team' : 'team');
+      bossTab = ['team', 'btasks', 'bmsg', 'breports', 'badmin'].includes(h) ? h : (h === 'boss' ? 'team' : 'team');
       Object.keys(C.backends).forEach((k) => { if (!B[k]) { const c = store.get('bossCache.' + k, null); if (c) B[k] = c; } });
       renderBoss(); if (stale(20000)) loadBoss(true);
       timer = setInterval(() => { if (!document.hidden) loadBoss(true); }, 60000);
@@ -722,7 +890,7 @@
     });
   }
   /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
-  const APP_VERSION = '10';
+  const APP_VERSION = '11';
   let lastVersionCheck = 0;
   async function checkVersion() {
     if (Date.now() - lastVersionCheck < 5 * 60000) return;
@@ -741,7 +909,7 @@
   window.addEventListener('hashchange', () => {
     const h = location.hash.slice(1);
     if (!S) return;
-    if (S.team === 'boss' && ['team', 'btasks', 'bmsg', 'breports'].includes(h)) { bossTab = h; renderBoss(); }
+    if (S.team === 'boss' && ['team', 'btasks', 'bmsg', 'breports', 'badmin'].includes(h)) { bossTab = h; renderBoss(); }
     else if (S.team !== 'boss' && ['home', 'tasks', 'inbox', 'me'].includes(h) && h !== tab) { tab = h; render(); }
   });
 

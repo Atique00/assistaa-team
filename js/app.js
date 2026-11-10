@@ -6,6 +6,8 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const app = $('#app');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const PFX = C.storagePrefix || 'assistaa.';
+  const ISSUES = C.issuesUrl || (C.backends.store.url + '?view=issues');
   const BASE = (location.origin + location.pathname.replace(/index\.html$/, '')).replace(/\/$/, '');
 
   /* ---------- icons ---------- */
@@ -43,9 +45,9 @@
 
   /* ---------- storage ---------- */
   const store = {
-    get(k, d) { try { const v = localStorage.getItem('assistaa.' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem('assistaa.' + k, JSON.stringify(v)); } catch (e) {} },
-    del(k) { try { localStorage.removeItem('assistaa.' + k); } catch (e) {} }
+    get(k, d) { try { const v = localStorage.getItem(PFX + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(PFX + k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(PFX + k); } catch (e) {} }
   };
 
   /* ---------- api ---------- */
@@ -327,7 +329,7 @@
         <div class="setting">${I('bell')}<div><b>Notifications</b><div class="small muted">Tasks and messages from ${esc(C.owner)}</div></div><div class="sp"></div><button class="switch ${notif ? 'on' : ''}" id="pushSw" aria-label="Notifications"></button></div>
         <div class="setting">${I('phone')}<div><b>Install the app</b><div class="small muted">Add Assistaa to your home screen</div></div><div class="sp"></div><button class="btn sm ghost" id="install">How</button></div>
         <div class="setting">${I('lock')}<div><b>Change PIN</b><div class="small muted">Pick a new 4-digit PIN</div></div><div class="sp"></div><button class="btn sm ghost" id="pinBtn">Change</button></div>
-        ${S.team === 'store' && ['Rashed', 'Sabuj'].includes(S.name) ? `<div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Issue sheet and top-5 checks</div></div><div class="sp"></div><a class="btn sm ghost" href="${C.backends.store.url}?view=issues" target="_blank" rel="noopener">Open</a></div>` : ''}
+        ${S.team === 'store' && ['Rashed', 'Sabuj'].includes(S.name) ? `<div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Issue sheet and top-5 checks</div></div><div class="sp"></div><a class="btn sm ghost" href="${ISSUES}" target="_blank" rel="noopener">Open</a></div>` : ''}
         <div class="setting">${I('history')}<div><b>History</b><div class="small muted">Reports, fines and scores</div></div><div class="sp"></div><button class="btn sm ghost" id="hist">Open</button></div>
         <div class="setting">${I('out')}<div><b>Sign out</b><div class="small muted">Use another account</div></div><div class="sp"></div><button class="btn sm ghost" id="logout">Sign out</button></div>
       </div></div>`;
@@ -539,7 +541,7 @@
     $('#bellB').onclick = () => enablePush(true);
     $('#moreB').onclick = () => openSheet(`<h2>Settings</h2><p class="lead">Manager account</p>
       <div class="setting">${I('lock')}<div><b>Change PIN</b><div class="small muted">Changes it for both teams</div></div><div class="sp"></div><button class="btn sm ghost" id="pinBtn2">Change</button></div>
-      <div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Store issue sheet</div></div><div class="sp"></div><a class="btn sm ghost" href="${C.backends.store.url}?view=issues" target="_blank" rel="noopener">Open</a></div>
+      <div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Store issue sheet</div></div><div class="sp"></div><a class="btn sm ghost" href="${ISSUES}" target="_blank" rel="noopener">Open</a></div>
       <div class="setting">${I('bell')}<div><b>Notifications</b><div class="small muted">Replies and reports from the team</div></div><div class="sp"></div><button class="btn sm ghost" id="pushB2">Turn on</button></div>
       <div class="setting">${I('out')}<div><b>Sign out</b></div><div class="sp"></div><button class="btn sm ghost" id="lo2">Sign out</button></div>`, (sh) => {
       $('#pinBtn2', sh).onclick = () => { closeSheet(); setTimeout(sheetPin, 420); };
@@ -720,6 +722,6 @@
     else if (S.team !== 'boss' && ['home', 'tasks', 'inbox', 'me'].includes(h) && h !== tab) { tab = h; render(); }
   });
 
-  let seen = false; try { seen = sessionStorage.getItem('assistaa.splash') === '1'; sessionStorage.setItem('assistaa.splash', '1'); } catch (e) {}
+  let seen = false; try { seen = sessionStorage.getItem(PFX + 'splash') === '1'; sessionStorage.setItem(PFX + 'splash', '1'); } catch (e) {}
   setTimeout(() => { hideSplash(); if (S) start(); else viewWelcome(); }, seen ? 700 : 1900);
 })();

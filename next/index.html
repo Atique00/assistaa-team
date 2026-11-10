@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Assistaa Team · TEST</title>
+  <meta name="description" content="Assistaa team app: your workday, tasks, messages and profile.">
+  <meta name="theme-color" content="#03060b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Assistaa">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css?v=6">
+</head>
+<body>
+  <div class="aurora"><i></i><i></i><i></i></div>
+  <div class="grid-bg"></div>
+
+  <div id="splash">
+    <div class="splash-in">
+      <div class="splash-mark"><img src="assets/mark.svg" alt=""></div>
+      <img class="splash-word" src="assets/wordmark.svg" alt="Assista">
+      <div class="splash-tag">E-commerce made effortless</div>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+  <main id="app"></main>
+  <nav class="nav" id="nav" hidden></nav>
+  <div id="fabSlot"></div>
+  <div class="scrim" id="scrim" hidden></div>
+  <section class="sheet" id="sheet" aria-modal="true" role="dialog"></section>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js"></script>
+  <script src="js/config.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
+  <div style="position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translateX(-50%);z-index:9999;background:#ffb547;color:#1a1200;font:700 11px/1 Inter,sans-serif;letter-spacing:.08em;padding:5px 10px;border-radius:99px;pointer-events:none">TEST · NEW SYSTEM</div>
+</body>
+</html>

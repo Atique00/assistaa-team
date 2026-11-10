@@ -105,9 +105,6 @@
 
 
   /* ---------- in-app notification sounds (play while the app is open; uses media volume) ---------- */
-  let actx = null;
-  const audio = () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} return actx; };
-  document.addEventListener('pointerdown', () => audio(), { once: true, capture: true });
   // [frequency Hz, start s, length s, wave, volume]
   const SOUNDS = {
     Chime: [[880, 0, 0.35, 'sine', 0.5], [1320, 0.12, 0.45, 'sine', 0.4]],
@@ -115,21 +112,51 @@
     Pop: [[600, 0, 0.08, 'triangle', 0.6], [900, 0.06, 0.1, 'triangle', 0.5]],
     Bell: [[784, 0, 0.9, 'sine', 0.5], [1568, 0, 0.6, 'sine', 0.2], [784, 0.45, 0.9, 'sine', 0.4]],
     Marimba: [[523, 0, 0.18, 'triangle', 0.6], [659, 0.15, 0.18, 'triangle', 0.6], [784, 0.3, 0.3, 'triangle', 0.6]],
-    'Loud alert': [[988, 0, 0.18, 'square', 0.35], [740, 0.2, 0.18, 'square', 0.35], [988, 0.4, 0.18, 'square', 0.35], [740, 0.6, 0.25, 'square', 0.35]],
+    'Loud alert': [[988, 0, 0.18, 'square', 0.3], [740, 0.2, 0.18, 'square', 0.3], [988, 0.4, 0.18, 'square', 0.3], [740, 0.6, 0.25, 'square', 0.3]],
     Off: []
   };
   const mySound = () => { const s = store.get('sound', 'Chime'); return SOUNDS[s] ? s : 'Chime'; };
-  function playSound(name) {
-    const notes = SOUNDS[name || mySound()] || [];
-    const c = notes.length && audio(); if (!c) return;
-    const t0 = c.currentTime + 0.02;
-    for (const [f, st, len, wave, vol] of notes) {
-      const o = c.createOscillator(), g = c.createGain();
-      o.type = wave; o.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, t0 + st); g.gain.exponentialRampToValueAtTime(vol, t0 + st + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t0 + st + len);
-      o.connect(g).connect(c.destination); o.start(t0 + st); o.stop(t0 + st + len + 0.05);
+  /* each sound is turned into a small WAV file once, then played with a normal <audio> player
+     (plays on the media volume, also on iPhone with the silent switch on) */
+  const wavCache = {};
+  function wavUrl(name) {
+    if (wavCache[name]) return wavCache[name];
+    const notes = SOUNDS[name] || [], rate = 22050;
+    const dur = notes.reduce((m, n) => Math.max(m, n[1] + n[2]), 0) + 0.05;
+    const len = Math.ceil(dur * rate), pcm = new Float32Array(len);
+    for (const [f, st, l, wave, vol] of notes) {
+      const s0 = Math.floor(st * rate), n = Math.floor(l * rate);
+      for (let i = 0; i < n && s0 + i < len; i++) {
+        const t = i / rate, ph = (f * t) % 1;
+        const w = wave === 'sine' ? Math.sin(2 * Math.PI * ph) : wave === 'square' ? (ph < 0.5 ? 1 : -1) : 1 - 4 * Math.abs(ph - 0.5);
+        const env = Math.min(1, i / (0.012 * rate)) * Math.exp(-4.5 * t / l);
+        pcm[s0 + i] += w * vol * env;
+      }
     }
+    const buf = new ArrayBuffer(44 + len * 2), v = new DataView(buf);
+    const str = (o, x) => { for (let i = 0; i < x.length; i++) v.setUint8(o + i, x.charCodeAt(i)); };
+    str(0, 'RIFF'); v.setUint32(4, 36 + len * 2, true); str(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, 'data'); v.setUint32(40, len * 2, true);
+    for (let i = 0; i < len; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, pcm[i])) * 32767, true);
+    return (wavCache[name] = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })));
   }
+  let player = null;
+  function playSound(name) {
+    name = name || mySound();
+    if (!(SOUNDS[name] || []).length) return Promise.resolve(false);
+    try {
+      player = player || new Audio();
+      player.pause(); player.src = wavUrl(name); player.volume = 1; player.currentTime = 0;
+      return player.play().then(() => true).catch(() => false);
+    } catch (e) { return Promise.resolve(false); }
+  }
+  // phones only allow sound after the person has touched the app once: unlock the player on the first tap
+  document.addEventListener('pointerdown', () => {
+    try {
+      player = player || new Audio(); const u = wavUrl('Pop'); player.src = u; player.volume = 0;
+      player.play().then(() => { if (player.src === u && player.volume === 0) player.pause(); player.volume = 1; }).catch(() => { player.volume = 1; });
+    } catch (e) {}
+  }, { once: true, capture: true });
   function sheetSound() {
     const android = /android/i.test(navigator.userAgent);
     openSheet(`<h2>Notification sound</h2><p class="lead">Tap a sound to hear it, then it is saved. It plays when a message arrives while Assistaa is open.</p>
@@ -139,7 +166,8 @@
         <div class="small muted" style="line-height:1.5">The phone plays its own notification sound. To change it${android ? '' : ' on Android'}: long-press the Assistaa icon → App info → Notifications → Sound (and turn on "Pop on screen").<br><br>
         If the phone is on <b>silent</b> or <b>vibrate</b>, no website or web app can make it ring. Keep the ringer on during work hours, or allow Assistaa in Do Not Disturb exceptions.</div></div>`, (sh) => {
       $$('[data-snd]', sh).forEach((b) => b.onclick = () => {
-        store.set('sound', b.dataset.snd); playSound(b.dataset.snd);
+        store.set('sound', b.dataset.snd);
+        playSound(b.dataset.snd).then((ok) => { if (!ok && b.dataset.snd !== 'Off') toast('No sound?', 'Turn up the media volume (the volume for videos) and try again.', 'bad'); });
         $$('[data-snd] .pill', sh).forEach((x) => x.remove());
         b.insertAdjacentHTML('beforeend', `<span class="pill green">Chosen</span>`);
       });
@@ -958,7 +986,7 @@
     });
   }
   /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
-  const APP_VERSION = '15';
+  const APP_VERSION = '16';
   let lastVersionCheck = 0;
   async function checkVersion() {
     if (Date.now() - lastVersionCheck < 5 * 60000) return;

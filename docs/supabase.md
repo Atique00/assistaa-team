@@ -40,3 +40,10 @@ team.assistaa.com now runs on Supabase (`team-api`). /next/ redirects to /.
 ## Rollback
 Put the two Apps Script URLs (kept as comments in `js/config.js`) back into `backends`, re-enable the old scheduled task and pause the new one. Data entered after the switch lives only in Supabase and would need copying back. Supabase can be restored from the latest encrypted nightly dump:
 `gpg -d assistaa-YYYY-MM-DD.dump.gpg > db.dump && pg_restore -d "$DB_URL" --no-owner db.dump`
+
+## 10 Nov 2026 evening — automatic fines/scores, products, admin, ticket split
+- Migration `0007_fines_scores_split.sql`: settings for every fine amount, `run_daily_fines` / `run_daily_scores` (pg_cron hourly at :50, and yesterday again at 01:10 Dhaka), ticket-split tables and helpers. Fines and scores stay hidden from the team until `silent_until` (13 Nov).
+- `team-api` v4: store "Done for today" takes the products count (`amount`) → `daily_stats.products_listed` + line in the end report; support "Tickets given today"; owner-only `admin` action (data, addPerson, updatePerson, resetPin, saveSplit, addFine, waiveFine, addLeave, cancelLeave, saveSetting, recalc). All tested 10 Nov, test person removed.
+- App v11: Admin tab for the manager (people + PIN reset shown once, ticket split, fines with waive/undo, scores, leave, rules and amounts); products field on the store end report.
+- Scheduled task "Peptonix ticket split" (trig_01VoUvubsnsANSg4zC9vNkUL): Sat–Thu 10:17, 13:17, 16:17 Dhaka. Unassigned open Commslayer tickets only, oldest first, by `current_split` scaled to 100%, only people who started today and are not on leave; Dipon only up to his fixed number; fills ticket requests first; logs to `ticket_assign_log`.
+- Not wired yet: the ৳50 "client not answered within 15 min" fine (`add_client_wait_fine`) inside the 3-hourly task.

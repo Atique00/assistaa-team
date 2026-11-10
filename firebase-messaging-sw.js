@@ -1,10 +1,10 @@
 /* Assistaa service worker: phone notifications + offline app shell */
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
-importScripts('js/config.js?v=13');
+importScripts('js/config.js?v=14');
 
-const CACHE = 'assistaa-v13';
-const SHELL = ['./', 'index.html', 'css/app.css?v=13', 'js/app.js?v=13', 'js/config.js?v=13', 'assets/mark.svg', 'assets/wordmark.svg', 'icons/icon-192.png', 'icons/badge-96.png'];
+const CACHE = 'assistaa-v14';
+const SHELL = ['./', 'index.html', 'css/app.css?v=14', 'js/app.js?v=14', 'js/config.js?v=14', 'assets/mark.svg', 'assets/wordmark.svg', 'icons/icon-192.png', 'icons/badge-96.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}));
@@ -17,7 +17,9 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
-  e.respondWith(fetch(e.request).then((r) => {
+  // always ask the server for the newest file (cheap 304 when nothing changed), fall back to the saved copy offline
+  const req = e.request.mode === 'navigate' ? new Request(e.request.url, { cache: 'no-cache', credentials: 'same-origin' }) : new Request(e.request, { cache: 'no-cache' });
+  e.respondWith(fetch(req).then((r) => {
     const copy = r.clone();
     caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
     return r;

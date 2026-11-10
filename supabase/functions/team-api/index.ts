@@ -476,7 +476,7 @@ const SETTING_KEYS = ["silent_until", "work_start", "missed_update_fine_tk", "cl
   "wait_fine_per_hour_after24", "wait_fine_max_per_ticket", "daily_fine_cap_tickets", "ticket_value_tk"];
 async function adminData() {
   const today = ymd(new Date()), month0 = today.slice(0, 8) + "01";
-  const [people, split, fines, leave, sets, scores, assigned] = await Promise.all([
+  const [people, split, fines, leave, sets, scores, assigned, upcoming] = await Promise.all([
     sql`select e.id::text, e.display_name name, t.key team, e.job_title title, e.rate_per_unit::float8 rate, e.active, e.joined_on::text joined,
           (e.photo_data is not null) has_photo from public.employees e join public.teams t on t.id = e.team_id order by t.key, e.created_at`,
     sql`select from_date::text, shares, dipon_tickets, note from public.current_split`,
@@ -490,9 +490,10 @@ async function adminData() {
     sql`select e.display_name name, s.day::text, s.score::float8, coalesce(s.why, '') why from public.scores s join public.employees e on e.id = s.employee_id
           where s.day >= ${addDays(today, -1)}::date order by s.day desc, e.display_name`,
     sql`select e.display_name name, count(*)::int n from public.ticket_assign_log a join public.employees e on e.id = a.employee_id where a.day = ${today}::date group by 1`,
+    sql`select id::int, from_date::text, shares, dipon_tickets, coalesce(note, '') note from public.ticket_splits where from_date > ${today}::date order by from_date, id`,
   ]);
   return {
-    people, split: split[0] ?? null, fines, leave, scores, assigned,
+    people, split: split[0] ?? null, upcoming, fines, leave, scores, assigned,
     settings: sets.map((r) => ({ scope: r.scope, key: r.key, value: typeof r.value === "string" ? r.value : JSON.stringify(r.value), meaning: r.meaning })),
     fineRules: { support: ["Idle too long", "Fake start (no work after start report)", "Refund promised but not done", "Refund done but not logged", "Promised follow-up missed (48 h)", "Said done, then kept working", "Other"],
                  store: ["Client not answered within 15 min", "Other"] },
@@ -557,7 +558,27 @@ async function admin(o: Emp, b: Record<string, any>) {
       for (const [k, v] of Object.entries(b.shares || {})) { const n = Math.round(Number(v)); if (n >= 0 && n <= 100) shares[k] = n; }
       if (!Object.values(shares).some((n) => n > 0)) fail("Give at least one person a share.");
       const dipon = Math.max(0, Math.min(500, Math.round(Number(b.dipon || 0))));
-      await sql`insert into public.ticket_splits (from_date, shares, dipon_tickets, set_by, note) values (${today}::date, ${sql.json(shares)}, ${dipon}, ${o.id}, ${String(b.note || "").slice(0, 200) || null})`;
+      const from = /^\d{4}-\d{2}-\d{2}$/.test(b.from || "") ? String(b.from) : today;
+      if (from < today) fail("Pick today or a later date.");
+      if (from > addDays(today, 90)) fail("Pick a date within the next 90 days.");
+      const note = String(b.note || "").slice(0, 200) || null;
+      if (b.oneDay) {
+        // only for that day: afterwards go back to the split that was planned for the next day
+        const next = addDays(from, 1);
+        const [prev] = await sql`select shares, dipon_tickets from public.ticket_splits where from_date <= ${next}::date order by from_date desc, id desc limit 1`;
+        const [own] = await sql`select 1 from public.ticket_splits where from_date = ${next}::date limit 1`;
+        await sql.begin((tx) => [
+          tx`insert into public.ticket_splits (from_date, shares, dipon_tickets, set_by, note) values (${from}::date, ${sql.json(shares)}, ${dipon}, ${o.id}, ${note ?? "Only " + from})`,
+          ...(prev && !own ? [tx`insert into public.ticket_splits (from_date, shares, dipon_tickets, set_by, note) values (${next}::date, ${sql.json(prev.shares)}, ${prev.dipon_tickets}, ${o.id}, ${"Back to normal after " + from})`] : []),
+        ]);
+      } else {
+        await sql`insert into public.ticket_splits (from_date, shares, dipon_tickets, set_by, note) values (${from}::date, ${sql.json(shares)}, ${dipon}, ${o.id}, ${note})`;
+      }
+      return { data: await adminData() };
+    }
+    case "deleteSplit": {
+      const del = await sql`delete from public.ticket_splits where id = ${Number(b.split) || 0} and from_date > ${today}::date returning id`;
+      if (!del.length) fail("Only planned (future) splits can be removed.");
       return { data: await adminData() };
     }
     case "addFine": {

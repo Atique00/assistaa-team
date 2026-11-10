@@ -720,7 +720,23 @@
       else nudgePush();
     });
   }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && stale(20000)) (S.team === 'boss' ? loadBoss(true) : loadMe(true)); });
+  /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
+  const APP_VERSION = '9';
+  let lastVersionCheck = 0;
+  async function checkVersion() {
+    if (Date.now() - lastVersionCheck < 5 * 60000) return;
+    lastVersionCheck = Date.now();
+    try {
+      const v = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => r.json());
+      if (v && v.v && String(v.v) !== APP_VERSION && !$('#sheet.on')) location.reload();
+    } catch (e) {}
+  }
+  setInterval(() => { if (!document.hidden) checkVersion(); }, 10 * 60000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    checkVersion();
+    if (S && stale(20000)) (S.team === 'boss' ? loadBoss(true) : loadMe(true));
+  });
   window.addEventListener('hashchange', () => {
     const h = location.hash.slice(1);
     if (!S) return;

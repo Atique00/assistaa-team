@@ -624,7 +624,7 @@
       ${sup ? `<div class="card"><h3>${I('headset')} Ticket split <span class="cnt">from ${esc(sp.from_date || '—')}</span></h3>
         ${Object.entries(sp.shares || {}).map(([n, v]) => `<div class="item"><span class="dot ok"></span><div class="body"><div class="t">${esc(n)} · ${esc(v)}</div><div class="s">≈ ${Math.round(v / shareSum * 100)}% of new tickets${given[n] != null ? ' · ' + given[n] + ' given today' : ''}</div></div></div>`).join('')}
         ${sp.dipon_tickets ? `<div class="item"><span class="dot"></span><div class="body"><div class="t">Dipon extra · ${esc(sp.dipon_tickets)} tickets a day</div><div class="s">On top of his share</div></div></div>` : ''}
-        <div class="small muted" style="margin:8px 0">New tickets are split at about 10:05, 13:05 and 16:05 (not Friday), oldest first.</div>
+        <div class="small muted" style="margin:8px 0">New tickets are split at 09:55, 12:55 and 15:55 (not Friday), oldest first.</div>
         <button class="btn ghost" id="aSplit">${I('refresh')} Change split</button></div>` : ''}
       <div class="card"><h3>${I('team')} People <span class="cnt">${people.filter((p) => p.active).length}</span></h3>
         ${people.map((p) => `<div class="item"${p.active ? '' : ' style="opacity:.5"'}>${avatar(p.name, '', 34)}<div class="body"><div class="t">${esc(p.name)}${p.active ? '' : ' · access off'}</div><div class="s">${esc([p.title, p.rate != null && sup ? '৳' + p.rate + ' per message' : '', p.joined ? 'joined ' + p.joined : ''].filter(Boolean).join(' · '))}</div></div><button class="iconbtn" data-aperson="${esc(p.id)}" aria-label="Edit">${I('chev')}</button></div>`).join('')}
@@ -890,7 +890,7 @@
     });
   }
   /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
-  const APP_VERSION = '12';
+  const APP_VERSION = '13';
   let lastVersionCheck = 0;
   async function checkVersion() {
     if (Date.now() - lastVersionCheck < 5 * 60000) return;

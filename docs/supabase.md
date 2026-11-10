@@ -12,7 +12,7 @@ API: `https://zciuchdximmzwiisdkqu.supabase.co` · publishable key `sb_publishab
 | PINs | bcrypt hashes in `private.employee_pins`; plain PINs are **not** in Supabase |
 | Edge function `auth-pin` | live — `login` and `change` |
 | Nightly encrypted backup | `.github/workflows/db-backup.yml` — secrets set, first run green 10 Nov |
-| Edge function `api` | live — same contract as Apps Script `doPost`; reads and writes tested 10 Nov |
+| Edge function `team-api` | live — same contract as Apps Script `doPost`; direct Postgres (≈50–90 ms per call warm); reads and writes tested 10 Nov. (`api` = older REST version, unused; `ping` = timing probe) |
 | Test app | https://team.assistaa.com/next/ — built by `tools/build-next.sh`, own storage (`assistaa-next.`), TEST label |
 | Push from Supabase | waits for secret `FIREBASE_SERVICE_ACCOUNT`; until then saved to `notifications` |
 

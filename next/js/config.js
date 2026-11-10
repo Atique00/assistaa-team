@@ -10,13 +10,13 @@ self.ASSISTAA = {
       label: 'Store team',
       sub: "Glenn & Dion's stores",
       icon: 'store',
-      url: 'https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/api?team=store'
+      url: 'https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/team-api?team=store&forceFunctionRegion=ap-southeast-1'
     },
     support: {
       label: 'Support team',
       sub: 'Peptonix customer care',
       icon: 'headset',
-      url: 'https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/api?team=support'
+      url: 'https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/team-api?team=support&forceFunctionRegion=ap-southeast-1'
     }
   },
   firebase: {

@@ -11,12 +11,12 @@ cp js/app.js next/js/
 cp firebase-messaging-sw.js next/
 sed -i "s/'assistaa-v\([0-9]*\)'/'assistaa-next-v\1'/" next/firebase-messaging-sw.js
 
-API=https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/api
+API=https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/team-api
 python3 - "$API" <<'PY'
 import re, sys
 api = sys.argv[1]
 c = open('js/config.js').read()
-c = re.sub(r"url: 'https://script\.google\.com/macros/s/[^']+'", lambda m, it=iter(['store', 'support']): f"url: '{api}?team={next(it)}'", c, count=2)
+c = re.sub(r"url: 'https://script\.google\.com/macros/s/[^']+'", lambda m, it=iter(['store', 'support']): f"url: '{api}?team={next(it)}&forceFunctionRegion=ap-southeast-1'", c, count=2)
 store = re.search(r"https://script\.google\.com/macros/s/[^']+", open('js/config.js').read()).group(0)
 c = c.replace("owner: 'Atiq',", f"owner: 'Atiq',\n  storagePrefix: 'assistaa-next.',\n  issuesUrl: '{store}?view=issues',\n  test: true,")
 open('next/js/config.js', 'w').write("/* TEST copy (Supabase). Built by tools/build-next.sh: do not edit by hand. */\n" + c)

@@ -127,6 +127,8 @@
   let B = {}; // boss data per team
   let tab = 'home';
   let timer = null;
+  let fresh = 0; // when data was last loaded (ms)
+  const stale = (ms) => Date.now() - fresh > ms;
 
   /* ---------- splash ---------- */
   function hideSplash() { const s = $('#splash'); if (s) { s.classList.add('out'); setTimeout(() => s.remove(), 800); } }
@@ -177,8 +179,9 @@
         if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
         $('#perr').innerHTML = `<span style="color:var(--green)">Welcome, ${esc(hit.name)} ✨</span>`;
         S = { team: hit.team, name: hit.name, pin: p }; store.set('session', S);
-        if (owner) res.forEach((x) => { if (x.r && x.r.role === 'owner' && x.r.data) B[x.k] = x.r.data; });
+        if (owner) res.forEach((x) => { if (x.r && x.r.role === 'owner' && x.r.data) { B[x.k] = x.r.data; store.set('bossCache.' + x.k, x.r.data); } });
         else if (mem.r.data) store.set('cache.' + mem.k + '.' + mem.r.name, mem.r.data);
+        fresh = Date.now();
         setTimeout(start, 650);
         return;
       }
@@ -216,7 +219,7 @@
 
   async function loadMe(quiet) {
     try {
-      D = await api(S.team, { action: 'me', name: S.name, pin: S.pin });
+      D = await api(S.team, { action: 'me', name: S.name, pin: S.pin }); fresh = Date.now();
       store.set('cache.' + S.team + '.' + S.name, D);
       if (!quiet) render(); else render(true);
     } catch (e) {
@@ -509,7 +512,7 @@
   async function loadBoss(quiet) {
     const teams = Object.keys(C.backends).filter((k) => C.backends[k].url).sort((a, b) => (a === bossTeam ? -1 : b === bossTeam ? 1 : 0));
     const one = async (k) => {
-      try { B[k] = await api(k, { action: 'boss', pin: S.pin }); store.set('bossCache.' + k, B[k]); if (k === bossTeam) render(true); }
+      try { B[k] = await api(k, { action: 'boss', pin: S.pin }); fresh = Date.now(); store.set('bossCache.' + k, B[k]); if (k === bossTeam && !$('#sheet.on')) render(true); }
       catch (e) { if (/PIN/i.test(e.message)) { logout(); toast('Please sign in again', '', 'bad'); } else if (!quiet) toast('Could not load ' + C.backends[k].label, e.message, 'bad'); }
     };
     await Promise.all(teams.map(one));
@@ -604,8 +607,11 @@
       $('#sgo', sh).onclick = () => {
         const txt = $('#stext', sh).value.trim();
         if (!txt) { $('#serr', sh).textContent = 'Write a message first.'; return; }
-        busy($('#sgo', sh), async () => { B[bossTeam] = await api(bossTeam, { action: 'send', pin: S.pin, to, text: txt, kind }); closeSheet(); toast('Sent', to === 'all' ? 'Everyone was notified.' : esc(to) + ' was notified.', 'ok'); renderBoss(true); })
-          .catch((e) => { $('#serr', sh).textContent = e.message; });
+        const team = bossTeam;
+        closeSheet(); toast('Sending…', to === 'all' ? 'To everyone' : 'To ' + to, '', 'send');
+        api(team, { action: 'send', pin: S.pin, to, text: txt, kind })
+          .then((d) => { B[team] = d; fresh = Date.now(); toast('Sent', to === 'all' ? 'Everyone was notified.' : to + ' was notified.', 'ok'); if (!$('#sheet.on')) renderBoss(true); })
+          .catch((e) => { toast('Not sent', e.message, 'bad'); setTimeout(() => { sheetSend(to); const ta = $('#stext'); if (ta) ta.value = txt; }, 450); });
       };
     });
   }
@@ -700,13 +706,13 @@
     if (S.team === 'boss') {
       bossTab = ['team', 'btasks', 'bmsg', 'breports'].includes(h) ? h : (h === 'boss' ? 'team' : 'team');
       Object.keys(C.backends).forEach((k) => { if (!B[k]) { const c = store.get('bossCache.' + k, null); if (c) B[k] = c; } });
-      renderBoss(); loadBoss(true);
+      renderBoss(); if (stale(20000)) loadBoss(true);
       timer = setInterval(() => { if (!document.hidden) loadBoss(true); }, 60000);
     } else {
       tab = ['home', 'tasks', 'inbox', 'me'].includes(h) ? h : 'home';
       D = store.get('cache.' + S.team + '.' + S.name, null);
       if (D) render(); else app.innerHTML = `<div class="view"><div class="sk" style="height:60px;margin-bottom:16px"></div><div class="sk" style="height:200px;margin-bottom:14px"></div><div class="sk" style="height:180px"></div></div>`;
-      loadMe(!!D);
+      if (!D || stale(20000)) loadMe(!!D);
       timer = setInterval(() => { if (!document.hidden) loadMe(true); }, 60000);
     }
     setupFirebase().then(() => {
@@ -714,7 +720,7 @@
       else nudgePush();
     });
   }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && S) (S.team === 'boss' ? loadBoss(true) : loadMe(true)); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && S && stale(20000)) (S.team === 'boss' ? loadBoss(true) : loadMe(true)); });
   window.addEventListener('hashchange', () => {
     const h = location.hash.slice(1);
     if (!S) return;

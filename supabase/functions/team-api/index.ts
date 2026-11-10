@@ -255,7 +255,7 @@ async function me(team: Team, m: Emp) {
        { label: "Overdue", value: String(mine.filter((x) => x.overdue).length) }];
   return {
     name: m.display_name, team: team.name, support, quiet, status: "", hour: +parts(now).hour, day: parts(now).weekday,
-    role: m.job_title || "", warn: "",
+    role: m.job_title || "", warn: "", stores: support ? [] : String(s.stores || "").split(",").map((x) => x.trim()).filter(Boolean),
     today: t, stats: statList,
     score: quiet || !scores.length ? null : { today: String(scores[0].day === today ? scores[0].score : "—"), week: (scores.reduce((a, r) => a + Number(r.score), 0) / scores.length).toFixed(1), why: scores[0].why || "" },
     fines: quiet ? null : { total: fines.reduce((a, f) => a + Number(f.amount), 0), unit: support ? "tickets" : "৳", list: fines.map((f) => ({ date: f.day, rule: f.rule, ref: f.ref || "", amount: f.amount })) },
@@ -293,7 +293,7 @@ async function boss(team: Team) {
   const since14 = addDays(ymd(new Date()), -14);
   const stores = support ? [] : [...new Set([...String(s.stores || "").split(",").map((x) => x.trim()).filter(Boolean), ...tasks.map((t) => t.store).filter(Boolean)])].sort();
   return {
-    team: team.name, support,
+    team: team.name, support, ownerPhoto: (await owner()).photo_data || "",
     people: people.map((p) => {
       const st = stateOf(evs[p.id] ?? []);
       const mine = tasks.filter((t) => t.ownerId === p.id && t.status !== "Done");
@@ -633,6 +633,99 @@ async function admin(o: Emp, b: Record<string, any>) {
   }
 }
 
+/* ---------------- listing tool (store team + owner): supplier page / client text -> ready-to-paste Shopify listing ---------------- */
+const LISTING_MODEL = "claude-sonnet-5-5";
+const strip = (h: string) => h.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ")
+  .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, " ").trim();
+function safeUrl(u: string) {
+  try {
+    const x = new URL(u);
+    if (!/^https?:$/.test(x.protocol)) return null;
+    if (/^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1|0\.)/.test(x.hostname) || x.hostname.endsWith(".internal")) return null;
+    return x;
+  } catch { return null; }
+}
+async function readSupplier(url: string) {
+  const u = safeUrl(url);
+  if (!u) fail("That link does not look right. Copy the full product link (https://...).");
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 12000);
+  let html = "";
+  try {
+    const r = await fetch(u!.toString(), { signal: ctl.signal, redirect: "follow", headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+      "Accept-Language": "en-US,en;q=0.9", Accept: "text/html,application/xhtml+xml" } });
+    html = (await r.text()).slice(0, 1_500_000);
+  } catch (_) { /* blocked or slow: continue with whatever the person pasted */ } finally { clearTimeout(tm); }
+  const meta = (p: string) => html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${p}["'][^>]*content=["']([^"']+)`, "i"))?.[1] ?? "";
+  const imgs = new Set<string>();
+  for (const k of ["og:image", "twitter:image"]) { const m = meta(k); if (m) imgs.add(m); }
+  const ld: string[] = [];
+  for (const m of html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+    ld.push(m[1].slice(0, 6000));
+    for (const i of m[1].matchAll(/"image"\s*:\s*\[?\s*"([^"]+)"/g)) imgs.add(i[1]);
+  }
+  for (const m of html.matchAll(/https?:\/\/[^"'\s)]+?\.(?:jpe?g|png|webp)/gi)) { if (imgs.size >= 12) break; if (!/sprite|icon|logo|avatar|flag|\d{2}x\d{2}\./i.test(m[0])) imgs.add(m[0]); }
+  const title = meta("og:title") || html.match(/<title[^>]*>([^<]+)/i)?.[1] || "";
+  return {
+    host: u!.hostname, title: strip(title).slice(0, 300), description: strip(meta("og:description") || meta("description")).slice(0, 1500),
+    jsonld: ld.join("\n").slice(0, 8000), text: strip(html).slice(0, 9000), images: [...imgs].map((x) => x.replace(/^\/\//, "https://")).slice(0, 12),
+  };
+}
+async function listing(team: Team, who: Emp, b: Record<string, any>) {
+  if (team.key !== "store" && who.role !== "owner") fail("The listing tool is for the store team.");
+  const key = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!key) fail("The listing tool is not switched on yet. Atiq needs to add the AI key.");
+  const s = await settings("store");
+  const limit = Number(s.listing_daily_limit ?? 80);
+  const [{ n }] = await sql`select count(*)::int n from public.listing_drafts where employee_id = ${who.id} and created_at >= ${dayStart(ymd(new Date()))}`;
+  if (n >= limit) fail(`Daily limit reached (${limit}). Ask Atiq if you need more.`);
+  const url = String(b.url || "").trim().slice(0, 1000), text = String(b.text || "").trim().slice(0, 8000);
+  const notes = String(b.notes || "").trim().slice(0, 1500), store = String(b.store || "").trim().slice(0, 80);
+  if (!url && text.length < 10) fail("Paste a supplier link, or paste the product details from the client.");
+  const src = url ? await readSupplier(url) : null;
+  if (url && !text && src && !src.title && src.text.length < 200) fail("Could not read that page (the site blocks it). Paste the product title and details in the text box instead.");
+  const extraImgs = String(b.images || "").split(/\s+/).filter((x) => safeUrl(x)).slice(0, 6);
+  const images = [...new Set([...extraImgs, ...(src?.images ?? [])])].slice(0, 12);
+  const prompt = `You write Shopify product listings for an e-commerce agency's client stores.
+House style: ${String(s.listing_style || "Clear, honest, benefit-led copy. US English.")}
+${store ? `Store: ${store}\n` : ""}${notes ? `Instructions from the team member (follow them): ${notes}\n` : ""}
+Rules: use only facts found in the source below; never invent specs, materials, certifications or measurements (leave them out instead). Never mention the supplier, AliExpress, dropshipping, shipping times from China or the source site. Convert measurements to inches/lbs with cm/kg in brackets when given. Keep the title under 70 characters, readable for a shopper (no keyword stuffing). Description: short intro paragraph, then a <ul> of 4-6 benefit bullets, then a "Specifications" <ul> if specs exist. Use simple HTML only (<p>, <ul>, <li>, <strong>).
+Return ONLY one JSON object, no markdown, with these keys:
+{"title": string, "description_html": string, "bullets": string[], "product_type": string, "tags": string[] (5-12, lowercase), "seo_title": string (max 60 chars), "seo_description": string (max 155 chars), "handle": string (url-safe, lowercase, hyphens), "variants": [{"option": string, "values": string[]}], "supplier_price": string (as found, or ""), "suggested_price_usd": string (a sensible retail price ending in .99 if a supplier price is known, else ""), "image_urls": string[] (best product images from the list, main image first, max 8), "missing": string[] (important facts you could not find, e.g. size chart), "warnings": string[] (anything the team must check, e.g. brand names, medical claims)}
+
+SOURCE
+${src ? `Link: ${url}\nPage title: ${src.title}\nPage description: ${src.description}\nStructured data: ${src.jsonld}\nPage text: ${src.text}` : ""}
+${text ? `Details pasted by the team (from the client sheet or files):\n${text}` : ""}
+Image links found: ${images.join(" ")}`;
+  const content: any[] = images.slice(0, 3).map((u) => ({ type: "image", source: { type: "url", url: u } }));
+  content.push({ type: "text", text: prompt });
+  const ask = async (withImages: boolean) => fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST", headers: { "x-api-key": key!, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({ model: LISTING_MODEL, max_tokens: 3000, messages: [{ role: "user", content: withImages ? content : [{ type: "text", text: prompt }] }] }),
+  });
+  let r = await ask(images.length > 0);
+  if (!r.ok && images.length) r = await ask(false); // an image link the AI cannot open: retry with text only
+  const j = await r.json();
+  if (!r.ok) { console.log("listing ai error", r.status, JSON.stringify(j).slice(0, 400)); fail(r.status === 401 ? "The AI key is not valid. Atiq needs to check it." : "The AI is busy. Try again in a minute."); }
+  const raw = (j.content || []).map((c: any) => c.text || "").join("");
+  let out: any;
+  try { out = JSON.parse(raw.slice(raw.indexOf("{"), raw.lastIndexOf("}") + 1)); } catch { fail("The AI answer was not complete. Try again."); }
+  if (!Array.isArray(out.image_urls) || !out.image_urls.length) out.image_urls = images.slice(0, 8);
+  const [row] = await sql`insert into public.listing_drafts (employee_id, store, source_url, input_text, notes, output, tokens_in, tokens_out)
+    values (${who.id}, ${store || null}, ${url || null}, ${text || null}, ${notes || null}, ${sql.json(out)}, ${j.usage?.input_tokens ?? null}, ${j.usage?.output_tokens ?? null}) returning id::int`;
+  return { id: row.id, left: limit - n - 1, listing: out };
+}
+async function listingHistory(who: Emp) {
+  const rows = await sql`select id::int, store, source_url, output->>'title' title, created_at from public.listing_drafts
+    where ${who.role === "owner" ? sql`true` : sql`employee_id = ${who.id}`} order by created_at desc limit 30`;
+  return rows.map((r) => ({ id: r.id, store: r.store || "", url: r.source_url || "", title: r.title || "", time: shortTime(r.created_at) }));
+}
+async function listingGet(who: Emp, id: number) {
+  const [r] = await sql`select output from public.listing_drafts where id = ${id} and (${who.role === "owner"} or employee_id = ${who.id})`;
+  if (!r) fail("Not found.");
+  return { id, listing: r.output };
+}
+
 /* ---------------- router ---------------- */
 async function route(teamKey: string, b: Record<string, any>, ip: string) {
   const team = await teamRow(teamKey);
@@ -700,7 +793,8 @@ async function route(teamKey: string, b: Record<string, any>, ip: string) {
       return { ok: true };
     }
     case "profile": {
-      const m = await checkMember(team, n, p, ip);
+      const isOwner = n === OWNER;
+      const m = isOwner ? await checkOwner(p, ip) : await checkMember(team, n, p, ip);
       let photo = m.photo_data, about = m.about, skills = m.skills || [];
       if (b.photo !== undefined) {
         const ph = String(b.photo || "");
@@ -711,11 +805,17 @@ async function route(teamKey: string, b: Record<string, any>, ip: string) {
       if (b.skills !== undefined) skills = String(b.skills).slice(0, 200).split(",").map((s) => s.trim()).filter(Boolean);
       const [fresh] = await sql`update public.employees set photo_data = ${photo}, about = ${about}, skills = (select coalesce(array_agg(x), '{}') from jsonb_array_elements_text(${sql.json(skills)}) x),
         joined_on = coalesce(joined_on, ${ymd(new Date())}::date) where id = ${m.id} returning ${EMP}`;
-      forget("people:");
-      return me(team, fresh as Emp);
+      forget("people:"); forget("owner");
+      return isOwner ? { photo: (fresh as Emp).photo_data || "" } : me(team, fresh as Emp);
     }
     case "boss": return authedRead(await owner(), p, ip, () => boss(team));
     case "admin": { const o = await checkOwner(p, ip); return admin(o, b); }
+    case "listing": case "listingHistory": case "listingGet": {
+      const who = n === OWNER ? await checkOwner(p, ip) : await checkMember(team, n, p, ip);
+      if (b.action === "listingHistory") return listingHistory(who);
+      if (b.action === "listingGet") return listingGet(who, Number(b.id) || 0);
+      return listing(team, who, b);
+    }
     case "send": { const o = await checkOwner(p, ip); await sendInbox(team, o, String(b.to || ""), b.text, b.kind); return boss(team); }
     case "saveTask": { const o = await checkOwner(p, ip); await saveTask(team, o, b.task || {}); return boss(team); }
     case "testPush": {

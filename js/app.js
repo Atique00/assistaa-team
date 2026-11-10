@@ -370,7 +370,7 @@
   function pageTasks() {
     const items = D.items || [];
     const title = D.support ? 'Tickets waiting over 20 h' : 'My tasks';
-    return `${header()}<div class="stagger"><div class="card"><h3>${I(D.support ? 'headset' : 'tasks')} ${title}<span class="cnt">${items.length}</span></h3>
+    return `${header()}<div class="stagger">${D.support ? '' : `<button class="btn" id="lstBtn" style="margin-bottom:14px">${I('spark')} Listing tool</button>`}<div class="card"><h3>${I(D.support ? 'headset' : 'tasks')} ${title}<span class="cnt">${items.length}</span></h3>
       ${items.map((it) => `<div class="item"><span class="dot ${it.bad ? 'bad' : it.status === 'In progress' ? 'amber' : ''}"></span><div class="body">
         <div class="t">${esc(it.title)}</div><div class="s">${esc(it.sub)}</div>
         ${!D.support && it.row ? `<div class="acts">${it.status !== 'In progress' ? `<button class="btn sm ghost" data-task="${it.row}" data-st="In progress" data-title="${esc(it.title)}">${I('play')} Start</button>` : '<span class="pill amber">In progress</span>'}<button class="btn sm green" data-task="${it.row}" data-st="Done" data-title="${esc(it.title)}">${I('check')} Done</button></div>` : ''}
@@ -451,6 +451,8 @@
     const hi = $('#hist'); if (hi) hi.onclick = sheetHistory;
     const pb = $('#pinBtn'); if (pb) pb.onclick = sheetPin;
     const sb = $('#sndBtn'); if (sb) sb.onclick = sheetSound;
+    const lb = $('#lstBtn'); if (lb) lb.onclick = sheetListing;
+    if (D && D.stores) store.set('lstStores', D.stores);
     const lo = $('#logout'); if (lo) lo.onclick = () => { logout(); toast('Signed out', '', 'ok'); };
   }
 
@@ -565,6 +567,98 @@
     });
   }
 
+
+  /* ---------- Listing tool (store team + manager) ---------- */
+  const lstTeam = () => (S.team === 'boss' ? 'store' : S.team);
+  const lstWho = () => (S.team === 'boss' ? C.owner : S.name);
+  function copyText(t) {
+    const done = () => toast('Copied', '', 'ok');
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).then(done).catch(() => fallback());
+    return fallback();
+    function fallback() { const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Could not copy', 'Select the text and copy it.', 'bad'); } ta.remove(); }
+  }
+  // only bare <p><ul><li><strong><b><em><br>, no attributes; everything else is shown as text
+  const safeHtml = (h) => esc(h || '').replace(/&lt;(\/?)(p|ul|li|strong|b|em|br)\s*\/?&gt;/gi, '<$1$2>');
+  function listingView(L) {
+    L = Object.assign({}, L, { image_urls: (L.image_urls || []).filter((u) => /^https:\/\//i.test(String(u))) });
+    const f = (label, val, big) => `<div class="card" style="margin:10px 0;padding:12px 14px"><div class="row" style="align-items:center;margin:0"><div class="label" style="margin:0">${label}</div><div class="sp"></div><button class="btn sm ghost" data-copy="${esc(val)}">Copy</button></div>
+      <div class="${big ? '' : 't'}" style="margin-top:6px;white-space:pre-wrap;word-break:break-word">${big ? val : esc(val)}</div></div>`;
+    const tags = (L.tags || []).join(', ');
+    const vars = (L.variants || []).map((v) => `${v.option}: ${(v.values || []).join(', ')}`).join('\n');
+    return `${(L.warnings || []).length ? `<div class="warnbox" style="margin:10px 0">${I('warn')} <div><b>Check before posting</b><br>${(L.warnings || []).map(esc).join('<br>')}</div></div>` : ''}
+      ${f('Title', L.title || '')}
+      ${f('Description (HTML)', L.description_html || '', false).replace('class="t" style="margin-top:6px;white-space:pre-wrap', 'class="small muted" style="margin-top:6px;white-space:pre-wrap')}
+      <div class="card" style="margin:10px 0;padding:12px 14px"><div class="label" style="margin:0 0 6px">Preview</div><div class="lst-prev">${safeHtml(L.description_html)}</div></div>
+      ${f('Product type', L.product_type || '')}
+      ${f('Tags', tags)}
+      ${f('SEO title', L.seo_title || '')}
+      ${f('SEO description', L.seo_description || '')}
+      ${f('URL handle', L.handle || '')}
+      ${vars ? f('Variants', vars) : ''}
+      ${L.supplier_price || L.suggested_price_usd ? f('Price', [L.suggested_price_usd ? 'Suggested: $' + String(L.suggested_price_usd).replace(/^\$/, '') : '', L.supplier_price ? 'Supplier: ' + L.supplier_price : ''].filter(Boolean).join('  ·  ')) : ''}
+      ${(L.image_urls || []).length ? `<div class="card" style="margin:10px 0;padding:12px 14px"><div class="row" style="align-items:center;margin:0"><div class="label" style="margin:0">Images (${L.image_urls.length})</div><div class="sp"></div><button class="btn sm ghost" data-copy="${esc(L.image_urls.join('\n'))}">Copy links</button></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px">${L.image_urls.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#0002"></a>`).join('')}</div>
+        <div class="small muted" style="margin-top:6px">Tap an image to open it, then save it.</div></div>` : ''}
+      ${(L.missing || []).length ? `<div class="small muted" style="margin:8px 2px">Not found in the source: ${(L.missing || []).map(esc).join(', ')}</div>` : ''}
+      <button class="btn ghost" data-copy="${esc([L.title, '', L.description_html, '', 'Type: ' + (L.product_type || ''), 'Tags: ' + tags, 'SEO title: ' + (L.seo_title || ''), 'SEO description: ' + (L.seo_description || ''), 'Handle: ' + (L.handle || ''), vars].join('\n'))}">${I('check')} Copy everything</button>`;
+  }
+  function bindCopy(root) { $$('[data-copy]', root).forEach((b) => b.onclick = () => copyText(b.dataset.copy)); }
+  function sheetListing() {
+    const stores = (S.team === 'boss' ? (B.store && B.store.stores) : null) || store.get('lstStores', []) || [];
+    const last = store.get('lstLast', {});
+    openSheet(`<h2>Listing tool</h2><p class="lead">Paste a supplier link and/or the client's product details. You get a ready-to-paste Shopify listing.</p>
+      <label class="fl">Supplier link</label><input class="field" id="lu" inputmode="url" placeholder="https://www.aliexpress.com/item/...">
+      <label class="fl">Product details from the client (optional)</label><textarea class="field" id="lt" placeholder="Paste the row from the client's sheet, sizes, colours, price…"></textarea>
+      <div class="row"><div><label class="fl">Store</label><input class="field" id="ls" list="lsl" value="${esc(last.store || '')}" placeholder="Store name"><datalist id="lsl">${stores.map((x) => `<option value="${esc(x)}">`).join('')}</datalist></div></div>
+      <label class="fl">Instructions (optional)</label><input class="field" id="ln" value="${esc((last.notes || {})[last.store || ''] || '')}" placeholder="e.g. women's fashion tone, price around $29.99, no emojis">
+      <label class="fl">Extra image links (optional)</label><input class="field" id="li" placeholder="Paste image links separated by spaces">
+      <div class="err" id="lerr2"></div>
+      <button class="btn" id="lgo2">${I('spark')} Write the listing</button>
+      <button class="btn ghost" id="lhist" style="margin-top:10px">${I('history')} My recent listings</button>
+      <div id="lout"></div>`, (sh) => {
+      $('#ls', sh).onchange = () => { const n = (store.get('lstLast', {}).notes || {})[$('#ls', sh).value]; if (n != null) $('#ln', sh).value = n; };
+      $('#lgo2', sh).onclick = () => {
+        const url = $('#lu', sh).value.trim(), text = $('#lt', sh).value.trim();
+        if (!url && text.length < 10) { $('#lerr2', sh).textContent = 'Paste a supplier link or the product details.'; return; }
+        $('#lerr2', sh).textContent = '';
+        const st = $('#ls', sh).value.trim(), notes = $('#ln', sh).value.trim();
+        const l = store.get('lstLast', {}); l.store = st; l.notes = Object.assign(l.notes || {}, { [st]: notes }); store.set('lstLast', l);
+        $('#lout', sh).innerHTML = '<div class="sk" style="height:260px;margin-top:14px"></div><div class="small muted" style="text-align:center;margin-top:8px">Reading the page and writing… about 20–40 seconds</div>';
+        busy($('#lgo2', sh), async () => {
+          try {
+            const r = await api(lstTeam(), { action: 'listing', name: lstWho(), pin: S.pin, url, text, store: st, notes, images: $('#li', sh).value });
+            $('#lout', sh).innerHTML = `<div class="small muted" style="margin:14px 2px 0">Done · ${r.left} left today</div>` + listingView(r.listing);
+            bindCopy($('#lout', sh)); $('#lout', sh).scrollIntoView({ behavior: 'smooth' }); playSound('Pop');
+          } catch (e) { $('#lout', sh).innerHTML = ''; $('#lerr2', sh).textContent = e.message; }
+        });
+      };
+      $('#lhist', sh).onclick = () => busy($('#lhist', sh), async () => {
+        const h = await api(lstTeam(), { action: 'listingHistory', name: lstWho(), pin: S.pin });
+        $('#lout', sh).innerHTML = `<div class="label" style="margin:14px 0 6px">Recent listings</div>` + (h.map((x) => `<button class="item" data-lget="${x.id}" style="width:100%;text-align:left"><span class="dot ok"></span><div class="body"><div class="t">${esc(x.title || '(no title)')}</div><div class="s">${esc([x.store, x.time].filter(Boolean).join(' · '))}</div></div>${I('chev')}</button>`).join('') || emptyBox('history', 'No listings yet.'));
+        $$('[data-lget]', sh).forEach((b) => b.onclick = () => busy(b, async () => {
+          const r = await api(lstTeam(), { action: 'listingGet', name: lstWho(), pin: S.pin, id: Number(b.dataset.lget) });
+          $('#lout', sh).innerHTML = listingView(r.listing); bindCopy($('#lout', sh));
+        }).catch((e) => toast('Could not open', e.message, 'bad')));
+      }).catch((e) => { $('#lerr2', sh).textContent = e.message; });
+    });
+  }
+  function bossPhoto(file) {
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'), size = 220; c.width = c.height = size;
+      const s = Math.min(img.width, img.height);
+      c.getContext('2d').drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      let q = 0.85, data = c.toDataURL('image/jpeg', q);
+      while (data.length > 40000 && q > 0.3) { q -= 0.1; data = c.toDataURL('image/jpeg', q); }
+      toast('Uploading photo…', '', '', 'cam');
+      api('store', { action: 'profile', name: C.owner, pin: S.pin, photo: data })
+        .then((r) => { Object.values(B).forEach((x) => { if (x) x.ownerPhoto = r.photo; }); store.set('ownerPhoto', r.photo); toast('Looking good! 📸', 'Profile photo updated', 'ok'); renderBoss(true); })
+        .catch((e) => toast('Could not upload', e.message, 'bad'));
+    };
+    img.src = URL.createObjectURL(file);
+  }
+
   function pickPhoto(file) {
     if (!file) return;
     const img = new Image();
@@ -613,7 +707,8 @@
     requestAnimationFrame(() => { const on = $('#nav button.on'), hl = $('#nav .hl'); if (on) { hl.style.left = on.offsetLeft + 'px'; hl.style.width = on.offsetWidth + 'px'; } });
     void pendingReplies;
     const teams = Object.keys(C.backends).filter((k) => C.backends[k].url);
-    const head = `<div class="top">${avatar(C.owner, '', 52)}<div><div class="sub">${greet()},</div><h1>${esc(C.owner)} <span style="font-size:18px">👑</span></h1></div><div class="sp"></div><button class="iconbtn" id="refresh">${I('refresh')}</button><button class="iconbtn" id="bellB" style="margin-left:8px" aria-label="Notifications">${I('bell')}</button><button class="iconbtn" id="moreB" style="margin-left:8px" aria-label="Settings">${I('user')}</button></div>
+    const oPhoto = (d && d.ownerPhoto) || store.get('ownerPhoto', '');
+    const head = `<div class="top"><label style="cursor:pointer" aria-label="Change photo">${avatar(C.owner, oPhoto, 52)}<input type="file" accept="image/*" id="bPhoto" hidden></label><div><div class="sub">${greet()},</div><h1>${esc(C.owner)} <span style="font-size:18px">👑</span></h1></div><div class="sp"></div><button class="iconbtn" id="refresh">${I('refresh')}</button><button class="iconbtn" id="bellB" style="margin-left:8px" aria-label="Notifications">${I('bell')}</button><button class="iconbtn" id="moreB" style="margin-left:8px" aria-label="Settings">${I('user')}</button></div>
       <div class="tabs">${teams.map((k) => `<button data-bt="${k}" class="${k === bossTeam ? 'on' : ''}">${esc(C.backends[k].label)}</button>`).join('')}</div>`;
     let body = '';
     if (!d && bossTab !== 'badmin') body = `<div class="sk" style="height:120px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`;
@@ -628,13 +723,16 @@
     $$('[data-bt]').forEach((b) => b.onclick = () => { bossTeam = b.dataset.bt; store.set('bossTeam', bossTeam); renderBoss(); });
     $('#refresh').onclick = () => { loadBoss(); if (bossTab === 'badmin') loadAdmin(); };
     $('#bellB').onclick = () => enablePush(true);
+    $('#bPhoto').onchange = (e) => bossPhoto(e.target.files[0]);
     $('#moreB').onclick = () => openSheet(`<h2>Settings</h2><p class="lead">Manager account</p>
+      <div class="setting">${I('cam')}<div><b>Profile photo</b><div class="small muted">Shown at the top of your view</div></div><div class="sp"></div><label class="btn sm ghost" style="cursor:pointer">Choose<input type="file" accept="image/*" id="bPhoto2" hidden></label></div>
       <div class="setting">${I('lock')}<div><b>Change PIN</b><div class="small muted">Changes it for both teams</div></div><div class="sp"></div><button class="btn sm ghost" id="pinBtn2">Change</button></div>
       <div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Store issue sheet</div></div><div class="sp"></div><a class="btn sm ghost" href="${ISSUES}" target="_blank" rel="noopener">Open</a></div>
       <div class="setting">${I('bell')}<div><b>Notifications</b><div class="small muted">Replies and reports from the team</div></div><div class="sp"></div><button class="btn sm ghost" id="pushB2">Turn on</button></div>
       <div class="setting">${I('play')}<div><b>Notification sound</b><div class="small muted">${esc(mySound())}</div></div><div class="sp"></div><button class="btn sm ghost" id="snd2">Choose</button></div>
       <div class="setting">${I('out')}<div><b>Sign out</b></div><div class="sp"></div><button class="btn sm ghost" id="lo2">Sign out</button></div>`, (sh) => {
       $('#pinBtn2', sh).onclick = () => { closeSheet(); setTimeout(sheetPin, 420); };
+      $('#bPhoto2', sh).onchange = (e) => { closeSheet(); bossPhoto(e.target.files[0]); };
       $('#pushB2', sh).onclick = () => { closeSheet(); enablePush(true); };
       $('#snd2', sh).onclick = () => { closeSheet(); setTimeout(sheetSound, 420); };
       $('#lo2', sh).onclick = () => { closeSheet(); logout(); };
@@ -643,6 +741,7 @@
     $$('[data-newtask]').forEach((b) => b.onclick = () => sheetTask({ owner: b.dataset.newtask || '' }));
     $$('[data-edit]').forEach((b) => b.onclick = () => sheetTask(d.tasks.find((t) => String(t.row) === b.dataset.edit)));
     if (bossTab === 'badmin') bindAdmin();
+    const lbb = $('#lstBtnB'); if (lbb) lbb.onclick = sheetListing;
   }
   const stLabel = { off: 'Not started', working: 'Working', break: 'On break', done: 'Done' };
   function bossTeamView(d) {
@@ -660,7 +759,7 @@
     const open = d.tasks.filter((t) => t.status !== 'Done');
     const done = d.tasks.filter((t) => t.status === 'Done');
     const row = (t) => `<div class="item"><span class="dot ${t.overdue ? 'bad' : t.status === 'Done' ? 'ok' : t.status === 'In progress' ? 'amber' : ''}"></span><div class="body"><div class="t">${esc(t.task)}</div><div class="s">${esc([t.store, t.owner || 'No owner', t.status, t.deadline ? 'due ' + t.deadline : ''].filter(Boolean).join(' · '))}</div></div><button class="iconbtn" data-edit="${t.row}" aria-label="Edit">${I('chev')}</button></div>`;
-    return `<button class="btn" data-newtask="" style="margin-bottom:14px">${I('plus')} New task</button>
+    return `<div class="row" style="margin-bottom:14px"><button class="btn" data-newtask="">${I('plus')} New task</button><button class="btn ghost" id="lstBtnB">${I('spark')} Listing tool</button></div>
       <div class="card"><h3>${I('tasks')} Open <span class="cnt">${open.length}</span></h3>${open.map(row).join('') || emptyBox('check', 'No open tasks.')}</div>
       ${done.length ? `<div class="card"><h3>${I('check')} Done recently <span class="cnt">${done.length}</span></h3>${done.map(row).join('')}</div>` : ''}`;
   }
@@ -986,7 +1085,7 @@
     });
   }
   /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
-  const APP_VERSION = '16';
+  const APP_VERSION = '17';
   let lastVersionCheck = 0;
   async function checkVersion() {
     if (Date.now() - lastVersionCheck < 5 * 60000) return;

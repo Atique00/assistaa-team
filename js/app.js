@@ -103,6 +103,57 @@
   function greet() { const h = new Date().getHours(); return h < 5 ? 'Late night' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
   function emptyBox(icon, text) { return `<div class="empty">${I(icon)}<div>${esc(text)}</div></div>`; }
 
+
+  /* ---------- in-app notification sounds (play while the app is open; uses media volume) ---------- */
+  let actx = null;
+  const audio = () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} return actx; };
+  document.addEventListener('pointerdown', () => audio(), { once: true, capture: true });
+  // [frequency Hz, start s, length s, wave, volume]
+  const SOUNDS = {
+    Chime: [[880, 0, 0.35, 'sine', 0.5], [1320, 0.12, 0.45, 'sine', 0.4]],
+    Ding: [[1046, 0, 0.6, 'sine', 0.6]],
+    Pop: [[600, 0, 0.08, 'triangle', 0.6], [900, 0.06, 0.1, 'triangle', 0.5]],
+    Bell: [[784, 0, 0.9, 'sine', 0.5], [1568, 0, 0.6, 'sine', 0.2], [784, 0.45, 0.9, 'sine', 0.4]],
+    Marimba: [[523, 0, 0.18, 'triangle', 0.6], [659, 0.15, 0.18, 'triangle', 0.6], [784, 0.3, 0.3, 'triangle', 0.6]],
+    'Loud alert': [[988, 0, 0.18, 'square', 0.35], [740, 0.2, 0.18, 'square', 0.35], [988, 0.4, 0.18, 'square', 0.35], [740, 0.6, 0.25, 'square', 0.35]],
+    Off: []
+  };
+  const mySound = () => { const s = store.get('sound', 'Chime'); return SOUNDS[s] ? s : 'Chime'; };
+  function playSound(name) {
+    const notes = SOUNDS[name || mySound()] || [];
+    const c = notes.length && audio(); if (!c) return;
+    const t0 = c.currentTime + 0.02;
+    for (const [f, st, len, wave, vol] of notes) {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = wave; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0 + st); g.gain.exponentialRampToValueAtTime(vol, t0 + st + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t0 + st + len);
+      o.connect(g).connect(c.destination); o.start(t0 + st); o.stop(t0 + st + len + 0.05);
+    }
+  }
+  function sheetSound() {
+    const android = /android/i.test(navigator.userAgent);
+    openSheet(`<h2>Notification sound</h2><p class="lead">Tap a sound to hear it, then it is saved. It plays when a message arrives while Assistaa is open.</p>
+      <div id="snds">${Object.keys(SOUNDS).map((n) => `<button class="setting" data-snd="${n}" style="width:100%;text-align:left">${I(n === 'Off' ? 'bell' : 'play')}<div><b>${n}</b></div><div class="sp"></div>${n === mySound() ? `<span class="pill green">Chosen</span>` : ''}</button>`).join('')}</div>
+      <button class="btn" id="tnot" style="margin-top:12px">${I('bell')} Test a phone notification</button>
+      <div class="card" style="margin-top:14px"><h3>${I('warn')} When the app is closed</h3>
+        <div class="small muted" style="line-height:1.5">The phone plays its own notification sound. To change it${android ? '' : ' on Android'}: long-press the Assistaa icon → App info → Notifications → Sound (and turn on "Pop on screen").<br><br>
+        If the phone is on <b>silent</b> or <b>vibrate</b>, no website or web app can make it ring. Keep the ringer on during work hours, or allow Assistaa in Do Not Disturb exceptions.</div></div>`, (sh) => {
+      $$('[data-snd]', sh).forEach((b) => b.onclick = () => {
+        store.set('sound', b.dataset.snd); playSound(b.dataset.snd);
+        $$('[data-snd] .pill', sh).forEach((x) => x.remove());
+        b.insertAdjacentHTML('beforeend', `<span class="pill green">Chosen</span>`);
+      });
+      $('#tnot', sh).onclick = async () => {
+        if (!('Notification' in window) || Notification.permission !== 'granted') { closeSheet(); setTimeout(() => enablePush(true), 420); return; }
+        try {
+          const reg = swReg || await navigator.serviceWorker.getRegistration();
+          await reg.showNotification('Assistaa test 🔔', { body: 'This is how a notification looks and sounds on your phone.', icon: 'icons/icon-192.png', badge: 'icons/badge-96.png', tag: 'assistaa-test', renotify: true });
+          toast('Test sent', 'Lock the phone or check the top bar.', 'ok');
+        } catch (e) { toast('Could not show a test', e.message || String(e), 'bad'); }
+      };
+    });
+  }
+
   /* ---------- sheet (bottom pop-up) ---------- */
   function openSheet(html, onMount) {
     const sh = $('#sheet'), sc = $('#scrim');
@@ -330,6 +381,7 @@
         <div style="margin-top:12px"><button class="btn" id="saveProfile">Save profile</button></div></div>
       <div class="card"><h3>${I('bell')} Settings</h3>
         <div class="setting">${I('bell')}<div><b>Notifications</b><div class="small muted">Tasks and messages from ${esc(C.owner)}</div></div><div class="sp"></div><button class="switch ${notif ? 'on' : ''}" id="pushSw" aria-label="Notifications"></button></div>
+        <div class="setting">${I('play')}<div><b>Notification sound</b><div class="small muted">${esc(mySound())}</div></div><div class="sp"></div><button class="btn sm ghost" id="sndBtn">Choose</button></div>
         <div class="setting">${I('phone')}<div><b>Install the app</b><div class="small muted">Add Assistaa to your home screen</div></div><div class="sp"></div><button class="btn sm ghost" id="install">How</button></div>
         <div class="setting">${I('lock')}<div><b>Change PIN</b><div class="small muted">Pick a new 4-digit PIN</div></div><div class="sp"></div><button class="btn sm ghost" id="pinBtn">Change</button></div>
         ${S.team === 'store' && ['Rashed', 'Sabuj'].includes(S.name) ? `<div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Issue sheet and top-5 checks</div></div><div class="sp"></div><a class="btn sm ghost" href="${ISSUES}" target="_blank" rel="noopener">Open</a></div>` : ''}
@@ -370,6 +422,7 @@
     const ins = $('#install'); if (ins) ins.onclick = sheetInstall;
     const hi = $('#hist'); if (hi) hi.onclick = sheetHistory;
     const pb = $('#pinBtn'); if (pb) pb.onclick = sheetPin;
+    const sb = $('#sndBtn'); if (sb) sb.onclick = sheetSound;
     const lo = $('#logout'); if (lo) lo.onclick = () => { logout(); toast('Signed out', '', 'ok'); };
   }
 
@@ -551,9 +604,11 @@
       <div class="setting">${I('lock')}<div><b>Change PIN</b><div class="small muted">Changes it for both teams</div></div><div class="sp"></div><button class="btn sm ghost" id="pinBtn2">Change</button></div>
       <div class="setting">${I('warn')}<div><b>Issue portal</b><div class="small muted">Store issue sheet</div></div><div class="sp"></div><a class="btn sm ghost" href="${ISSUES}" target="_blank" rel="noopener">Open</a></div>
       <div class="setting">${I('bell')}<div><b>Notifications</b><div class="small muted">Replies and reports from the team</div></div><div class="sp"></div><button class="btn sm ghost" id="pushB2">Turn on</button></div>
+      <div class="setting">${I('play')}<div><b>Notification sound</b><div class="small muted">${esc(mySound())}</div></div><div class="sp"></div><button class="btn sm ghost" id="snd2">Choose</button></div>
       <div class="setting">${I('out')}<div><b>Sign out</b></div><div class="sp"></div><button class="btn sm ghost" id="lo2">Sign out</button></div>`, (sh) => {
       $('#pinBtn2', sh).onclick = () => { closeSheet(); setTimeout(sheetPin, 420); };
       $('#pushB2', sh).onclick = () => { closeSheet(); enablePush(true); };
+      $('#snd2', sh).onclick = () => { closeSheet(); setTimeout(sheetSound, 420); };
       $('#lo2', sh).onclick = () => { closeSheet(); logout(); };
     });
     $$('[data-person]').forEach((b) => b.onclick = () => sheetPerson(b.dataset.person));
@@ -830,6 +885,7 @@
       messaging.onMessage((p) => {
         const d = p.data || {};
         toast(d.title || 'Assistaa', d.body || '', '', 'bell');
+        playSound();
         if (S && S.team === 'boss') loadBoss(true); else if (S) loadMe(true);
       });
     } catch (e) { pushErr = 'Setup failed: ' + (e && e.message || e); setupP = null; console.log('push setup', e); }
@@ -902,7 +958,7 @@
     });
   }
   /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
-  const APP_VERSION = '14';
+  const APP_VERSION = '15';
   let lastVersionCheck = 0;
   async function checkVersion() {
     if (Date.now() - lastVersionCheck < 5 * 60000) return;

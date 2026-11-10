@@ -11,7 +11,10 @@ API: `https://zciuchdximmzwiisdkqu.supabase.co` · publishable key `sb_publishab
 | Data copied from both Google Sheets | team (9 people), settings, rules, stores, 30 activity events, 26 reports, 8 tasks (+5 owners), 30 support person-days of stats, ticket split |
 | PINs | bcrypt hashes in `private.employee_pins`; plain PINs are **not** in Supabase |
 | Edge function `auth-pin` | live — `login` and `change` |
-| Nightly encrypted backup | `.github/workflows/db-backup.yml`, waits for 2 secrets |
+| Nightly encrypted backup | `.github/workflows/db-backup.yml` — secrets set, first run green 10 Nov |
+| Edge function `api` | live — same contract as Apps Script `doPost`; reads and writes tested 10 Nov |
+| Test app | https://team.assistaa.com/next/ — built by `tools/build-next.sh`, own storage (`assistaa-next.`), TEST label |
+| Push from Supabase | waits for secret `FIREBASE_SERVICE_ACCOUNT`; until then saved to `notifications` |
 
 Not copied (on purpose): `owner_pin` (hashed instead), Sabuj's profile photo (moves to Storage at switch-over), "Issue Seen" (a cache the issue portal rebuilds), empty tabs (Inbox, Fines, Scores, Push Tokens, Client Messages, Tickets Waiting).
 
@@ -22,7 +25,7 @@ Not copied (on purpose): `owner_pin` (hashed instead), Sabuj's profile photo (mo
 - Login: 15 wrong tries per device or 60 overall per 10 min → 10-minute wait. Every try is logged in `login_attempts`.
 
 ## Still running the old way
-Google Sheets + Apps Script remain the live system. Nothing in the app points at Supabase yet.
+Google Sheets + Apps Script remain the live system at team.assistaa.com. Only /next/ points at Supabase. The two do not sync: the test copy starts from the 9 Nov snapshot. Claude's report replies only run on the sheets.
 
 ## Switch-over plan
 1. Test copy of the app on a separate address reading Supabase.

@@ -902,6 +902,15 @@ footer .glass-logo .logo-mark{width:26px;height:26px}
 .glass-logo .mark-wrap{width:36px;height:36px}
 @media (max-width:420px){.wq{font-size:19px}.glass-logo{padding-right:12px}}
 @media (prefers-reduced-motion:reduce){.wq,.glass-logo::before{animation:none}}
+
+/* Menu links: bold, larger, glass hover pill + glowing underline */
+.nav-links{gap:4px;font:600 16px/1 var(--f-body);color:#DCE4EE}
+.nav-links a{position:relative;padding:10px 14px;border-radius:999px;color:#DCE4EE;transition:color .25s,background .25s,box-shadow .25s,transform .25s}
+.nav-links a::after{content:"";position:absolute;left:50%;right:50%;bottom:4px;height:2px;border-radius:2px;background:linear-gradient(90deg,#00AEEF,#7FE0FF);box-shadow:0 0 10px #00AEEF;transition:left .3s cubic-bezier(.2,.8,.2,1),right .3s cubic-bezier(.2,.8,.2,1)}
+.nav-links a:hover,.nav-links a:focus-visible{color:#fff;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.03));box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 0 1px rgba(0,174,239,.35),0 8px 22px -10px rgba(0,174,239,.6);transform:translateY(-1px);outline:none}
+.nav-links a:hover::after,.nav-links a:focus-visible::after,.nav-links a.is-on::after{left:14px;right:14px}
+.nav-links a.is-on{color:#7FE0FF}
+@media (max-width:1180px){.nav-links{font-size:15px}.nav-links a{padding:9px 10px}}
 </style>
 </head>
 <body>
@@ -1710,6 +1719,13 @@ const xform = document.getElementById('xform');
     if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(en => { seen = en.isIntersecting; if (seen) maybeAuto(); }), {threshold: .5}).observe(q);
     function maybeAuto(){ const n = q.querySelector('.nm'); if (!n || !seen || autos >= 2 || anchor) return; autos++; setTimeout(() => { if (seen && q.contains(n)) open(n, true); }, 1500); }
     new MutationObserver(() => { if (anchor && !document.body.contains(anchor)) close(); wrap(q); maybeAuto(); }).observe(q, {childList: true});
+  })();
+  /* Menu: mark the section in view */
+  (function(){
+    const links = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+    const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(en => { const a = map.get(en.target.id); if (a && en.isIntersecting) { links.forEach(l => l.classList.remove('is-on')); a.classList.add('is-on'); } }), {rootMargin: '-40% 0px -55% 0px'}) : null;
+    if (io) map.forEach((a, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
   })();
   document.getElementById('xunlock').addEventListener('submit', e=>{
     e.preventDefault();

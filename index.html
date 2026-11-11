@@ -13,6 +13,21 @@
 body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
+
+/* Store X-Ray live results */
+.sev.lo{background:color-mix(in srgb,var(--con-fg) 12%,transparent);color:var(--con-muted)}
+.sev.ok{background:color-mix(in srgb,#3CD58A 22%,transparent);color:#8FF0BE}
+.finds .xarea{font:600 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--con-muted);margin-right:6px}
+.finds{max-height:420px;overflow:auto}
+.xmore{margin-top:14px;padding:14px;border-radius:14px;border:1px dashed var(--con-line);display:flex;flex-direction:column;gap:10px}
+.xmore p{margin:0;font-size:14px;color:var(--con-muted)}
+.xmore p b{color:var(--con-fg)}
+.xmore form{display:flex;flex-wrap:wrap;gap:8px}
+.xmore input{flex:1 1 140px;min-width:0;background:transparent;border:1px solid var(--con-line);border-radius:10px;color:var(--con-fg);font:500 14px var(--f-body,inherit);padding:10px 12px}
+.xmore input:focus{outline:none;border-color:var(--brand)}
+.xmore .btn{padding:10px 16px}
+.xmore a{color:var(--brand);font-weight:600}
+.xerr{color:#FFA79C}
 </style>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Assistaa runs the back office for ecommerce brands: customer support, disputes, product listings and creatives, by an experienced team working with AI.">
@@ -455,6 +470,44 @@ html{scroll-behavior:auto}
 .viz .v-eq rect:nth-child(2){animation-delay:.2s}.viz .v-eq rect:nth-child(3){animation-delay:.35s}.viz .v-eq rect:nth-child(4){animation-delay:.5s}
 @keyframes veq{from{transform:scaleY(.4)}to{transform:scaleY(1.15)}}
 @media (max-width:420px){.svc-grid .svc .viz{width:54px;height:54px}}
+
+/* Premium AI + team split: dark glass, rotating light border, live hand-off */
+.split{position:relative;isolation:isolate;border:0;color:#EEF3F9;background:radial-gradient(620px 320px at 0% 0%,rgba(0,174,239,.22),transparent 62%),radial-gradient(620px 320px at 100% 100%,rgba(255,180,58,.17),transparent 62%),linear-gradient(160deg,#0D1728,#060B15);box-shadow:0 44px 90px -44px rgba(4,12,28,.85),0 0 0 1px rgba(255,255,255,.06) inset;backdrop-filter:none;-webkit-backdrop-filter:none}
+.split>.ring{position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:rgba(255,255,255,.08);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);overflow:hidden;pointer-events:none;z-index:3}
+.split>.ring::before{content:"";position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent 0 55%,rgba(0,174,239,.85) 68%,#fff 72%,rgba(255,180,58,.85) 78%,transparent 88%);animation:ringspin 8s linear infinite}
+@keyframes ringspin{to{transform:rotate(360deg)}}
+.split .side{position:relative;overflow:hidden}
+.split .side h3{color:#fff}
+.split .side.ai .badge{background:rgba(0,174,239,.16);color:#7FD8FF}
+.split .side.hu .badge{background:rgba(255,180,58,.16);color:#FFD27A}
+.split .side h3 .badge::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:7px;vertical-align:1px;box-shadow:0 0 8px currentColor;animation:livedot 1.6s ease-in-out infinite}
+@keyframes livedot{50%{opacity:.25}}
+.split .side li{color:#B3C0D0;padding:10px 12px;margin:-10px -12px;border-radius:12px;border:1px solid transparent;transition:background .5s,border-color .5s,transform .5s,box-shadow .5s}
+.split .side li b{color:#fff}
+.split .side.ai li.on{background:rgba(0,174,239,.12);border-color:rgba(0,174,239,.5);box-shadow:0 0 28px -8px rgba(0,174,239,.6);transform:translateX(6px)}
+.split .side.hu li.on{background:rgba(255,180,58,.12);border-color:rgba(255,180,58,.5);box-shadow:0 0 28px -8px rgba(255,180,58,.55);transform:translateX(-6px)}
+.split .side li svg path{stroke-dasharray:16}
+.split .side li.on svg path{animation:redraw .55s ease}
+@keyframes redraw{from{stroke-dashoffset:16}to{stroke-dashoffset:0}}
+.split .side.ai::after{content:"";position:absolute;left:0;right:0;top:-90px;height:90px;background:linear-gradient(180deg,transparent,rgba(0,174,239,.11),transparent);animation:aiscan 4.5s linear infinite;pointer-events:none}
+@keyframes aiscan{to{top:100%}}
+.split .side.hu::after{content:"";position:absolute;right:-120px;bottom:-120px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,180,58,.16),transparent 65%);animation:breathe 5s ease-in-out infinite;pointer-events:none}
+@keyframes breathe{50%{transform:scale(1.25);opacity:.6}}
+.split .join{position:relative;min-width:170px;background:rgba(255,255,255,.02);border-color:rgba(255,255,255,.08);overflow:hidden}
+.split .beam{position:absolute;left:0;right:0;top:50%;height:2px;margin-top:-1px;background:linear-gradient(90deg,rgba(0,174,239,.0),rgba(0,174,239,.55),rgba(255,180,58,.55),rgba(255,180,58,0))}
+.split .beam i{position:absolute;top:-3px;left:-10px;width:8px;height:8px;border-radius:50%;animation:packet 2.4s linear infinite}
+.split .beam i:nth-child(2){animation-delay:.8s}.split .beam i:nth-child(3){animation-delay:1.6s}
+@keyframes packet{0%{left:-10px;background:#7FD8FF;box-shadow:0 0 12px 2px #00AEEF}50%{background:#fff;box-shadow:0 0 16px 4px #fff}100%{left:calc(100% + 2px);background:#FFD27A;box-shadow:0 0 12px 2px #FFB43A}}
+.split .core{position:relative;z-index:1;width:124px;height:124px;border-radius:50%;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 35% 30%,#16263D,#070D18 70%);box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 40px -6px rgba(0,174,239,.45);animation:corepulse 2.8s ease-in-out infinite}
+.split .core b{font:800 16px/1.1 var(--f-display);color:#fff;letter-spacing:-.01em}
+.split .core-ring{position:absolute;inset:-8px;border-radius:50%;border:1.5px dashed rgba(0,174,239,.75);animation:spin 14s linear infinite}
+.split .core-ring.r2{inset:10px;border-color:rgba(255,180,58,.8);animation-direction:reverse;animation-duration:9s}
+.split .core.hit{animation:corehit .7s ease}
+@keyframes corepulse{50%{box-shadow:0 0 0 1px rgba(255,255,255,.1),0 0 60px 0 rgba(0,174,239,.35)}}
+@keyframes corehit{0%{transform:scale(1)}35%{transform:scale(1.09);box-shadow:0 0 0 1px rgba(255,255,255,.2),0 0 70px 6px rgba(255,180,58,.5)}100%{transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:860px){.split .join{border-color:rgba(255,255,255,.08);padding:30px}.split .side.ai li.on,.split .side.hu li.on{transform:none}}
+@media (prefers-reduced-motion:reduce){.split>.ring::before,.split .side.ai::after,.split .side.hu::after,.split .beam i,.split .core,.split .core-ring,.split .side h3 .badge::before{animation:none}}
 </style>
 </head>
 <body>
@@ -564,7 +617,7 @@ html{scroll-behavior:auto}
 <div><span class="eyebrow">How we're different</span><h2>Experienced people. AI speed.</h2></div>
 <p>AI does the repetitive groundwork in seconds. Our team makes every call that needs judgment, so your customers always talk to someone who understands them.</p>
 </div>
-<div class="split rv">
+<div class="split rv"><span class="ring" aria-hidden="true"></span>
 <div class="side ai">
 <h3>The AI layer <span class="badge">Seconds</span></h3>
 <ul>
@@ -574,7 +627,7 @@ html{scroll-behavior:auto}
 <li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Flags risks</b> before they turn into refunds or chargebacks</span></li>
 </ul>
 </div>
-<div class="join"><div class="orb">One<br>team</div></div>
+<div class="join"><div class="beam" aria-hidden="true"><i></i><i></i><i></i></div><div class="core"><span class="core-ring"></span><span class="core-ring r2"></span><b>One<br>team</b></div></div>
 <div class="side hu">
 <h3>Our team <span class="badge">Judgment</span></h3>
 <ul>
@@ -615,7 +668,7 @@ html{scroll-behavior:auto}
 <input id="store" name="store" type="text" placeholder="yourstore.com" autocomplete="url">
 <button class="btn btn-primary" type="submit">Scan <span class="arrow">→</span></button>
 </form>
-<p class="xnote">This preview shows sample findings. Full scans of your own store are coming soon.</p>
+<p class="xnote" id="xnote">Free. Checks only what your store shows the public, in about 10 seconds. Built for Shopify stores.</p>
 </div>
 <div class="report tilt" aria-live="polite">
 <span class="sample-tag">Sample</span>
@@ -629,7 +682,16 @@ html{scroll-behavior:auto}
 <li><span class="sev md">MED</span><span>Contact page shows no expected response time</span></li>
 <li><span class="sev md">MED</span><span>3 products share the same description</span></li>
 </ul>
-<div class="leak"><small>Estimated monthly leak</small><strong id="leak">$2,100 – $3,400</strong></div>
+<div class="leak"><small id="leak-l">Estimated monthly leak</small><strong id="leak">$2,100 – $3,400</strong></div>
+          <div class="xmore" id="xmore" hidden>
+            <p><b id="xmore-n">More issues</b> and the full list of what passed. Get the full report free:</p>
+            <form id="xunlock" novalidate>
+              <input id="xname" type="text" placeholder="Your name" autocomplete="name" aria-label="Your name">
+              <input id="xemail" type="email" placeholder="Work email" autocomplete="email" aria-label="Work email">
+              <button class="btn btn-primary" type="submit">Show full report</button>
+            </form>
+            <p id="xumsg" hidden></p>
+          </div>
 </div>
 </div>
 </div>
@@ -972,40 +1034,114 @@ requestAnimationFrame(f); co.unobserve(el);
 nums.forEach(n=>co.observe(n));
 }
 const xform = document.getElementById('xform');
-const bar = document.getElementById('bar');
-const step = document.getElementById('scanstep');
-const state = document.getElementById('rep-state');
-const repStore = document.getElementById('rep-store');
-const finds = [...document.querySelectorAll('#finds li')];
-const leak = document.getElementById('leak');
-const phases = ['Reading product pages…','Checking refund and shipping policies…','Reviewing size charts and variants…','Estimating revenue at risk…'];
-let scanning = false;
-xform.addEventListener('submit', e=>{
-e.preventDefault();
-if (scanning) return; scanning = true;
-const v = document.getElementById('store').value.trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
-repStore.textContent = v || 'example-store.com';
-state.textContent = 'Scanning…';
-finds.forEach(f=>f.classList.add('dim'));
-leak.textContent = '$ —';
-bar.style.transition = 'none'; bar.style.transform = 'scaleX(0)';
-void bar.offsetWidth;
-bar.style.transition = reduce ? 'none' : 'transform 2.4s cubic-bezier(.4,0,.2,1)';
-bar.style.transform = 'scaleX(1)';
-let p = 0; step.textContent = phases[0];
-const iv = setInterval(()=>{ p++; if (p < phases.length) step.textContent = phases[p]; }
-, reduce?0:600);
-setTimeout(()=>{
-clearInterval(iv);
-state.textContent = 'Sample report';
-step.textContent = '6 issues found across 48 pages (sample)';
-finds.forEach((f,idx)=>setTimeout(()=>f.classList.remove('dim'), reduce?0:idx*160));
-leak.textContent = '$2,100 – $3,400';
-scanning = false;
-}
-, reduce?50:2500);
-}
-);
+  const bar = document.getElementById('bar');
+  const step = document.getElementById('scanstep');
+  const state = document.getElementById('rep-state');
+  const repStore = document.getElementById('rep-store');
+  const findsUl = document.getElementById('finds');
+  const leak = document.getElementById('leak');
+  const leakL = document.getElementById('leak-l');
+  const xmore = document.getElementById('xmore');
+  const sampleTag = document.querySelector('.report .sample-tag');
+  const phases = ['Connecting to the store…','Reading public product data…','Checking refund, shipping and privacy policies…','Looking for chat, reviews and email tools…','Scoring the results…'];
+  const SEV = {hi:'HIGH', md:'MED', lo:'LOW'};
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const row = i => `<li><span class="sev ${i.sev}">${SEV[i.sev]}</span><span><b class="xarea">${esc(i.area)}</b>${esc(i.text)}</span></li>`;
+  let scanning = false, last = null;
+  function render(r, full){
+    if (sampleTag) sampleTag.hidden = true;
+    repStore.textContent = r.domain;
+    state.textContent = full ? 'Full report' : 'Scan complete';
+    const n = r.issues.length;
+    step.textContent = (n ? `${n} issue${n>1?'s':''} found` : 'No issues found') + (r.productsChecked ? ` · ${r.productsChecked} products checked` : '');
+    const list = full ? r.issues : r.issues.slice(0,3);
+    findsUl.innerHTML = list.map(row).join('') + (full && r.passed.length ? `<li><span class="sev ok">PASS</span><span>${r.passed.map(esc).join(' · ')}</span></li>` : '');
+    leakL.textContent = 'Store score';
+    leak.textContent = r.score + '/100';
+    leak.style.color = r.score >= 80 ? '#3CD58A' : r.score >= 50 ? '' : '#FF8A7A';
+    if (!full && (n > 3 || r.passed.length)) {
+      xmore.hidden = false;
+      document.getElementById('xmore-n').textContent = n > 3 ? `${n-3} more issue${n-3>1?'s':''}` : 'The details';
+    } else if (!full) xmore.hidden = true;
+  }
+  function fail(text){
+    state.textContent = 'Scan failed';
+    step.innerHTML = `<span class="xerr">${esc(text)}</span>`;
+    findsUl.innerHTML = '';
+    leak.textContent = '—'; leak.style.color = '';
+    xmore.hidden = true;
+  }
+  xform.addEventListener('submit', e=>{
+    e.preventDefault();
+    if (scanning) return;
+    const v = document.getElementById('store').value.trim().replace(/^https?:\/\//i,'').replace(/[\/?#].*$/,'');
+    if (!v || !/\./.test(v)) { document.getElementById('store').focus(); step.innerHTML = '<span class="xerr">Enter your store address, like yourstore.com</span>'; return; }
+    scanning = true; last = null;
+    if (sampleTag) sampleTag.hidden = true;
+    repStore.textContent = v; state.textContent = 'Scanning…';
+    findsUl.querySelectorAll('li').forEach(f=>f.classList.add('dim'));
+    leak.textContent = '—'; leak.style.color = ''; xmore.hidden = true;
+    bar.style.transition = 'none'; bar.style.transform = 'scaleX(0)';
+    void bar.offsetWidth;
+    bar.style.transition = reduce ? 'none' : 'transform 9s cubic-bezier(.2,.6,.3,1)';
+    bar.style.transform = 'scaleX(.92)';
+    let p = 0; step.textContent = phases[0];
+    const iv = setInterval(()=>{ p = Math.min(p+1, phases.length-1); step.textContent = phases[p]; }, reduce ? 0 : 1600);
+    const started = Date.now();
+    fetch('/api/xray?store=' + encodeURIComponent(v))
+      .then(r => r.json().catch(()=>({error:'Live scans run on assistaa.com.'})).then(j => ({ok:r.ok, j})))
+      .catch(() => ({ok:false, j:{error:'Live scans run on assistaa.com. Please try again in a moment.'}}))
+      .then(({ok, j}) => new Promise(res => setTimeout(()=>res({ok, j}), Math.max(0, 2200 - (Date.now()-started)))))
+      .then(({ok, j}) => {
+        clearInterval(iv);
+        bar.style.transition = 'transform .3s'; bar.style.transform = 'scaleX(1)';
+        if (!ok || j.error || !j.issues) fail(j.error || 'Something went wrong. Please try again.');
+        else { last = j; render(j, false); }
+        scanning = false;
+      });
+  });
+  /* AI -> team hand-off loop in the split section */
+  (function(){
+    const sp = document.querySelector('.split'); if (!sp || reduce) return;
+    const ai = [...sp.querySelectorAll('.side.ai li')], hu = [...sp.querySelectorAll('.side.hu li')], core = sp.querySelector('.core');
+    let t = 0, iv = null;
+    const tick = () => {
+      const i = Math.floor(t / 2) % ai.length;
+      if (t % 2 === 0) { ai.concat(hu).forEach(l => l.classList.remove('on')); ai[i].classList.add('on'); }
+      else { if (core) { core.classList.remove('hit'); void core.offsetWidth; core.classList.add('hit'); } setTimeout(() => hu[i] && hu[i].classList.add('on'), 350); }
+      t++;
+    };
+    const io = new IntersectionObserver(es => es.forEach(en => {
+      if (en.isIntersecting && !iv) { tick(); iv = setInterval(tick, 1100); }
+      else if (!en.isIntersecting && iv) { clearInterval(iv); iv = null; }
+    }), {threshold: .35});
+    io.observe(sp);
+  })();
+  document.getElementById('xunlock').addEventListener('submit', e=>{
+    e.preventDefault();
+    if (!last) return;
+    const name = document.getElementById('xname').value.trim();
+    const email = document.getElementById('xemail').value.trim();
+    const m = document.getElementById('xumsg');
+    m.hidden = false; m.className = '';
+    if (!name || !/^\S+@\S+\.\S+$/.test(email)) { m.className = 'xerr'; m.textContent = 'Add your name and a valid email.'; return; }
+    const btn = e.target.querySelector('button'); btn.disabled = true; m.textContent = 'One moment…';
+    fetch('https://zciuchdximmzwiisdkqu.supabase.co/rest/v1/website_leads', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':'sb_publishable_WMggW823F5JaQWI5tZUn3A_2RCcqKcA','Prefer':'return=minimal'},
+      body: JSON.stringify({ name: name.slice(0,120), email: email.slice(0,200), store_url: last.domain, need: 'Store X-Ray', note: `X-Ray score ${last.score}/100, ${last.issues.length} issues` })
+    }).then(r=>{
+      if (!r.ok) throw new Error(r.status);
+      render(last, true);
+      e.target.hidden = true;
+      document.querySelector('#xmore p').hidden = true;
+      m.innerHTML = 'Full report unlocked. Want us to fix these for you? <a href="#book">Book a free call →</a>';
+      const bs = document.getElementById('bstore'); if (bs && !bs.value) bs.value = last.domain;
+      const bn = document.getElementById('bname'); if (bn && !bn.value) bn.value = name;
+      const be = document.getElementById('bemail'); if (be && !be.value) be.value = email;
+    }).catch(()=>{ m.className = 'xerr'; m.textContent = 'That didn\'t go through. Please try again.'; })
+      .finally(()=>{ btn.disabled = false; });
+  });
 const cv = document.getElementById('globe');
 if (cv && cv.getContext){
 const ctx = cv.getContext('2d');

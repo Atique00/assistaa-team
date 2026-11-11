@@ -873,11 +873,26 @@ footer a:hover{color:#fff}
 .viz-cycle .ph-h2{animation-delay:.9s}
 @keyframes phh{0%{transform:translateY(6px) scale(.5);opacity:0}30%{opacity:1}100%{transform:translateY(-16px) scale(1.1);opacity:0}}
 @media (prefers-reduced-motion:reduce){.viz-cycle *{animation:none!important}.viz-cycle .cy2,.viz-cycle .cy3{display:none}.viz-cycle .cy1{opacity:1}}
+
+/* Cursor: ring + mini cart (links) / bag with +1 (main buttons) */
+.cur-ring{display:grid;place-items:center}
+.cur-ring svg{position:absolute;width:24px;height:24px;opacity:0;transform:scale(.4);transition:opacity .2s,transform .35s cubic-bezier(.3,1.6,.5,1);filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff)}
+.cur-ring .cur-bag{width:22px;height:25px}
+.cur-ring.cart .cur-cart,.cur-ring.bag .cur-bag{opacity:1;transform:none}
+.cur-cart .ci{transform:translateY(-14px);opacity:0;transition:transform .4s cubic-bezier(.3,1.5,.5,1) .12s,opacity .2s .12s}
+.cur-ring.cart .ci{transform:none;opacity:1}
+.cur-bag .cb{transform-box:fill-box;transform-origin:50% 0;animation:curbag 2.2s ease-in-out infinite}
+@keyframes curbag{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.cur-plus{position:absolute;top:-4px;right:-6px;min-width:22px;height:20px;padding:0 5px;border-radius:10px;background:#3CD58A;color:#021019;font:700 10.5px/20px var(--f-body);text-align:center;opacity:0;transform:scale(.3) translateY(6px);transition:opacity .2s,transform .4s cubic-bezier(.3,1.6,.5,1);box-shadow:0 4px 12px rgba(60,213,138,.5)}
+.cur-ring.bag .cur-plus{opacity:1;transform:none}
+.cur-ring.down .cur-plus{transform:scale(1.25)}
+.cur-dot.off{opacity:0!important}
+@media (prefers-reduced-motion:reduce){.cur-bag .cb{animation:none}}
 </style>
 </head>
 <body>
 <div class="bgfx" aria-hidden="true"><div class="grid"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
-<div class="cur-ring" id="curRing" aria-hidden="true"></div><div class="cur-dot" id="curDot" aria-hidden="true"></div>
+<div class="cur-ring" id="curRing" aria-hidden="true"><svg class="cur-cart" viewBox="0 0 34 34"><path d="M2 3h5l4 18h16l4-12H9" fill="none" stroke="#00AEEF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 21h16" stroke="#00AEEF" stroke-width="3"/><circle cx="13" cy="28" r="2.8" fill="#00AEEF"/><circle cx="25" cy="28" r="2.8" fill="#00AEEF"/><rect class="ci" x="15" y="10" width="9" height="8" rx="1.6" fill="#FFC14A"/></svg><svg class="cur-bag" viewBox="0 0 30 34"><g class="cb"><path d="M10 9V7a5 5 0 0 1 10 0v2" fill="none" stroke="#00AEEF" stroke-width="2.6" stroke-linecap="round"/><path d="M4 9h22l-1.6 21H5.6z" fill="#00AEEF"/><path d="M11 15a4 4 0 0 0 8 0" fill="none" stroke="#021019" stroke-width="2.2" stroke-linecap="round"/></g></svg><span class="cur-plus">+1</span></div><div class="cur-dot" id="curDot" aria-hidden="true"></div>
 <header class="nav" id="top">
 <div class="wrap nav-in">
 <a class="logo live-logo" href="#home" aria-label="Assistaa home"><span class="mark-wrap"><span class="mark-glow"></span><img class="mark-img" src="/logo-mark.svg" alt="" width="38" height="38"></span><span class="word-wrap"><img src="/logo-word.svg" alt="Assistaa" height="24" class="word-img"><span class="word-shine" aria-hidden="true"></span></span></a>
@@ -1828,7 +1843,8 @@ x=e.clientX; y=e.clientY;
 if(!shown){ document.documentElement.classList.add('has-cursor'); shown=true; rx=x; ry=y; }
 dot.style.transform='translate('+x+'px,'+y+'px)';
 const tgt=e.target.closest && e.target.closest('a,button,summary,.svc,.plan,.console,.report');
-ring.classList.toggle('hover',!!tgt && !e.target.closest('input,textarea,select'));
+const fld=e.target.closest('input,textarea,select'), cta=!fld && e.target.closest('.btn-primary'), lnk=!fld && !cta && e.target.closest('a,button,summary,.nm,.who-chip');
+      ring.classList.toggle('hover',!fld && !!(tgt||cta||lnk)); ring.classList.toggle('cart',!!lnk); ring.classList.toggle('bag',!!cta); dot.classList.toggle('off',!!(cta||lnk));
 }
 ,{passive:true}
 );

@@ -694,6 +694,35 @@ footer a:hover{color:#fff}
 .pfx i:nth-child(3){width:600px;height:600px;top:62%;right:-200px;background:var(--c1);opacity:.30;animation:drift3 32s ease-in-out infinite alternate}
 .pfx i:nth-child(4){width:620px;height:620px;bottom:-260px;left:20%;background:var(--c2);opacity:.28;animation:drift1 28s ease-in-out infinite alternate-reverse}
 @media (prefers-reduced-motion:reduce){.pfx i{animation:none}}
+
+/* Pricing (pay per result) + live estimator */
+.grad{font-style:normal;background:linear-gradient(92deg,#00AEEF,#7FE0FF 45%,#FFC14A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pp .plan .plan-base{margin-top:-6px;font:500 12.5px var(--f-mono);color:#FFD27A}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:2px 0 8px}
+.tiers span{display:flex;flex-direction:column;gap:2px;padding:8px 6px;border-radius:12px;text-align:center;font-size:11px;color:#9AA6B6;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)}
+.tiers b{font:700 15px var(--f-display);color:#fff}
+.calc{display:grid;grid-template-columns:1.25fr 1fr;gap:0;margin-top:22px;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 40px 80px -44px rgba(0,0,0,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+@media (max-width:860px){.calc{grid-template-columns:1fr}}
+.calc-in{padding:30px;display:grid;gap:18px;min-width:0}
+.calc-head h3{font-size:26px;color:#fff;margin-top:6px}
+.cs{display:grid;gap:8px}
+.cs>span{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:#DCE4EE}
+.cs output{font:600 14px var(--f-mono);color:#7FD8FF}
+.cs input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;background:linear-gradient(90deg,#00AEEF,#FFC14A) 0/var(--fill,30%) 100% no-repeat,rgba(255,255,255,.10);outline:none;cursor:pointer}
+.cs input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #00AEEF;box-shadow:0 0 0 6px rgba(0,174,239,.18),0 4px 12px rgba(0,0,0,.4)}
+.cs input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #00AEEF;box-shadow:0 0 0 6px rgba(0,174,239,.18)}
+.cs input[type=range]:focus-visible{box-shadow:0 0 0 3px rgba(0,174,239,.45)}
+.calc-out{position:relative;padding:30px;display:flex;flex-direction:column;gap:12px;background:radial-gradient(500px 260px at 100% 0%,rgba(0,174,239,.28),transparent 60%),radial-gradient(400px 240px at 0% 100%,rgba(255,180,58,.14),transparent 60%),rgba(6,11,21,.55);border-left:1px solid rgba(255,255,255,.08);min-width:0}
+@media (max-width:860px){.calc-out{border-left:0;border-top:1px solid rgba(255,255,255,.08)}}
+.calc-out small{font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:#9AA6B6}
+.calc-out strong{font:800 clamp(44px,5vw,60px)/1 var(--f-display);letter-spacing:-.03em;background:linear-gradient(120deg,#fff 40%,#7FD8FF 70%,#FFC14A);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.calc-out ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:8px}
+.calc-out li{display:flex;justify-content:space-between;gap:12px;font-size:14px;color:#B9C5D4;padding-bottom:8px;border-bottom:1px dashed rgba(255,255,255,.10)}
+.calc-out li b{color:#fff;font-weight:600;font-variant-numeric:tabular-nums}
+.calc-note{font-size:12.5px;color:#8E9AAB}
+.calc-out .btn{align-self:flex-start;margin-top:auto}
+.pp-svc{--c1:#0091D4;--c2:#7A4BD6}
+.pp-svc .sec-head p{color:#B9C5D4}
 </style>
 </head>
 <body>
@@ -766,7 +795,7 @@ footer a:hover{color:#fff}
 </div>
 </div>
 </div>
-<div class="page p-light" data-page="Services">
+<div class="page pp pp-svc" data-page="Services"><div class="pfx" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <section id="services">
 <div class="wrap">
 <div class="sec-head rv">
@@ -780,7 +809,7 @@ footer a:hover{color:#fff}
 <ul><li>Where-is-my-order</li><li>Returns and exchanges</li><li>Refunds logged</li><li>Comment moderation</li></ul>
 </article>
 <article class="svc rv tilt"><span class="glare"></span>
-<span class="ring" aria-hidden="true"></span><div class="svc-top"><div class="svc-title"><h3>Disputes and chargebacks</h3><span class="tag">PayPal · Stripe · Klarna</span></div><svg class="viz" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5l21 7.5V29c0 14.5-9 24-21 30C20 53 11 43.5 11 29V12.5z" class="v-soft"/><path d="M22 31l7.5 7.5L43 24" class="v-check"/><rect x="11" y="10" width="42" height="3" rx="1.5" class="v-scan"/></svg></div>
+<span class="ring" aria-hidden="true"></span><div class="svc-top"><div class="svc-title"><h3>Disputes and chargebacks</h3><span class="tag">PayPal · Stripe · Klarna · Shopify</span></div><svg class="viz" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5l21 7.5V29c0 14.5-9 24-21 30C20 53 11 43.5 11 29V12.5z" class="v-soft"/><path d="M22 31l7.5 7.5L43 24" class="v-check"/><rect x="11" y="10" width="42" height="3" rx="1.5" class="v-scan"/></svg></div>
 <p>We gather tracking, order and conversation evidence and submit strong responses on time, so less of your revenue gets clawed back.</p>
 <ul><li>Evidence packs</li><li>Deadline tracking</li><li>Item not received</li><li>Not as described</li></ul>
 </article>
@@ -964,47 +993,68 @@ Super customer service! Recommended</blockquote><figcaption><span class="rc-cc">
 <section id="pricing" style="padding-top:0">
 <div class="wrap">
 <div class="sec-head rv">
-<div><span class="eyebrow">Pricing</span><h2>One monthly plan. No hiring headaches.</h2></div>
-<p>Every plan is shaped around your order volume and catalog size. These are starting points; we'll confirm your price on the call.</p>
+<div><span class="eyebrow">Pricing</span><h2>Pay for results, <em class="grad">not hours.</em></h2></div>
+        <p>AI drafts the work and our team checks every piece before it goes out. You pay per ticket answered, per dispute won and per listing published. Month to month, no long contracts.</p>
 </div>
 <div class="plans">
-<div class="plan rv tilt">
-<h3>Support</h3>
-<div class="price">From $500<small> / month</small></div>
-<p>For stores that need their inbox handled well, every day.</p>
-<ul>
-<li><span>✓</span><span>Email, chat and social support</span></li>
-<li><span>✓</span><span>Refunds and returns handled</span></li>
-<li><span>✓</span><span>Weekly report</span></li>
-</ul>
-<a class="btn btn-ghost" href="#book">Talk to us</a>
-</div>
-<div class="plan pop rv tilt">
-<span class="pop-tag">Most chosen</span>
-<h3>Growth</h3>
-<div class="price">From $750<small> / month</small></div>
-<p>Support plus disputes, so fewer sales turn into chargebacks.</p>
-<ul>
-<li><span>✓</span><span>Everything in Support</span></li>
-<li><span>✓</span><span>PayPal, Stripe and Klarna disputes</span></li>
-<li><span>✓</span><span>Live client dashboard</span></li>
-</ul>
-<a class="btn btn-primary" href="#book">Book a call <span class="arrow">→</span></a>
-</div>
-<div class="plan rv tilt">
-<h3>Full back office</h3>
-<div class="price">From $1,000<small> / month</small></div>
-<p>Support, disputes, listings and creatives from one team.</p>
-<ul>
-<li><span>✓</span><span>Everything in Growth</span></li>
-<li><span>✓</span><span>Product listings and size charts</span></li>
-<li><span>✓</span><span>Ad creatives and launch packs</span></li>
-</ul>
-<a class="btn btn-ghost" href="#book">Talk to us</a>
-</div>
-</div>
-</div>
-</section>
+        <div class="plan pop rv tilt">
+          <span class="pop-tag">Most chosen</span>
+          <h3>AI + human support</h3>
+          <div class="price">$0.40<small> / ticket</small></div>
+          <p class="plan-base">+ $300 / month platform fee</p>
+          <p>AI drafts every reply from your policies and order data. A trained agent checks it and sends it.</p>
+          <ul>
+            <li><span>✓</span><span>Email, chat and social inboxes</span></li>
+            <li><span>✓</span><span>Refunds, returns and order issues</span></li>
+            <li><span>✓</span><span>Live dashboard and weekly report</span></li>
+          </ul>
+          <div class="tiers"><span><b>$0.40</b>first 2,000</span><span><b>$0.30</b>up to 10,000</span><span><b>$0.22</b>above 10,000</span></div>
+          <a class="btn btn-primary" href="#book">Book a call <span class="arrow">→</span></a>
+        </div>
+        <div class="plan rv tilt">
+          <h3>Disputes and chargebacks</h3>
+          <div class="price">20%<small> of what we win</small></div>
+          <p class="plan-base">No win, no fee · $10 min · $150 max per case</p>
+          <p>We build the evidence and respond before every deadline. If the case is lost, you pay nothing.</p>
+          <ul>
+            <li><span>✓</span><span>PayPal, Stripe and Klarna disputes</span></li>
+            <li><span>✓</span><span>Shopify Payments chargebacks</span></li>
+            <li><span>✓</span><span>Tracking, order and chat evidence</span></li>
+          </ul>
+          <a class="btn btn-ghost" href="#book">Talk to us</a>
+        </div>
+        <div class="plan rv tilt">
+          <h3>Listings and creatives</h3>
+          <div class="price">$0.65<small> / listing</small></div>
+          <p class="plan-base">Premium listings $2 · min. 500 listings a month</p>
+          <p>Titles, descriptions, variants, collections and pricing rules, checked by a person before they go live.</p>
+          <ul>
+            <li><span>✓</span><span>Premium: research, images, size chart, translation</span></li>
+            <li><span>✓</span><span>Ad creatives $5 each, or 20 for $79</span></li>
+            <li><span>✓</span><span>Bulk uploads and catalog clean-up</span></li>
+          </ul>
+          <a class="btn btn-ghost" href="#book">Talk to us</a>
+        </div>
+      </div>
+      <div class="calc rv" id="calc">
+        <div class="calc-in">
+          <div class="calc-head"><span class="eyebrow">Estimate your month</span><h3>Move the sliders. See your price.</h3></div>
+          <label class="cs"><span>Tickets a month<output id="o-t">1,500</output></span><input type="range" id="c-t" min="0" max="20000" step="100" value="1500"></label>
+          <label class="cs"><span>Disputes won a month<output id="o-d">10</output></span><input type="range" id="c-d" min="0" max="100" step="1" value="10"></label>
+          <label class="cs"><span>Average order value<output id="o-a">$60</output></span><input type="range" id="c-a" min="15" max="400" step="5" value="60"></label>
+          <label class="cs"><span>Listings a month<output id="o-l">0</output></span><input type="range" id="c-l" min="0" max="5000" step="50" value="0"></label>
+          <label class="cs"><span>Ad creatives a month<output id="o-c">0</output></span><input type="range" id="c-c" min="0" max="200" step="5" value="0"></label>
+        </div>
+        <div class="calc-out" aria-live="polite">
+          <small>Estimated monthly total</small>
+          <strong id="c-total">$900</strong>
+          <ul id="c-break"></ul>
+          <p class="calc-note">An estimate from our public rates. We confirm your price on the call.</p>
+          <a class="btn btn-primary" href="#book">Get my exact quote <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
 <section style="padding-top:0">
 <div class="wrap">
 <div class="sec-head rv"><div><span class="eyebrow">Questions</span><h2>Before you book.</h2></div></div>
@@ -1394,6 +1444,25 @@ const xform = document.getElementById('xform');
     });
     const st = [...document.querySelectorAll('#steps .step')];
     if (st.length && !reduce) { let k = 0; setInterval(() => { st.forEach((s, i) => s.classList.toggle('lit', i === k)); k = (k + 1) % st.length; }, 1800); }
+  })();
+  /* Pricing estimator: public rates, same formulas as the plan cards */
+  (function(){
+    const $ = id => document.getElementById(id); if (!$('calc')) return;
+    const ins = ['c-t','c-d','c-a','c-l','c-c'].map($);
+    const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+    function support(t){ if (!t) return 0; const a = Math.min(t, 2000), b = Math.min(Math.max(t - 2000, 0), 8000), c = Math.max(t - 10000, 0); return 300 + a * .40 + b * .30 + c * .22; }
+    let shown = 0, target = 0, anim = 0;
+    function tick(){ shown += (target - shown) * .18; if (Math.abs(target - shown) < .5) shown = target; $('c-total').textContent = fmt(shown); if (shown !== target) anim = requestAnimationFrame(tick); }
+    function calc(){
+      const [t, d, a, l, c] = ins.map(i => +i.value);
+      ins.forEach(i => i.style.setProperty('--fill', ((i.value - i.min) / (i.max - i.min) * 100) + '%'));
+      $('o-t').textContent = t.toLocaleString('en-US'); $('o-d').textContent = d; $('o-a').textContent = '$' + a; $('o-l').textContent = l.toLocaleString('en-US'); $('o-c').textContent = c;
+      const s = support(t), dis = d * Math.min(150, Math.max(10, a * .2)), li = l ? Math.max(l, 500) * .65 : 0, cr = Math.floor(c / 20) * 79 + Math.min((c % 20) * 5, 79);
+      const rows = [['Support', s, t ? `${t.toLocaleString('en-US')} tickets + $300 platform` : 'Not included'], ['Disputes won', dis, d ? `${d} × ${fmt(Math.min(150, Math.max(10, a * .2)))}` : 'Not included'], ['Listings', li, l ? `${Math.max(l, 500).toLocaleString('en-US')} × $0.65` : 'Not included'], ['Creatives', cr, c ? `${c} images` : 'Not included']];
+      $('c-break').innerHTML = rows.map(([k, v, n]) => `<li><span>${k}<br><small style="text-transform:none;letter-spacing:0">${n}</small></span><b>${fmt(v)}</b></li>`).join('');
+      target = s + dis + li + cr; cancelAnimationFrame(anim); if (reduce) { shown = target; $('c-total').textContent = fmt(target); } else tick();
+    }
+    ins.forEach(i => i.addEventListener('input', calc)); calc();
   })();
   document.getElementById('xunlock').addEventListener('submit', e=>{
     e.preventDefault();

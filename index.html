@@ -572,6 +572,128 @@ html{scroll-behavior:auto}
 .tw-dot{width:7px;height:7px;border-radius:50%;background:#3CD58A;box-shadow:0 0 10px #3CD58A;animation:livedot 1.6s ease-in-out infinite}
 @keyframes livedot{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.tw::before,.tw-stars,.rc-stars,.tw-spot::after,.tw-dot{animation:none}.spot-q .w{animation:none;opacity:1;transform:none;filter:none}.spot-q mark{animation:none;background-size:100% .42em}}
+
+/* ===== Lower pages: same premium dark world as the hero ===== */
+@property --spa{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes spotring{to{--spa:360deg}}
+.page.pp{background:#060B15;color:var(--ink)}
+.pp-how{--c1:#0091D4;--c2:#0E6E7C}
+.pp-case{--c1:#C7801C;--c2:#0091D4}
+.pp-rev{--c1:#0E6E7C;--c2:#C7801C}
+.pp-price{--c1:#2F55D4;--c2:#0091D4}
+.pp-contact{--c1:#0091D4;--c2:#1F9D63}
+.pfx{position:absolute;inset:0;z-index:-1;overflow:hidden;border-radius:inherit;pointer-events:none}
+.pfx::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/56px 56px,linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/56px 56px;-webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 20%,#000 10%,transparent 75%);mask-image:radial-gradient(ellipse 80% 60% at 50% 20%,#000 10%,transparent 75%)}
+.pfx::after{content:"";position:absolute;inset:0;opacity:.05;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.pfx i{position:absolute;border-radius:50%;filter:blur(110px);opacity:.42;will-change:transform}
+.pfx i:nth-child(1){width:640px;height:640px;top:-200px;right:-160px;background:var(--c1);animation:drift1 26s ease-in-out infinite alternate}
+.pfx i:nth-child(2){width:560px;height:560px;bottom:-220px;left:-180px;background:var(--c2);opacity:.32;animation:drift2 30s ease-in-out infinite alternate}
+.pp .sec-head h2,.pp .case-head h2,.pp .book h2{color:#fff;text-shadow:0 10px 40px rgba(0,0,0,.4)}
+.pp .sec-head p,.pp .case-head p,.pp .book .sub{color:#B9C5D4}
+
+/* Shared glass surface */
+.pp .step,.pp .cn,.pp .band,.pp .plan,.pp .faq details,.pp .form,.pp .g-steps>div{position:relative;background:radial-gradient(320px circle at var(--mx,-400px) var(--my,-400px),rgba(0,174,239,.13),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 30px 60px -40px rgba(0,0,0,.85);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}
+
+/* How it works: glowing numbered cards joined by a moving beam */
+.pp .steps{gap:16px}
+.pp .steps::before{content:"";position:absolute;left:4%;right:4%;top:58px;height:1px;background:linear-gradient(90deg,transparent,rgba(0,174,239,.55),rgba(255,180,58,.5),transparent);z-index:0}
+.pp .steps::after{content:"";position:absolute;top:56px;left:0;width:90px;height:5px;border-radius:5px;background:linear-gradient(90deg,transparent,#7FD8FF,#fff,#FFD27A,transparent);filter:drop-shadow(0 0 8px #00AEEF);animation:beamrun 5s cubic-bezier(.5,0,.5,1) infinite;z-index:0}
+@keyframes beamrun{0%{transform:translateX(-10%);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateX(calc(1100px));opacity:0}}
+@media (max-width:960px){.pp .steps::before,.pp .steps::after{display:none}}
+.pp .step{z-index:1;border-radius:22px;padding:28px 24px 26px;border-top:1px solid rgba(255,255,255,.10);transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .45s,box-shadow .45s}
+.pp .step::before{font:800 42px/1 var(--f-display);letter-spacing:-.03em;margin-bottom:22px;background:linear-gradient(120deg,#7FD8FF,#00AEEF 45%,#FFC14A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pp .step::after{top:-1px;left:24px;height:2px;background:linear-gradient(90deg,#00AEEF,#FFC14A)}
+.pp .step.on::after{width:calc(100% - 48px)}
+.pp .step h3{color:#fff}
+.pp .step p{color:#B3C0D0}
+.pp .step.lit{transform:translateY(-8px);border-color:rgba(0,174,239,.55);box-shadow:0 1px 0 rgba(255,255,255,.16) inset,0 30px 70px -30px rgba(0,174,239,.55)}
+
+/* X-Ray: rotating light border + scan sweep */
+.xray::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:conic-gradient(from var(--spa,0deg),transparent 0 62%,rgba(0,174,239,.9) 74%,#fff 78%,rgba(255,180,58,.9) 84%,transparent 94%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:spotring 10s linear infinite;pointer-events:none}
+.xray .report::after{content:"";position:absolute;left:0;right:0;top:-80px;height:80px;background:linear-gradient(180deg,transparent,rgba(0,174,239,.10),transparent);animation:aiscan 5s linear infinite;pointer-events:none}
+@keyframes aiscan{to{top:100%}}
+
+/* Case study */
+.pp .case-head .eyebrow{color:#FFC14A}
+.pp .cn{border-radius:22px;color:#EEF3F9}
+.pp .cn strong{background:linear-gradient(120deg,#FFFFFF,#7FD8FF 40%,#FFC14A);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 24px rgba(0,174,239,.25))}
+.pp .cn span{color:#AEB9C9}
+.pp .g-track{height:8px;background:rgba(255,255,255,.08)}
+.pp .g-fill{position:relative;overflow:hidden;box-shadow:0 0 22px rgba(0,174,239,.55)}
+.pp .g-fill::after{content:"";position:absolute;top:0;bottom:0;left:0;width:25%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:gshine 3s linear infinite}
+@keyframes gshine{from{transform:translateX(-100%)}to{transform:translateX(420%)}}
+.pp .g-steps>div{border-radius:18px;padding:18px 20px}
+.pp .g-steps b{color:#fff}
+.pp .g-steps span{color:#AEB9C9}
+
+/* Stats band */
+.pp .band{border-radius:22px;overflow:hidden}
+.pp .band div{border-color:rgba(255,255,255,.08)!important;background:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.pp .band strong{background:linear-gradient(120deg,#FFFFFF,#7FD8FF 55%,#FFC14A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pp .band span{color:#AEB9C9}
+
+/* Pricing */
+.pp .plans{gap:18px;align-items:stretch}
+.pp .plan{border-radius:24px;padding:32px 28px;overflow:hidden;transition:border-color .35s,box-shadow .35s}
+.pp .plan:hover{border-color:rgba(0,174,239,.45);box-shadow:0 1px 0 rgba(255,255,255,.16) inset,0 40px 80px -40px rgba(0,174,239,.45)}
+.pp .plan h3{color:#fff}
+.pp .plan p{color:#B3C0D0}
+.pp .plan .price{background:linear-gradient(120deg,#FFFFFF 40%,#7FD8FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pp .plan .price small{-webkit-text-fill-color:#9AA6B6;color:#9AA6B6}
+.pp .plan li{color:#DCE4EE}
+.pp .plan li>span:first-child{display:grid;place-items:center;width:20px;height:20px;border-radius:7px;font-size:11px;margin-top:2px;color:#3CD58A;background:rgba(60,213,138,.14);border:1px solid rgba(60,213,138,.3)}
+.pp .plan.pop{background:radial-gradient(520px 280px at 100% 0%,rgba(0,174,239,.30),transparent 60%),radial-gradient(400px 240px at 0% 100%,rgba(255,180,58,.14),transparent 60%),linear-gradient(160deg,rgba(18,32,52,.95),rgba(6,11,21,.95));border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,.16) inset,0 50px 100px -40px rgba(0,174,239,.55)}
+.pp .plan.pop::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:conic-gradient(from var(--spa,0deg),rgba(0,174,239,.25) 0 55%,rgba(0,174,239,1) 70%,#fff 75%,rgba(255,180,58,1) 82%,rgba(0,174,239,.25) 95%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:spotring 6s linear infinite;pointer-events:none}
+.pp .pop-tag{background:linear-gradient(90deg,rgba(0,174,239,.25),rgba(255,180,58,.25));color:#fff;border:1px solid rgba(255,255,255,.18)}
+.pp .plan .btn-ghost{color:#fff;border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.04)}
+.pp .plan .btn-ghost:hover{border-color:#00AEEF;background:rgba(0,174,239,.12)}
+
+/* FAQ */
+.pp .faq details{border-radius:18px;padding:20px 24px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.10);transition:border-color .3s,box-shadow .3s}
+.pp .faq details:hover{border-color:rgba(0,174,239,.35)}
+.pp .faq details[open]{border-color:rgba(0,174,239,.5);box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 30px 60px -36px rgba(0,174,239,.45)}
+.pp .faq summary{color:#fff}
+.pp .faq summary::after{color:#7FD8FF}
+.pp .faq details p{color:#B9C5D4}
+
+/* Contact */
+.book h2 em{font-style:normal;background:linear-gradient(92deg,#00AEEF,#7FE0FF 45%,#FFC14A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.book-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.book-chips span{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;font-size:14px;color:#DCE4EE;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.book-chips span::before{content:"";width:7px;height:7px;border-radius:50%;background:#3CD58A;box-shadow:0 0 10px #3CD58A;animation:livedot 1.6s ease-in-out infinite}
+@keyframes livedot{50%{opacity:.25}}
+.book-next{display:grid;gap:10px;margin-top:28px;max-width:420px;position:relative}
+.book-next::before{content:"";position:absolute;left:21px;top:14px;bottom:14px;width:2px;background:linear-gradient(#00AEEF,#FFC14A);opacity:.6}
+.book-next div{position:relative;display:flex;align-items:center;gap:14px;color:#DCE4EE}
+.book-next b{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;font:600 13px var(--f-mono);color:#fff;background:linear-gradient(160deg,rgba(18,32,52,.95),rgba(6,11,21,.95));border:1px solid rgba(0,174,239,.4);box-shadow:0 0 20px -6px rgba(0,174,239,.6)}
+.pp .form{border-radius:24px;padding:30px;overflow:hidden}
+.pp .form::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:conic-gradient(from var(--spa,0deg),transparent 0 62%,rgba(0,174,239,.9) 74%,#fff 78%,rgba(255,180,58,.9) 84%,transparent 94%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:spotring 9s linear infinite;pointer-events:none}
+.pp .form>*{position:relative;z-index:1}
+.pp .field label{color:#DCE4EE}
+.pp .field input,.pp .field select,.pp .field textarea{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);color:#fff;transition:border-color .25s,box-shadow .25s,background .25s}
+.pp .field input::placeholder,.pp .field textarea::placeholder{color:#7D8A9C}
+.pp .field input:focus,.pp .field select:focus,.pp .field textarea:focus{outline:none;border-color:#00AEEF;background:rgba(0,174,239,.06);box-shadow:0 0 0 4px rgba(0,174,239,.15)}
+.pp .field select option{background:#0C1422;color:#fff}
+
+/* Footer */
+footer{background:#04070E;box-shadow:none;border-top:0;overflow:hidden}
+footer::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,174,239,.7),rgba(255,180,58,.6),transparent)}
+footer::after{content:"";position:absolute;left:50%;top:-140px;width:700px;height:220px;margin-left:-350px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,174,239,.20),transparent);pointer-events:none}
+footer .foot{position:relative;z-index:1}
+footer,footer a{color:#9AA6B6}
+footer a:hover{color:#fff}
+
+@media (prefers-reduced-motion:reduce){.pfx i,.pp .steps::after,.xray::after,.xray .report::after,.pp .g-fill::after,.pp .plan.pop::after,.pp .form::after,.book-chips span::before{animation:none}}
+
+.page.pp > section:first-of-type{padding-top:96px!important}
+@media (max-width:860px){.page.pp > section:first-of-type{padding-top:76px!important}}
+
+/* Fill the full height of tall pages so no band goes flat */
+.pfx::before{-webkit-mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.45) 40%,rgba(0,0,0,.45) 70%,#000);mask-image:linear-gradient(180deg,#000,rgba(0,0,0,.45) 40%,rgba(0,0,0,.45) 70%,#000)}
+.pfx i:nth-child(2){bottom:auto;top:34%;left:-220px}
+.pfx i:nth-child(3){width:600px;height:600px;top:62%;right:-200px;background:var(--c1);opacity:.30;animation:drift3 32s ease-in-out infinite alternate}
+.pfx i:nth-child(4){width:620px;height:620px;bottom:-260px;left:20%;background:var(--c2);opacity:.28;animation:drift1 28s ease-in-out infinite alternate-reverse}
+@media (prefers-reduced-motion:reduce){.pfx i{animation:none}}
 </style>
 </head>
 <body>
@@ -612,7 +734,7 @@ html{scroll-behavior:auto}
 <div class="trust">
 <span><span class="stars">★★★★★</span> <b>125</b> five-star client reviews</span>
 <span><b>300,000+</b> tickets resolved</span>
-<span>Clients in <b>9+ countries</b></span>
+<span>Clients in <b>16 countries</b></span>
 <span>Shopify specialists since <b>2019</b></span>
 </div>
 </div>
@@ -705,7 +827,7 @@ html{scroll-behavior:auto}
 </div>
 </section>
 </div>
-<div class="page" data-page="How it works">
+<div class="page pp pp-how" data-page="How it works"><div class="pfx" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <section id="how" style="padding-top:0">
 <div class="wrap">
 <div class="sec-head rv">
@@ -762,7 +884,7 @@ html{scroll-behavior:auto}
 </div>
 </section>
 </div>
-<div class="page p-light" data-page="Case study">
+<div class="page pp pp-case" data-page="Case study"><div class="pfx" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <section id="case">
 <div class="wrap">
 <div class="case rv">
@@ -789,15 +911,15 @@ html{scroll-behavior:auto}
 </div>
 </section>
 </div>
-<div class="page" data-page="Reviews">
+<div class="page pp pp-rev" data-page="Reviews"><div class="pfx" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <section style="padding-top:0">
 <div class="wrap">
 <div class="band rv">
-<div><strong data-count="125">125</strong><span>Five-star client reviews</span></div>
-<div><strong data-count="60" data-suffix="+">60+</strong><span>Ecommerce clients served</span></div>
-<div><strong data-count="9" data-suffix="+">9+</strong><span>Countries our clients sell from</span></div>
-<div><strong data-count="2019" data-plain="1">2019</strong><span>Running store support since</span></div>
-</div>
+        <div><strong data-count="60" data-suffix="+">60+</strong><span>Ecommerce clients served</span></div>
+        <div><strong data-count="100" data-suffix="+">100+</strong><span>Projects delivered</span></div>
+        <div><strong data-count="16">16</strong><span>Countries our clients are based in</span></div>
+        <div><strong data-count="2019" data-plain="1">2019</strong><span>Running store support since</span></div>
+      </div>
 </div>
 </section>
 <section id="reviews" style="padding-top:0">
@@ -838,7 +960,7 @@ Super customer service! Recommended</blockquote><figcaption><span class="rc-cc">
 </div>
 </section>
 </div>
-<div class="page p-light" data-page="Pricing">
+<div class="page pp pp-price" data-page="Pricing"><div class="pfx" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <section id="pricing" style="padding-top:0">
 <div class="wrap">
 <div class="sec-head rv">
@@ -896,13 +1018,19 @@ Super customer service! Recommended</blockquote><figcaption><span class="rc-cc">
 </div>
 </section>
 </div>
-<div class="page" data-page="Contact">
+<div class="page pp pp-contact" data-page="Contact"><div class="pfx" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <section id="book" style="padding-top:0">
 <div class="wrap book">
 <div class="rv">
 <span class="eyebrow">Let's talk</span>
-<h2>Hand off the back office this month.</h2>
+<h2>Hand off the back office <em>this month.</em></h2>
 <p class="sub">Tell us about your store. We'll come back with your Store X-Ray and a plan for what we'd take off your plate first.</p>
+        <div class="book-chips"><span>Reply within one business day</span><span>Live within a week</span><span>Month to month</span></div>
+        <div class="book-next">
+          <div><b>01</b><span>You send the form</span></div>
+          <div><b>02</b><span>We run your Store X-Ray</span></div>
+          <div><b>03</b><span>15-minute call with a plan</span></div>
+        </div>
 </div>
 <form class="form rv" id="bookform" novalidate>
 <div class="two">
@@ -944,7 +1072,7 @@ Super customer service! Recommended</blockquote><figcaption><span class="rc-cc">
 <div class="tl rv"><span class="yr">2019</span><div><h3>One person, one inbox</h3><p>Our founder, Atiq, starts freelancing in ecommerce customer support, learning store operations ticket by ticket.</p></div></div>
 <div class="tl rv"><span class="yr">2020</span><div><h3>First international clients</h3><p>Store owners on Fiverr start hiring him for support, refunds and order issues, and many keep coming back.</p></div></div>
 <div class="tl rv"><span class="yr">2021</span><div><h3>A dedicated team</h3><p>Demand grows past one person. A trained team forms around support, disputes and product listings.</p></div></div>
-<div class="tl rv"><span class="yr">2022–25</span><div><h3>125 five-star reviews</h3><p>The team serves 60+ clients selling from 9+ countries, keeping a perfect 5.0 rating along the way.</p></div></div>
+<div class="tl rv"><span class="yr">2022–25</span><div><h3>125 five-star reviews</h3><p>The team serves 60+ clients in 16 countries, keeping a perfect 5.0 rating along the way.</p></div></div>
 <div class="tl rv"><span class="yr">2026</span><div><h3>Assistaa, powered by AI</h3><p>The team becomes Assistaa: an agency that pairs experienced people with AI to run complete ecommerce back offices.</p></div></div>
 </div>
 </div>
@@ -1257,6 +1385,15 @@ const xform = document.getElementById('xform');
       raf = requestAnimationFrame(loop);
     }
     raf = requestAnimationFrame(loop);
+  })();
+  /* Lower pages: cursor glow on glass cards + live step cycle */
+  (function(){
+    document.querySelectorAll('.pp .step,.pp .cn,.pp .plan,.pp .faq details,.pp .form,.pp .g-steps>div').forEach(el => {
+      el.addEventListener('mousemove', e => { const b = el.getBoundingClientRect(); el.style.setProperty('--mx', (e.clientX - b.left) + 'px'); el.style.setProperty('--my', (e.clientY - b.top) + 'px'); });
+      el.addEventListener('mouseleave', () => { el.style.setProperty('--mx', '-400px'); el.style.setProperty('--my', '-400px'); });
+    });
+    const st = [...document.querySelectorAll('#steps .step')];
+    if (st.length && !reduce) { let k = 0; setInterval(() => { st.forEach((s, i) => s.classList.toggle('lit', i === k)); k = (k + 1) % st.length; }, 1800); }
   })();
   document.getElementById('xunlock').addEventListener('submit', e=>{
     e.preventDefault();

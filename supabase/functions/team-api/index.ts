@@ -355,7 +355,7 @@ async function act(team: Team, m: Emp, a: string, text: string, amount: unknown)
         tx`insert into public.reports (employee_id, kind, body) values (${m.id}, 'Start report', ${txt || "(no note)"})`]);
       push([o.id], `${m.display_name} started`, txt.slice(0, 140), "/#breports");
       break;
-    case "done":
+    case "done": {
       if (t.state === "off") fail("Start your day first.");
       if (t.state === "done") fail("You already finished today.");
       if (txt.length < 5) fail("Write what you did today and what is still pending.");
@@ -369,6 +369,7 @@ async function act(team: Team, m: Emp, a: string, text: string, amount: unknown)
             on conflict (day, employee_id, metric) do update set value = excluded.value`])]);
       push([o.id], `${m.display_name} finished`, txt.slice(0, 140), "/#breports");
       break;
+    }
     case "break":
       if (!support) fail("Breaks are tracked for the support team only.");
       if (t.state !== "working") fail("You can only take a break while working.");

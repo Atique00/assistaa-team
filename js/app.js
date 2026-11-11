@@ -204,6 +204,18 @@
   let S = store.get('session', null); // {team, name, pin}
   let D = null; // data for member
   let B = {}; // boss data per team
+  let M = store.get('mapCache', null), mapAt = 0, mapLoading = false; // owner Map tab
+  async function loadMap(quiet) {
+    if (mapLoading || !C.mapUrl || !window.AMap) return; mapLoading = true;
+    try {
+      const r = await fetch(C.mapUrl, { method: 'POST', body: JSON.stringify({ pin: S.pin }) });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'Could not load the map.');
+      M = j.data; mapAt = Date.now(); store.set('mapCache', M);
+      if (S.team === 'boss' && bossTab === 'bmap' && !$('#sheet.on')) renderBoss(true);
+    } catch (e) { if (/PIN/i.test(e.message)) { logout(); toast('Please sign in again', '', 'bad'); } else if (!quiet) toast('Could not load the map', e.message, 'bad'); }
+    finally { mapLoading = false; }
+  }
   let tab = 'home';
   let timer = null;
   let fresh = 0; // when data was last loaded (ms)
@@ -701,7 +713,7 @@
     $('#fabSlot').innerHTML = `<button class="fab" id="fab" aria-label="Announcement">${I('megaphone')}</button>`;
     $('#fab').onclick = () => sheetSend('all');
     const pendingReplies = Object.values(B).reduce((a, x) => a + (x.inbox || []).filter((m) => m.reply).length, 0);
-    nav([{ id: 'team', icon: 'team', label: 'Team' }, { id: 'btasks', icon: 'tasks', label: 'Tasks' }, { id: 'bmsg', icon: 'inbox', label: 'Messages' }, { id: 'breports', icon: 'history', label: 'Reports' }, { id: 'badmin', icon: 'crown', label: 'Admin' }]);
+    nav([{ id: 'bmap', icon: 'spark', label: 'Map' }, { id: 'team', icon: 'team', label: 'Team' }, { id: 'btasks', icon: 'tasks', label: 'Tasks' }, { id: 'bmsg', icon: 'inbox', label: 'Messages' }, { id: 'breports', icon: 'history', label: 'Reports' }, { id: 'badmin', icon: 'crown', label: 'Admin' }]);
     $$('#nav button').forEach((b) => b.onclick = () => { bossTab = b.dataset.tab; tab = bossTab; renderBoss(); });
     $$('#nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === bossTab));
     requestAnimationFrame(() => { const on = $('#nav button.on'), hl = $('#nav .hl'); if (on) { hl.style.left = on.offsetLeft + 'px'; hl.style.width = on.offsetWidth + 'px'; } });
@@ -711,7 +723,8 @@
     const head = `<div class="top"><label style="cursor:pointer" aria-label="Change photo">${avatar(C.owner, oPhoto, 52)}<input type="file" accept="image/*" id="bPhoto" hidden></label><div><div class="sub">${greet()},</div><h1>${esc(C.owner)} <span style="font-size:18px">👑</span></h1></div><div class="sp"></div><button class="iconbtn" id="refresh">${I('refresh')}</button><button class="iconbtn" id="bellB" style="margin-left:8px" aria-label="Notifications">${I('bell')}</button><button class="iconbtn" id="moreB" style="margin-left:8px" aria-label="Settings">${I('user')}</button></div>
       <div class="tabs">${teams.map((k) => `<button data-bt="${k}" class="${k === bossTeam ? 'on' : ''}">${esc(C.backends[k].label)}</button>`).join('')}</div>`;
     let body = '';
-    if (!d && bossTab !== 'badmin') body = `<div class="sk" style="height:120px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`;
+    if (bossTab === 'bmap') body = window.AMap ? window.AMap.html(M) : '';
+    else if (!d && bossTab !== 'badmin') body = `<div class="sk" style="height:120px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`;
     else if (bossTab === 'btasks') body = bossTasks(d);
     else if (bossTab === 'bmsg') body = bossMsgs(d);
     else if (bossTab === 'breports') body = bossReports(d);
@@ -719,9 +732,11 @@
     else body = bossTeamView(d);
     const scroll = window.scrollY;
     app.innerHTML = `<div class="${soft ? '' : 'view'}">${head}<div class="stagger">${body}</div></div>`;
+    app.classList.toggle('wide', bossTab === 'bmap');
+    if (bossTab === 'bmap') { const tb = $('.tabs', app); if (tb) tb.remove(); if (window.AMap) window.AMap.mount(app); if (!M || Date.now() - mapAt > 30000) loadMap(true); }
     if (soft) window.scrollTo(0, scroll);
     $$('[data-bt]').forEach((b) => b.onclick = () => { bossTeam = b.dataset.bt; store.set('bossTeam', bossTeam); renderBoss(); });
-    $('#refresh').onclick = () => { loadBoss(); if (bossTab === 'badmin') loadAdmin(); };
+    $('#refresh').onclick = () => { loadBoss(); if (bossTab === 'badmin') loadAdmin(); if (bossTab === 'bmap') loadMap(); };
     $('#bellB').onclick = () => enablePush(true);
     $('#bPhoto').onchange = (e) => bossPhoto(e.target.files[0]);
     $('#moreB').onclick = () => openSheet(`<h2>Settings</h2><p class="lead">Manager account</p>
@@ -1068,10 +1083,10 @@
     checkVersion();
     const h = location.hash.slice(1);
     if (S.team === 'boss') {
-      bossTab = ['team', 'btasks', 'bmsg', 'breports', 'badmin'].includes(h) ? h : (h === 'boss' ? 'team' : 'team');
+      bossTab = ['bmap', 'team', 'btasks', 'bmsg', 'breports', 'badmin'].includes(h) ? h : 'bmap';
       Object.keys(C.backends).forEach((k) => { if (!B[k]) { const c = store.get('bossCache.' + k, null); if (c) B[k] = c; } });
       renderBoss(); if (stale(20000)) loadBoss(true);
-      timer = setInterval(() => { if (!document.hidden) loadBoss(true); }, 60000);
+      timer = setInterval(() => { if (!document.hidden) { loadBoss(true); if (bossTab === 'bmap') loadMap(true); } }, 60000);
     } else {
       tab = ['home', 'tasks', 'inbox', 'me'].includes(h) ? h : 'home';
       D = store.get('cache.' + S.team + '.' + S.name, null);
@@ -1085,7 +1100,7 @@
     });
   }
   /* ---------- self-update: a phone can keep the app open for days; reload when a new version is published ---------- */
-  const APP_VERSION = '17';
+  const APP_VERSION = '18';
   let lastVersionCheck = 0;
   async function checkVersion() {
     if (Date.now() - lastVersionCheck < 5 * 60000) return;

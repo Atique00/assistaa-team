@@ -508,6 +508,11 @@ html{scroll-behavior:auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:860px){.split .join{border-color:rgba(255,255,255,.08);padding:30px}.split .side.ai li.on,.split .side.hu li.on{transform:none}}
 @media (prefers-reduced-motion:reduce){.split>.ring::before,.split .side.ai::after,.split .side.hu::after,.split .beam i,.split .core,.split .core-ring,.split .side h3 .badge::before{animation:none}}
+
+.gmc{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;font-family:var(--f-mono);font-size:11px;color:var(--con-muted);text-transform:uppercase;letter-spacing:.08em}
+.gmc b{font:700 15px/1 var(--f-display);letter-spacing:0;color:var(--con-fg)}
+.gmc .gbar{flex:1;height:4px;border-radius:4px;background:var(--con-line);overflow:hidden;max-width:140px}
+.gmc .gbar i{display:block;height:100%;background:linear-gradient(90deg,#4285F4,#34A853);transform-origin:left;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
 </style>
 </head>
 <body>
@@ -683,6 +688,7 @@ html{scroll-behavior:auto}
 <li><span class="sev md">MED</span><span>3 products share the same description</span></li>
 </ul>
 <div class="leak"><small id="leak-l">Estimated monthly leak</small><strong id="leak">$2,100 – $3,400</strong></div>
+          <div class="gmc" id="gmc" hidden><span>Google Merchant readiness</span><span class="gbar"><i id="gbar"></i></span><b id="gnum"></b></div>
           <div class="xmore" id="xmore" hidden>
             <p><b id="xmore-n">More issues</b> and the full list of what passed. Get the full report free:</p>
             <form id="xunlock" novalidate>
@@ -1059,6 +1065,8 @@ const xform = document.getElementById('xform');
     leakL.textContent = 'Store score';
     leak.textContent = r.score + '/100';
     leak.style.color = r.score >= 80 ? '#3CD58A' : r.score >= 50 ? '' : '#FF8A7A';
+    const gm = document.getElementById('gmc');
+    if (r.google && r.google.total) { gm.hidden = false; document.getElementById('gnum').textContent = `${r.google.passed}/${r.google.total}`; document.getElementById('gbar').style.transform = `scaleX(${r.google.passed / r.google.total})`; } else gm.hidden = true;
     if (!full && (n > 3 || r.passed.length)) {
       xmore.hidden = false;
       document.getElementById('xmore-n').textContent = n > 3 ? `${n-3} more issue${n-3>1?'s':''}` : 'The details';
@@ -1069,7 +1077,7 @@ const xform = document.getElementById('xform');
     step.innerHTML = `<span class="xerr">${esc(text)}</span>`;
     findsUl.innerHTML = '';
     leak.textContent = '—'; leak.style.color = '';
-    xmore.hidden = true;
+    xmore.hidden = true; document.getElementById('gmc').hidden = true;
   }
   xform.addEventListener('submit', e=>{
     e.preventDefault();

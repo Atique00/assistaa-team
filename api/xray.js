@@ -81,6 +81,7 @@ const APPS = {
   email: /klaviyo|omnisend|privy|mailchimp|chimpstatic|contact\[tags\][^>]*newsletter|form_type"? value="customer"|newsletter|sendlane|drip\.com|attentive|postscript/i,
   sizing: /kiwisizing|kiwi-sizing|size-chart|sizechart|size_chart|sizeguide|size-guide|esc-size|ilm-size|virtusize|truefit/i,
 };
+const PROMO_TITLE = /free shipping|\b\d{1,2}\s?% off\b|\bsale\b|\bbuy \d+ get\b|limited time|best price|\bcheap(est)?\b|\bhot deal\b|\bclearance\b/i;
 const SIZE_IN_TEXT = /size\s*(chart|guide)|sizing|measurement|bust|waist|hip|chest|inseam|shoulder|\b(cm|inch|inches)\b/i;
 
 // ---------- scan ----------
@@ -96,6 +97,9 @@ async function scan(domain) {
   }
   const origin = new URL(home.url).origin;
   const html = home.text;
+  if (/^\/password/.test(new URL(home.url).pathname)) {
+    return { error: 'This store is password protected, so shoppers and Google cannot see it yet. Google Merchant Center will not approve a locked store.' };
+  }
   // Headless or custom storefronts redirect to a checkout host or serve an empty shell we cannot read fairly.
   if (/(^|\.)checkout\./i.test(new URL(home.url).hostname) || (!/<title[^>]*>[^<]+</i.test(html) && Buffer.byteLength(html) < 8000)) {
     return { error: 'This store uses a custom storefront the X-Ray cannot read reliably. Book a call and we will review it by hand.' };
@@ -173,14 +177,14 @@ async function scan(domain) {
   if (home.ms <= 3000 && scripts <= 25) passed.push('Homepage loads quickly');
 
   // ---- Listings (Shopify only) ----
-  let productCount = 0;
+  let productCount = 0, promoTitles = 0, bigDiscount = 0, productsSeen = 0;
   if (shopify) {
     const pj = prodRes && prodRes.ok ? json(prodRes.text) : null;
     const products = (pj && Array.isArray(pj.products)) ? pj.products : null;
     if (!products) {
       add('lo', 'Listings', 'Product data is not public, so listing checks were skipped.');
     } else {
-      productCount = products.length;
+      productCount = products.length; productsSeen = products.length;
       const n = products.length || 1;
       let thin = 0, longTitle = 0, caps = 0, fewImg = 0, noImg = 0, noType = 0, soldOut = 0, sizeProducts = 0, noSize = 0;
       let imgs = 0, noAlt = 0;
@@ -197,6 +201,8 @@ async function scan(domain) {
         if (im.length === 0) noImg++; else if (im.length < 3) fewImg++;
         for (const i of im) { if ('alt' in i) { imgs++; if (!i.alt || !String(i.alt).trim()) noAlt++; } }
         if (!p.product_type) noType++;
+        if (PROMO_TITLE.test(t)) promoTitles++;
+        if ((Array.isArray(p.variants) ? p.variants : []).some(v => { const c = parseFloat(v.compare_at_price), pr = parseFloat(v.price); return c > 0 && pr > 0 && pr / c <= 0.3; })) bigDiscount++;
         const vars = Array.isArray(p.variants) ? p.variants : [];
         if (vars.length && vars.every(v => v.available === false)) soldOut++;
         const opts = Array.isArray(p.options) ? p.options : [];
@@ -223,11 +229,60 @@ async function scan(domain) {
     add('lo', 'Listings', 'This does not look like a Shopify store, so product checks were skipped.');
   }
 
+  // ---- Google Merchant Center readiness ----
+  // Based on Google's Merchant Center misrepresentation, checkout and landing page requirements.
+  const google = [];
+  const g = (name, ok, sev, text) => { google.push({ name, ok: !!ok }); if (!ok && text) add(sev, 'Google', text); };
+  const rootDomain = new URL(origin).hostname.replace(/^www\./, '');
+  const contactHtml = contactP && contactP.ok ? contactP.text : '';
+  const siteText = strip(html) + ' ' + strip(contactHtml);
+  const emails = [...new Set(((html + ' ' + contactHtml).match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) || [])
+    .map(e => e.toLowerCase())
+    .filter(e => !/\.(png|jpe?g|gif|webp|svg|js|css)$/.test(e) && !/example\.|sentry|wixpress|shopify\.com|domain\.com|email\.com|@[0-9]x/.test(e)))];
+  const ownEmail = emails.some(e => { const d = e.split('@')[1]; return d === rootDomain || d.endsWith('.' + rootDomain); });
+  const freeEmail = emails.some(e => /@(gmail|yahoo|hotmail|outlook|live|icloud|aol|proton(mail)?)\./.test(e));
+  const phone = /href=["']tel:/i.test(html + contactHtml) || /(phone|call us|tel)[^\d+]{0,20}\+?\d[\d\s().-]{7,}\d/i.test(siteText);
+  const contactForm = /form_type["']?\s*(value=)?["']?contact|<form[^>]+contact/i.test(contactHtml || html);
+  const social = /href=["']https?:\/\/(www\.)?(instagram|facebook|tiktok|x|twitter)\.com\/[a-z0-9_.-]+/i.test(html);
+  const address = /\b\d{1,5}[a-z]?\s+([a-z0-9.'-]+\s){0,4}(street|st|road|rd|avenue|ave|lane|ln|drive|dr|boulevard|blvd|way|court|ct|place|pl|parade|pde|highway|hwy|terrace|close|crescent|cres)\b|\b(suite|unit|level|floor)\s?\d+/i.test(siteText);
+  const linkedRefund = /href=["'][^"']*(refund|return)/i.test(html);
+  const linkedShip = /href=["'][^"']*(shipping|delivery)/i.test(html);
+  const linkedPrivacy = /href=["'][^"']*privacy/i.test(html);
+  const pp = productPage && productPage.ok ? productPage.text : '';
+  const ld = (pp.match(/<script[^>]+application\/ld\+json[^>]*>[\s\S]*?<\/script>/gi) || []).join(' ');
+  const schemaOk = /"@type"\s*:\s*"Product"/i.test(ld) && /"offers"/i.test(ld) && /"price"/i.test(ld) && /"availability"/i.test(ld);
+  const addToCart = /action=["'][^"']*\/cart\/add|name=["']add["']|add[\s_-]?to[\s_-]?(cart|bag|basket)/i.test(pp);
+  const placeholder = /lorem ipsum|dolor sit amet|your (text|content|tagline|heading) (here|goes here)|under construction|this is a demo store|sample product/i.test(strip(html) + ' ' + strip(pp));
+  const refundOk = refundP.ok && words(refundT) >= 40 && /\b\d{1,3}\s*(-|–|to)?\s*\d{0,3}\s*(calendar |business |working )?(day|days|week|weeks)\b/i.test(refundT);
+  const returnCost = /return shipping|return postage|free returns?|customer (is|will be) responsible|responsible for (the )?(cost|return)|pay(s)? for (the )?return|prepaid (return )?label|return label|shipping costs? (are|is) non-?refundable/i.test(refundT);
+  const shipCost = /free shipping|free delivery|[$€£]\s?\d|\b(aud|usd|cad|nzd|gbp|eur)\s?\d|shipping (cost|fee|rate|charge)s?|flat rate|calculated at checkout/i.test(shipT);
+
+  g('Secure HTTPS website', origin.startsWith('https://'), 'hi', 'The store does not load over HTTPS. Google requires a valid SSL certificate.');
+  g('Clear refund and return policy', refundOk, null, null);
+  g('Return shipping costs explained', !refundOk || returnCost, 'md', 'The refund policy does not say who pays for return shipping. Google asks stores to disclose return costs before purchase.');
+  g('Shipping costs stated', !(shippingP.ok && words(shipT) >= 30) || shipCost, 'md', 'The shipping policy does not state shipping costs (for example "Free shipping over $50"). Google requires all shipping costs to be disclosed.');
+  g('Privacy policy and terms', privacy.ok && terms.ok, null, null);
+  g('Policies linked on every page', linkedRefund && linkedShip && linkedPrivacy, 'md', 'Refund, shipping and privacy policies are not all linked from the homepage. Google reviewers look for them in the footer.');
+  g('Ways for shoppers to contact you', emails.length || phone || contactForm || social, 'hi', 'No email, phone, contact form or social link found. Google flags stores with insufficient contact information.');
+  g('Email on your own domain', ownEmail, 'lo', freeEmail ? 'The store uses a free email address (like Gmail). Google recommends an email on your own domain, such as support@yourstore.com.' : 'No email address on your own domain was found. Google recommends one, such as support@yourstore.com.');
+  g('Business address shown', address, 'lo', 'No business address found on the homepage or contact page. Google recommends a street address that matches your business registration.');
+  g('No placeholder or demo text', !placeholder, 'hi', 'Placeholder or demo text was found (for example "lorem ipsum"). Google rejects stores that look unfinished.');
+  g('Mobile-friendly pages', /<meta[^>]+name=["']viewport/i.test(html), 'md', 'The homepage has no mobile viewport tag. Google requires mobile-friendly product pages.');
+  if (pp) {
+    g('Add to cart on product pages', addToCart, 'hi', 'We could not find an Add to cart button on a product page. Google requires in-stock products to be purchasable.');
+    g('Product data Google can read', schemaOk, 'md', 'Product pages are missing structured data for price and availability. Google uses it to check that your listings match your site.');
+  }
+  if (productsSeen) {
+    g('No promotional text in product titles', !promoTitles, 'lo', `${np(promoTitles, 'product title has', 'product titles have')} promotional words like "Sale" or "Free shipping". Google Shopping does not allow promotional text in titles.`);
+    g('Realistic discounts', pct(bigDiscount, productsSeen) < 20, 'md', `${bigDiscount} of ${productsSeen} products show discounts of 70% or more. Offers that look too good to be true can trigger a misrepresentation review.`);
+  }
+  for (const c of google) if (c.ok) passed.push('Google: ' + c.name);
+
   const weight = { hi: 12, md: 6, lo: 2 };
   const order = { hi: 0, md: 1, lo: 2 };
   issues.sort((a, b) => order[a.sev] - order[b.sev]);
-  const score = Math.max(5, 100 - issues.reduce((s, i) => s + weight[i.sev], 0));
-  return { domain, origin, shopify, score, productsChecked: productCount, diag: { productsStatus: prodRes ? prodRes.status : null, productPage: productPage ? productPage.status : null }, issues, passed, ms: Date.now() - t0, scannedAt: new Date().toISOString() };
+  const score = Math.max(5, Math.round(100 - issues.reduce((s, i) => s + weight[i.sev] * (i.area === 'Google' ? 0.5 : 1), 0)));
+  return { domain, origin, shopify, score, productsChecked: productCount, google: { passed: google.filter(c => c.ok).length, total: google.length, checks: google }, diag: { productsStatus: prodRes ? prodRes.status : null, productPage: productPage ? productPage.status : null }, issues, passed, ms: Date.now() - t0, scannedAt: new Date().toISOString() };
 }
 
 // ---------- Supabase (log + rate limit) ----------

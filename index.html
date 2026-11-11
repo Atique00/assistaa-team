@@ -33,7 +33,7 @@ img{max-width:100%}
 <meta name="description" content="Assistaa runs the back office for ecommerce brands: customer support, disputes, product listings and creatives, by an experienced team working with AI.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Manrope:wght@800&family=JetBrains+Mono:wght@400;500&display=swap">
 <style> :root{--bg:#050912;--surface:#0C1422;--ink:#F3F6FA;--muted:#AEB9C9;--line:#1B2638;--accent:#2CC0FF;--accent-ink:#021019;--accent-soft:#0A2639;--brand:#00AEEF;--signal:#FFC14A;--good:#3CD58A;--blob1:#0091D4;--blob2:#C7801C;--blob3:#0E6E7C;--dot:#FFFFFF;--logo-edge:#000000;--con-bg:#08101C;--con-fg:#E9EEF5;--con-muted:#9AA6B6;--con-line:#22304A;--f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;--f-body:"Instrument Sans","Segoe UI",system-ui,-apple-system,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;--r:14px;--max:1180px;--page-bg:radial-gradient(1100px 560px at 78% -8%,rgba(0,174,239,.20),transparent 62%),radial-gradient(800px 480px at -5% 105%,rgba(255,170,40,.08),transparent 60%),linear-gradient(180deg,#070D18,#050912);color-scheme:dark;}
 .p-light{--bg:#F3F6FB;--surface:#FFFFFF;--ink:#07101B;--muted:#3A4555;--line:#D2D9E4;--accent:#0A7CC4;--accent-ink:#FFFFFF;--accent-soft:#DCF1FC;--signal:#C97F00;--good:#0B8A4C;--dot:#07101B;--logo-edge:#07101B;--page-bg:radial-gradient(1000px 520px at 85% -10%,rgba(0,174,239,.16),transparent 60%),radial-gradient(700px 420px at 0% 100%,rgba(255,176,40,.10),transparent 60%),linear-gradient(180deg,#FFFFFF,#EEF2F8);color-scheme:light;color:var(--ink);}
 *{box-sizing:border-box}
@@ -888,6 +888,20 @@ footer a:hover{color:#fff}
 .cur-ring.down .cur-plus{transform:scale(1.25)}
 .cur-dot.off{opacity:0!important}
 @media (prefers-reduced-motion:reduce){.cur-bag .cb{animation:none}}
+
+/* Logo: shimmer wordmark in a glass pill with a glowing border */
+.glass-logo{position:relative;gap:9px;padding:5px 16px 5px 5px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.02));backdrop-filter:blur(12px) saturate(150%);-webkit-backdrop-filter:blur(12px) saturate(150%);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(0,0,0,.3),0 10px 30px -12px rgba(0,174,239,.55);isolation:isolate;transition:box-shadow .3s,transform .3s}
+.glass-logo::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.3px;background:conic-gradient(from var(--spa,0deg),rgba(0,174,239,.25) 0 55%,rgba(0,174,239,1) 70%,#fff 75%,rgba(255,193,74,1) 81%,rgba(0,174,239,.25) 94%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:spotring 7s linear infinite;pointer-events:none}
+.glass-logo::after{content:"";position:absolute;inset:-8px;z-index:-1;border-radius:inherit;background:radial-gradient(closest-side,rgba(0,174,239,.28),transparent);filter:blur(6px);opacity:.8;pointer-events:none}
+.glass-logo:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 14px 36px -12px rgba(0,174,239,.75)}
+.wq{font:800 22px/1 "Manrope",var(--f-display);letter-spacing:-.035em;background:linear-gradient(100deg,#fff 38%,#7FE0FF 47%,#FFE29A 52%,#fff 62%) 0 0/260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:wqsh 4.5s linear infinite;filter:drop-shadow(0 0 10px rgba(0,174,239,.25))}
+@keyframes wqsh{from{background-position:100% 0}to{background-position:-160% 0}}
+footer .glass-logo{padding:4px 14px 4px 4px}
+footer .wq{font-size:18px}
+footer .glass-logo .logo-mark{width:26px;height:26px}
+.glass-logo .mark-wrap{width:36px;height:36px}
+@media (max-width:420px){.wq{font-size:19px}.glass-logo{padding-right:12px}}
+@media (prefers-reduced-motion:reduce){.wq,.glass-logo::before{animation:none}}
 </style>
 </head>
 <body>
@@ -895,7 +909,7 @@ footer a:hover{color:#fff}
 <div class="cur-ring" id="curRing" aria-hidden="true"><svg class="cur-cart" viewBox="0 0 34 34"><path d="M2 3h5l4 18h16l4-12H9" fill="none" stroke="#00AEEF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 21h16" stroke="#00AEEF" stroke-width="3"/><circle cx="13" cy="28" r="2.8" fill="#00AEEF"/><circle cx="25" cy="28" r="2.8" fill="#00AEEF"/><rect class="ci" x="15" y="10" width="9" height="8" rx="1.6" fill="#FFC14A"/></svg><svg class="cur-bag" viewBox="0 0 30 34"><g class="cb"><path d="M10 9V7a5 5 0 0 1 10 0v2" fill="none" stroke="#00AEEF" stroke-width="2.6" stroke-linecap="round"/><path d="M4 9h22l-1.6 21H5.6z" fill="#00AEEF"/><path d="M11 15a4 4 0 0 0 8 0" fill="none" stroke="#021019" stroke-width="2.2" stroke-linecap="round"/></g></svg><span class="cur-plus">+1</span></div><div class="cur-dot" id="curDot" aria-hidden="true"></div>
 <header class="nav" id="top">
 <div class="wrap nav-in">
-<a class="logo live-logo" href="#home" aria-label="Assistaa home"><span class="mark-wrap"><span class="mark-glow"></span><img class="mark-img" src="/logo-mark.svg" alt="" width="38" height="38"></span><span class="word-wrap"><img src="/logo-word.svg" alt="Assistaa" height="24" class="word-img"><span class="word-shine" aria-hidden="true"></span></span></a>
+<a class="logo live-logo glass-logo" href="#home" aria-label="Assistaa home"><span class="mark-wrap"><span class="mark-glow"></span><img class="mark-img" src="/logo-mark.svg" alt="" width="38" height="38"></span><span class="wq">Assistaa</span></a>
 <nav class="nav-links" aria-label="Main">
 <a href="#services">Services</a>
 <a href="#how">How it works</a>
@@ -1331,7 +1345,7 @@ Super customer service! Recommended</blockquote><figcaption><span class="rc-cc">
 </div>
 <footer>
 <div class="wrap foot">
-<a class="logo" href="#home" aria-label="Assistaa home"><img src="/mark.svg" alt="" width="28" height="28" class="logo-mark"><img src="/wordmark.svg" alt="Assistaa" height="18" class="logo-word"></a>
+<a class="logo glass-logo" href="#home" aria-label="Assistaa home"><img src="/mark.svg" alt="" width="28" height="28" class="logo-mark"><span class="wq">Assistaa</span></a>
 <nav aria-label="Footer">
 <a href="#services">Services</a><a href="#xray">Store X-Ray</a><a href="#pricing">Pricing</a><a href="#about">About</a><a href="#book">Contact</a>
 </nav>

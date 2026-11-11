@@ -911,6 +911,18 @@ footer .glass-logo .logo-mark{width:26px;height:26px}
 .nav-links a:hover::after,.nav-links a:focus-visible::after,.nav-links a.is-on::after{left:14px;right:14px}
 .nav-links a.is-on{color:#7FE0FF}
 @media (max-width:1180px){.nav-links{font-size:15px}.nav-links a{padding:9px 10px}}
+
+/* Phones: smooth scrolling. No page stacking, no heavy blur layers. */
+@media (max-width:860px){
+  .page{position:relative!important;top:auto!important;transform:none!important}
+  .page::after{display:none}
+  .pfx i{filter:none!important;animation:none!important;opacity:.55!important}
+  .pfx i:nth-child(odd){background:radial-gradient(closest-side,color-mix(in srgb,var(--c1) 55%,transparent),transparent 100%)!important}
+  .pfx i:nth-child(even){background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 50%,transparent),transparent 100%)!important}
+  .bgfx .blob{filter:blur(50px)}
+  .page *,header.nav{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  header.nav{background:rgba(5,9,18,.94)}
+}
 </style>
 </head>
 <body>
@@ -1839,6 +1851,7 @@ function pinTops(){ pages.forEach(pg=>{ pg.style.top = Math.min(0, innerHeight -
 ); }
 function stack(){
 if (reduce || home.hidden) return;
+if (innerWidth <= 860) { pages.forEach(pg => { pg.style.transform = ''; pg.style.setProperty('--dim', 0); }); return; }
 const vh=innerHeight;
 for (let k=0;k<pages.length;k++){
 const nx=pages[k+1];

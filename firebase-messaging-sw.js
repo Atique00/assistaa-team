@@ -1,10 +1,10 @@
 /* Assistaa service worker: phone notifications + offline app shell */
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
-importScripts('js/config.js?v=18');
+importScripts('js/config.js?v=19');
 
-const CACHE = 'assistaa-v18';
-const SHELL = ['./', 'index.html', 'css/app.css?v=18', 'js/app.js?v=18', 'js/map.js?v=18', 'css/map.css?v=18', 'js/config.js?v=18', 'assets/mark.svg', 'assets/wordmark.svg', 'icons/icon-192.png', 'icons/badge-96.png'];
+const CACHE = 'assistaa-v19';
+const SHELL = ['./', 'index.html', 'css/app.css?v=19', 'js/app.js?v=19', 'js/config.js?v=19', 'assets/mark.svg', 'assets/wordmark.svg', 'icons/icon-192.png', 'icons/badge-96.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}));

@@ -513,6 +513,65 @@ html{scroll-behavior:auto}
 .gmc b{font:700 15px/1 var(--f-display);letter-spacing:0;color:var(--con-fg)}
 .gmc .gbar{flex:1;height:4px;border-radius:4px;background:var(--con-line);overflow:hidden;max-width:140px}
 .gmc .gbar i{display:block;height:100%;background:linear-gradient(90deg,#4285F4,#34A853);transform-origin:left;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+
+/* Trust wall: verified reviews, glass cards that drift, a rotating spotlight */
+.tw{position:relative;display:grid;gap:22px;isolation:isolate}
+.tw::before{content:"";position:absolute;inset:-60px -10vw;z-index:-1;pointer-events:none;background:radial-gradient(520px 300px at 15% 30%,rgba(0,174,239,.20),transparent 70%),radial-gradient(520px 320px at 85% 70%,rgba(255,180,58,.14),transparent 70%);filter:blur(10px);animation:twaura 14s ease-in-out infinite alternate}
+@keyframes twaura{to{transform:translate3d(3%,-4%,0) scale(1.06)}}
+.tw-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 34px;padding:18px 24px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.10);box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 30px 60px -40px rgba(0,0,0,.8);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
+.tw-stat{display:flex;align-items:baseline;gap:10px;min-width:0}
+.tw-stat b{font:800 clamp(26px,3vw,34px)/1 var(--f-display);color:#fff;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tw-stat span{font-size:13.5px;color:#AEB9C9;line-height:1.25}
+.tw-stars{display:block;font-style:normal;letter-spacing:2px;font-size:13px;background:linear-gradient(90deg,#FFC14A 0 40%,#FFF3C4 50%,#FFC14A 60% 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:starshine 3.2s linear infinite}
+@keyframes starshine{from{background-position:100% 0}to{background-position:-150% 0}}
+.tw-link{margin-left:auto;color:#7FD8FF;font-weight:600;text-decoration:none;white-space:nowrap}
+.tw-link:hover .arrow{transform:translateX(3px)}
+@media (max-width:760px){.tw-bar{gap:14px 22px}.tw-link{margin-left:0}}
+.tw-spot{position:relative;margin:0;padding:clamp(26px,4vw,44px);border-radius:26px;overflow:hidden;background:radial-gradient(700px 300px at 0% 0%,rgba(0,174,239,.24),transparent 60%),radial-gradient(600px 300px at 100% 100%,rgba(255,180,58,.14),transparent 60%),linear-gradient(160deg,rgba(18,32,52,.85),rgba(6,11,21,.9));border:1px solid rgba(255,255,255,.10);box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 50px 100px -50px rgba(0,0,0,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.tw-spot::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:conic-gradient(from var(--spa,0deg),transparent 0 60%,rgba(0,174,239,.9) 72%,#fff 76%,rgba(255,180,58,.9) 82%,transparent 92%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);animation:spotring 9s linear infinite;pointer-events:none}
+@property --spa{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes spotring{to{--spa:360deg}}
+.spot-glyph{position:absolute;top:-34px;right:22px;font:800 220px/1 var(--f-display);color:rgba(127,216,255,.10);pointer-events:none}
+.spot-q{margin:0;font:600 clamp(20px,2.3vw,30px)/1.38 var(--f-display);letter-spacing:-.01em;color:#F3F6FA;white-space:pre-line;min-height:5.6em;max-width:60ch}
+.spot-q .w{display:inline-block;opacity:0;transform:translateY(.4em);filter:blur(4px);animation:wordin .55s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes wordin{to{opacity:1;transform:none;filter:none}}
+.tw mark{background:linear-gradient(90deg,rgba(0,174,239,.0),rgba(0,174,239,.0));color:inherit;padding:0 .08em;border-radius:4px;background-image:linear-gradient(90deg,rgba(0,174,239,.35),rgba(255,180,58,.30));background-repeat:no-repeat;background-size:100% .42em;background-position:0 88%}
+.spot-q mark{color:#fff;background-size:0% .42em;animation:hlgrow 1s .5s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes hlgrow{to{background-size:100% .42em}}
+.spot-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;margin-top:22px;font-size:14px;color:#AEB9C9}
+.spot-who{display:flex;align-items:center;gap:8px}
+.spot-who b{color:#FFD27A;font-weight:600}
+.spot-ver{font:500 11.5px var(--f-mono);letter-spacing:.04em;color:#8FF0BE}
+.spot-nav{margin-left:auto;display:flex;align-items:center;gap:10px}
+.spot-nav button{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);color:#fff;font-size:16px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+.spot-nav button:hover{background:rgba(0,174,239,.22);border-color:rgba(0,174,239,.7);transform:translateY(-1px)}
+.spot-dots{display:flex;gap:6px}
+.spot-dots i{width:7px;height:7px;border-radius:7px;background:rgba(255,255,255,.22);transition:width .35s,background .35s;cursor:pointer}
+.spot-dots i.on{width:22px;background:linear-gradient(90deg,#00AEEF,#FFC14A)}
+.spot-prog{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.06)}
+.spot-prog i{display:block;height:100%;width:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,#00AEEF,#FFC14A)}
+@media (max-width:640px){.spot-nav{margin-left:0}.spot-q{min-height:0}}
+.rc-cc{display:inline-grid;place-items:center;min-width:30px;height:22px;padding:0 6px;border-radius:7px;font:600 10.5px var(--f-mono);letter-spacing:.06em;color:#DCE4EE;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.tw-rows{display:grid;gap:16px;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)))}
+.tw-row{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;cursor:grab;mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.tw-row::-webkit-scrollbar{display:none}
+.tw-row.drag{cursor:grabbing}
+.tw-track{display:flex;gap:16px;width:max-content;padding:10px 16px 18px}
+.rc{position:relative;flex:none;width:min(360px,82vw);margin:0;padding:22px 22px 18px;border-radius:20px;display:flex;flex-direction:column;gap:14px;color:#DCE4EE;background:radial-gradient(300px circle at var(--mx,50%) var(--my,-20%),rgba(0,174,239,.16),transparent 60%),linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 24px 50px -34px rgba(0,0,0,.85);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .35s,box-shadow .35s;user-select:none;-webkit-user-select:none}
+.rc:hover,.rc:focus-visible{transform:translateY(-6px);border-color:rgba(0,174,239,.45);box-shadow:0 1px 0 rgba(255,255,255,.16) inset,0 30px 60px -30px rgba(0,174,239,.45);outline:none}
+.rc.picked{border-color:rgba(255,193,74,.7)}
+.rc-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.rc-stars{letter-spacing:2px;font-size:14px;background:linear-gradient(90deg,#FFC14A 0 40%,#FFF3C4 50%,#FFC14A 60% 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:starshine 3.2s linear infinite}
+.rc-rep{font:500 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:#FFD27A;background:rgba(255,180,58,.12);border:1px solid rgba(255,180,58,.28);padding:4px 8px;border-radius:999px}
+.rc-rep.new{color:#7FD8FF;background:rgba(0,174,239,.10);border-color:rgba(0,174,239,.28)}
+.rc blockquote{margin:0;font-size:15.5px;line-height:1.55;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.rc mark{color:#fff}
+.rc figcaption{margin-top:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:#9AA6B6}
+.rc-ver{margin-left:auto;font:500 11px var(--f-mono);color:#8FF0BE}
+.tw-hint{display:flex;align-items:center;gap:8px;justify-content:center;font:500 12px var(--f-mono);letter-spacing:.04em;color:#8E9AAB;margin:0}
+.tw-dot{width:7px;height:7px;border-radius:50%;background:#3CD58A;box-shadow:0 0 10px #3CD58A;animation:livedot 1.6s ease-in-out infinite}
+@keyframes livedot{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.tw::before,.tw-stars,.rc-stars,.tw-spot::after,.tw-dot{animation:none}.spot-q .w{animation:none;opacity:1;transform:none;filter:none}.spot-q mark{animation:none;background-size:100% .42em}}
 </style>
 </head>
 <body>
@@ -745,35 +804,37 @@ html{scroll-behavior:auto}
 <div class="wrap">
 <div class="sec-head rv">
 <div><span class="eyebrow">Client reviews</span><h2>Store owners trust us with their customers.</h2></div>
-<p>Every quote below is a verified review, word for word, from a client who hired us.</p>
+<p>Every quote is a verified Fiverr review, word for word, typos and all. One review per client, picked from 125 five-star reviews.</p>
 </div>
-<div class="rev-grid">
-<figure class="rev big rv" style="margin:0">
-<q>He treats each project like it's his own business. Highly recommend.</q>
-<figcaption class="rev-meta"><span>Ecommerce brand · United States</span><span class="verified">✓ Verified Fiverr review</span></figcaption>
-</figure>
-<figure class="rev rv" style="margin:0">
-<q>Provided customer service for our Shopify store, handling email and live chat channels as well as disputes and chargebacks.</q>
-<figcaption class="rev-meta"><span>Shopify store · Venezuela</span><span class="verified">✓ Verified</span></figcaption>
-</figure>
-<figure class="rev rv" style="margin:0">
-<q>They respond quickly, handle every situation with empathy, and always find effective solutions.</q>
-<figcaption class="rev-meta"><span>Online store · Chile</span><span class="verified">✓ Verified</span></figcaption>
-</figure>
-<figure class="rev rv" style="margin:0">
-<q>Handled perfectly easy to very difficult situations with the customers with a lot of patience and professionalism.</q>
-<figcaption class="rev-meta"><span>Online store · France</span><span class="verified">✓ Verified</span></figcaption>
-</figure>
-<figure class="rev rv" style="margin:0">
-<q>Helped our business grow by delivering great customer service.</q>
-<figcaption class="rev-meta"><span>Ecommerce brand · Canada</span><span class="verified">✓ Verified</span></figcaption>
-</figure>
-</div>
-<div class="rev-sum rv">
-<span><span class="stars">★★★★★</span> 5.0 average from 125 reviews</span>
-<span>5.0 for communication, service and "would recommend"</span>
-<a href="https://www.fiverr.com/atique_va" target="_blank" rel="noopener">Read all reviews on Fiverr →</a>
-</div>
+<div class="tw">
+        <div class="tw-bar rv">
+          <div class="tw-stat"><b>5.0</b><span><i class="tw-stars">★★★★★</i>average rating</span></div>
+          <div class="tw-stat"><b>125</b><span>five-star Fiverr reviews</span></div>
+          <div class="tw-stat"><b>100%</b><span>rated 5 out of 5</span></div>
+          <div class="tw-stat"><b>16</b><span>countries</span></div>
+          <a class="tw-link" href="https://www.fiverr.com/atique_va" target="_blank" rel="noopener">Check them on Fiverr <span class="arrow">→</span></a>
+        </div>
+        <figure class="tw-spot rv" aria-live="polite">
+          <span class="spot-glyph" aria-hidden="true">“</span>
+          <blockquote class="spot-q" id="spotQ">Atique is absolutely outstanding! We’ve been working with him for almost a month &amp; he’s just THAT GUY you want to have on your team. <mark>He treats each project like it’s his own business</mark>. Highly recommend</blockquote>
+          <figcaption class="spot-foot">
+            <span class="spot-who" id="spotWho"><span class="rc-cc">US</span>United States · 2022 · <b>2× five-star</b></span>
+            <span class="spot-ver">✓ Verified Fiverr review, word for word</span>
+            <span class="spot-nav"><button type="button" id="spotPrev" aria-label="Previous review">←</button><span class="spot-dots" id="spotDots"></span><button type="button" id="spotNext" aria-label="Next review">→</button></span>
+          </figcaption>
+          <div class="spot-prog"><i id="spotBar"></i></div>
+        </figure>
+        <div class="tw-rows">
+          <div class="tw-row" data-dir="1"><div class="tw-track"><figure class="rc" data-i="0" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">2× five-star</span></div><blockquote>Atique is absolutely outstanding! We’ve been working with him for almost a month &amp; he’s just THAT GUY you want to have on your team. <mark>He treats each project like it’s his own business</mark>. Highly recommend</blockquote><figcaption><span class="rc-cc">US</span><span class="rc-where">United States · 2022</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="4" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">4× five-star</span></div><blockquote>I am satisfied with the work done by this seller. The seller provided customer service for our Shopify store, handling <mark>email and live chat channels as well as disputes and chargebacks</mark>.</blockquote><figcaption><span class="rc-cc">VE</span><span class="rc-where">Venezuela · 2022</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="7" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep new">Client</span></div><blockquote>I am very satisfied with the work that was done, and I can recommend Atikur’s services to everyone. The service was delivered professionally, <mark>with attention to every detail</mark>. I 100% recommend him!</blockquote><figcaption><span class="rc-cc">PL</span><span class="rc-where">Poland · 2026</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="1" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">9× five-star</span></div><blockquote>Atiq is <mark>the most hardworking and dedicated person I have ever worked with on Fiverr</mark>. He does an amazing job of organizing things in my business, responding to emails, taking care of customers, making those customers happy, and communicating every day. I would recommend 200%.</blockquote><figcaption><span class="rc-cc">US</span><span class="rc-where">United States · 2021</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="9" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">9× five-star</span></div><blockquote>Such a professional and experienced costumer service manager, <mark>i recommend it for all E-commerce entrepreneurs</mark>.</blockquote><figcaption><span class="rc-cc">MX</span><span class="rc-where">Mexico · 2021</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="3" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">4× five-star</span></div><blockquote>atikur is one of a kind! he now works for us fulltime and he does such a good job with making sure our customers are not worried and he is <mark>very good at calming customers down that get angry</mark>.. he is amazing</blockquote><figcaption><span class="rc-cc">MA</span><span class="rc-where">Morocco · 2021</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="12" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep new">Client</span></div><blockquote>It has been an absolute pleasure working with Atique, he is very reliable, easy to communicate with and <mark>always quick to respond</mark>.</blockquote><figcaption><span class="rc-cc">US</span><span class="rc-where">United States · 2021</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="14" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep new">Client</span></div><blockquote>A+++ dedicated and <mark>a true customer service professional</mark>.</blockquote><figcaption><span class="rc-cc">AU</span><span class="rc-where">Australia · 2022</span><span class="rc-ver">✓ Verified</span></figcaption></figure></div></div>
+          <div class="tw-row" data-dir="-1"><div class="tw-track"><figure class="rc" data-i="2" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">5× five-star</span></div><blockquote>I’m truly impressed with the professionalism and dedication of this customer service team. They respond quickly, <mark>handle every situation with empathy, and always find effective solutions</mark>. You can tell they genuinely care about customer satisfaction and go above and beyond to deliver great results.
+Communication was clear from day one, and everything was completed exactly as promised — even better than expected. I’ll definitely continue working with them and highly recommend their services!</blockquote><figcaption><span class="rc-cc">CL</span><span class="rc-where">Chile · 2025</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="5" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">9× five-star</span></div><blockquote>The best on Fiverr. Totally recommended, he handled perfectly <mark>easy to very difficult situations</mark> with the customers with a lot of patience and professionalism.</blockquote><figcaption><span class="rc-cc">FR</span><span class="rc-where">France · 2022</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="8" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep new">Client</span></div><blockquote>Perect, Nice job by the seller. <mark>Every listings were good as I expected</mark>. It was a fast and effective delivery. Will hire him soon again for more task.</blockquote><figcaption><span class="rc-cc">IT</span><span class="rc-where">Italy · 2026</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="6" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">3× five-star</span></div><blockquote>Amazing gentleman who is very supportive and <mark>helped our business grow</mark> by delivering great customer service.</blockquote><figcaption><span class="rc-cc">CA</span><span class="rc-where">Canada · 2022</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="10" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">3× five-star</span></div><blockquote>A hard worker. We talk by phone. <mark>This man will manage all my business</mark>. 
+I love your job and your personality.</blockquote><figcaption><span class="rc-cc">FR</span><span class="rc-where">France · 2022</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="11" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">11× five-star</span></div><blockquote>Incredible work as always, <mark>great communication</mark> and I’m very happy with the work produced.</blockquote><figcaption><span class="rc-cc">US</span><span class="rc-where">United States · 2023</span><span class="rc-ver">✓ Verified</span></figcaption></figure><figure class="rc" data-i="13" tabindex="0"><div class="rc-top"><span class="rc-stars" aria-label="5 out of 5 stars">★★★★★</span><span class="rc-rep">2× five-star</span></div><blockquote>Atiq was very professional, he delivered very well 
+<mark>He knows what he’s doing</mark>
+Thank you for your help and reactivity
+Super customer service! Recommended</blockquote><figcaption><span class="rc-cc">FR</span><span class="rc-where">France · 2023</span><span class="rc-ver">✓ Verified</span></figcaption></figure></div></div>
+        </div>
+        <p class="tw-hint"><span class="tw-dot"></span>Drag or scroll to browse. Tap any review to read it in full.</p>
+      </div>
 </div>
 </section>
 </div>
@@ -1124,6 +1185,78 @@ const xform = document.getElementById('xform');
       else if (!en.isIntersecting && iv) { clearInterval(iv); iv = null; }
     }), {threshold: .35});
     io.observe(sp);
+  })();
+  /* Trust wall: spotlight rotation + drifting, draggable review rows */
+  (function(){
+    const tw = document.querySelector('.tw'); if (!tw) return;
+    const DATA = [{"q": "Atique is absolutely outstanding! We’ve been working with him for almost a month &amp; he’s just THAT GUY you want to have on your team. <mark>He treats each project like it’s his own business</mark>. Highly recommend", "cc": "US", "c": "United States", "yr": 2022, "n": 2}, {"q": "Atiq is <mark>the most hardworking and dedicated person I have ever worked with on Fiverr</mark>. He does an amazing job of organizing things in my business, responding to emails, taking care of customers, making those customers happy, and communicating every day. I would recommend 200%.", "cc": "US", "c": "United States", "yr": 2021, "n": 9}, {"q": "I’m truly impressed with the professionalism and dedication of this customer service team. They respond quickly, <mark>handle every situation with empathy, and always find effective solutions</mark>. You can tell they genuinely care about customer satisfaction and go above and beyond to deliver great results.\nCommunication was clear from day one, and everything was completed exactly as promised — even better than expected. I’ll definitely continue working with them and highly recommend their services!", "cc": "CL", "c": "Chile", "yr": 2025, "n": 5}, {"q": "atikur is one of a kind! he now works for us fulltime and he does such a good job with making sure our customers are not worried and he is <mark>very good at calming customers down that get angry</mark>.. he is amazing", "cc": "MA", "c": "Morocco", "yr": 2021, "n": 4}, {"q": "I am satisfied with the work done by this seller. The seller provided customer service for our Shopify store, handling <mark>email and live chat channels as well as disputes and chargebacks</mark>.", "cc": "VE", "c": "Venezuela", "yr": 2022, "n": 4}, {"q": "The best on Fiverr. Totally recommended, he handled perfectly <mark>easy to very difficult situations</mark> with the customers with a lot of patience and professionalism.", "cc": "FR", "c": "France", "yr": 2022, "n": 9}, {"q": "Amazing gentleman who is very supportive and <mark>helped our business grow</mark> by delivering great customer service.", "cc": "CA", "c": "Canada", "yr": 2022, "n": 3}, {"q": "I am very satisfied with the work that was done, and I can recommend Atikur’s services to everyone. The service was delivered professionally, <mark>with attention to every detail</mark>. I 100% recommend him!", "cc": "PL", "c": "Poland", "yr": 2026, "n": 1}, {"q": "Perect, Nice job by the seller. <mark>Every listings were good as I expected</mark>. It was a fast and effective delivery. Will hire him soon again for more task.", "cc": "IT", "c": "Italy", "yr": 2026, "n": 1}, {"q": "Such a professional and experienced costumer service manager, <mark>i recommend it for all E-commerce entrepreneurs</mark>.", "cc": "MX", "c": "Mexico", "yr": 2021, "n": 9}, {"q": "A hard worker. We talk by phone. <mark>This man will manage all my business</mark>. \nI love your job and your personality.", "cc": "FR", "c": "France", "yr": 2022, "n": 3}, {"q": "Incredible work as always, <mark>great communication</mark> and I’m very happy with the work produced.", "cc": "US", "c": "United States", "yr": 2023, "n": 11}, {"q": "It has been an absolute pleasure working with Atique, he is very reliable, easy to communicate with and <mark>always quick to respond</mark>.", "cc": "US", "c": "United States", "yr": 2021, "n": 1}, {"q": "Atiq was very professional, he delivered very well \n<mark>He knows what he’s doing</mark>\nThank you for your help and reactivity\nSuper customer service! Recommended", "cc": "FR", "c": "France", "yr": 2023, "n": 2}, {"q": "A+++ dedicated and <mark>a true customer service professional</mark>.", "cc": "AU", "c": "Australia", "yr": 2022, "n": 1}];
+    const SPOT = [0, 2, 1, 3, 4];
+    const q = document.getElementById('spotQ'), who = document.getElementById('spotWho'), dots = document.getElementById('spotDots'), barEl = document.getElementById('spotBar');
+    let cur = 0, timer = null, t0 = 0, raf = 0, paused = false;
+    const DUR = 8000;
+    SPOT.forEach((_, k) => { const d = document.createElement('i'); d.title = 'Review ' + (k + 1); d.addEventListener('click', () => show(SPOT[k], true)); dots.appendChild(d); });
+    const words = h => h.replace(/(<mark>|<\/mark>)|([^\s<]+)/g, (m, tag, w) => tag ? tag : `<span class="w">${w}</span>`);
+    function show(i, user){
+      const r = DATA[i]; cur = i;
+      q.innerHTML = reduce ? r.q : words(r.q);
+      if (!reduce) q.querySelectorAll('.w').forEach((w, k) => w.style.animationDelay = (k * 0.028) + 's');
+      who.innerHTML = `<span class="rc-cc">${r.cc}</span>${r.c} · ${r.yr}` + (r.n > 1 ? ` · <b>${r.n}× five-star</b>` : '');
+      [...dots.children].forEach((d, k) => d.classList.toggle('on', SPOT[k] === i));
+      tw.querySelectorAll('.rc').forEach(c => c.classList.toggle('picked', +c.dataset.i === i));
+      t0 = performance.now(); if (user) { paused = false; }
+    }
+    function nextSpot(dir){ const k = SPOT.indexOf(cur); show(SPOT[((k < 0 ? -1 : k) + dir + SPOT.length) % SPOT.length], true); }
+    document.getElementById('spotNext').addEventListener('click', () => nextSpot(1));
+    document.getElementById('spotPrev').addEventListener('click', () => nextSpot(-1));
+    const spot = tw.querySelector('.tw-spot');
+    spot.addEventListener('mouseenter', () => paused = true);
+    spot.addEventListener('mouseleave', () => { paused = false; t0 = performance.now() - (parseFloat(barEl.dataset.p || 0) * DUR); });
+    show(SPOT[0], false);
+
+    // Rows: duplicate for a seamless loop, drift slowly, pause on hover, drag to browse.
+    const rows = [...tw.querySelectorAll('.tw-row')].map(row => {
+      const track = row.querySelector('.tw-track');
+      const clone = track.innerHTML.replace(/<figure class="rc"/g, '<figure class="rc" aria-hidden="true"');
+      track.insertAdjacentHTML('beforeend', clone);
+      const st = { row, dir: +row.dataset.dir || 1, hover: false, drag: null, moved: false, resume: 0, x: 0 };
+      requestAnimationFrame(() => { st.x = st.dir < 0 ? track.scrollWidth / 2 : 0; row.scrollLeft = st.x; });
+      row.addEventListener('mouseenter', () => st.hover = true);
+      row.addEventListener('mouseleave', () => st.hover = false);
+      row.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button !== 0) return; st.drag = { x: e.clientX, s: row.scrollLeft }; st.moved = false; });
+      window.addEventListener('pointermove', e => { if (!st.drag || e.pointerType !== 'mouse') return; const dx = e.clientX - st.drag.x; if (Math.abs(dx) > 5) { st.moved = true; row.classList.add('drag'); } row.scrollLeft = st.drag.s - dx; });
+      window.addEventListener('pointerup', () => { if (!st.drag) return; st.drag = null; row.classList.remove('drag'); st.resume = performance.now() + 1500; st.x = row.scrollLeft; });
+      row.addEventListener('touchstart', () => { st.resume = performance.now() + 2500; }, {passive:true});
+      row.addEventListener('scroll', () => { if (Math.abs(row.scrollLeft - st.x) > 2) { st.x = row.scrollLeft; st.resume = Math.max(st.resume, performance.now() + 1200); } }, {passive:true});
+      row.addEventListener('click', e => {
+        const c = e.target.closest('.rc'); if (!c) return;
+        if (st.moved) { e.preventDefault(); st.moved = false; return; }
+        show(+c.dataset.i, true); spot.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'center'});
+      });
+      row.addEventListener('keydown', e => { const c = e.target.closest('.rc'); if (c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); c.click(); } });
+      row.addEventListener('mousemove', e => { const c = e.target.closest('.rc'); if (!c) return; const b = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - b.left) + 'px'); c.style.setProperty('--my', (e.clientY - b.top) + 'px'); });
+      return st;
+    });
+
+    let visible = true;
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(en => visible = en.isIntersecting), {threshold: 0}).observe(tw);
+    let last = performance.now();
+    function loop(now){
+      const dt = Math.min(64, now - last); last = now;
+      if (visible) {
+        if (!paused && !reduce) {
+          const p = Math.min(1, (now - t0) / DUR); barEl.style.transform = `scaleX(${p})`; barEl.dataset.p = p;
+          if (p >= 1) { const k = SPOT.indexOf(cur); show(SPOT[((k < 0 ? -1 : k) + 1) % SPOT.length], false); }
+        }
+        if (!reduce) rows.forEach(st => {
+          const half = st.row.querySelector('.tw-track').scrollWidth / 2;
+          if (st.hover || st.drag || now < st.resume) { st.x = st.row.scrollLeft; }
+          else { st.x += st.dir * dt * 0.035; st.row.scrollLeft = st.x; }
+          if (half > 0) { if (st.row.scrollLeft >= half) { st.row.scrollLeft -= half; st.x = st.row.scrollLeft; } else if (st.row.scrollLeft <= 0 && st.dir < 0) { st.row.scrollLeft += half; st.x = st.row.scrollLeft; } }
+        });
+      }
+      raf = requestAnimationFrame(loop);
+    }
+    raf = requestAnimationFrame(loop);
   })();
   document.getElementById('xunlock').addEventListener('submit', e=>{
     e.preventDefault();

@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Assistaa · AI-powered back office for ecommerce brands</title>
+<link rel="icon" type="image/svg+xml" href="/mark.svg">
+<meta property="og:title" content="Assistaa · The back office your store runs on">
+<meta property="og:description" content="Customer support, disputes, product listings and creatives for ecommerce brands, by an experienced team working with AI.">
+<meta property="og:type" content="website"><meta property="og:url" content="https://assistaa.com">
+<meta name="theme-color" content="#050912">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Assistaa runs the back office for ecommerce brands: customer support, disputes, product listings and creatives, by an experienced team working with AI.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style> :root{--bg:#050912;--surface:#0C1422;--ink:#F3F6FA;--muted:#AEB9C9;--line:#1B2638;--accent:#2CC0FF;--accent-ink:#021019;--accent-soft:#0A2639;--brand:#00AEEF;--signal:#FFC14A;--good:#3CD58A;--blob1:#0091D4;--blob2:#C7801C;--blob3:#0E6E7C;--dot:#FFFFFF;--logo-edge:#000000;--con-bg:#08101C;--con-fg:#E9EEF5;--con-muted:#9AA6B6;--con-line:#22304A;--f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;--f-body:"Instrument Sans","Segoe UI",system-ui,-apple-system,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;--r:14px;--max:1180px;--page-bg:radial-gradient(1100px 560px at 78% -8%,rgba(0,174,239,.20),transparent 62%),radial-gradient(800px 480px at -5% 105%,rgba(255,170,40,.08),transparent 60%),linear-gradient(180deg,#070D18,#050912);color-scheme:dark;}
+.p-light{--bg:#F3F6FB;--surface:#FFFFFF;--ink:#07101B;--muted:#3A4555;--line:#D2D9E4;--accent:#0A7CC4;--accent-ink:#FFFFFF;--accent-soft:#DCF1FC;--signal:#C97F00;--good:#0B8A4C;--dot:#07101B;--logo-edge:#07101B;--page-bg:radial-gradient(1000px 520px at 85% -10%,rgba(0,174,239,.16),transparent 60%),radial-gradient(700px 420px at 0% 100%,rgba(255,176,40,.10),transparent 60%),linear-gradient(180deg,#FFFFFF,#EEF2F8);color-scheme:light;color:var(--ink);}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bg)}
+a{color:inherit}
+h1,h2,h3{font-family:var(--f-display);line-height:1.05;letter-spacing:-.02em;text-wrap:balance;margin:0}
+p{margin:0}
+.wrap{max-width:var(--max);margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:10px;font:600 15px/1 var(--f-body);padding:15px 22px;border-radius:999px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s ease,background .2s ease,box-shadow .2s ease}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 28px -10px var(--accent)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.arrow{transition:transform .2s ease}
+.btn:hover .arrow{transform:translateX(3px)}
+header.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:color-mix(in srgb,#050912 78%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s}
+header.nav.scrolled{border-bottom-color:var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font:800 22px/1 var(--f-display);letter-spacing:-.03em}
+.logo img{flex:none;display:block;max-width:none}
+.logo .logo-word{height:22px;width:auto}
+footer .logo .logo-word{height:18px}
+.logo:hover .logo-mark{transform:rotate(-12deg) scale(1.06)}
+.logo .logo-mark{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.nav-links{display:flex;gap:26px;font-size:15px;color:var(--muted)}
+.nav-links a{text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--ink)}
+.nav .btn{padding:11px 18px;font-size:14px}
+@media (max-width:860px){.nav-links{display:none}
+}
+.hero{padding-block:56px 64px}
+.page:first-child>section.hero{padding-top:56px}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+@media (max-width:960px){.hero-grid{grid-template-columns:1fr;gap:40px}
+}
+.status{display:inline-flex;align-items:center;gap:10px;padding:7px 14px 7px 10px;border:1px solid var(--line);border-radius:999px;font-family:var(--f-mono);font-size:12px;color:var(--muted);background:var(--surface)}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 var(--good);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--good) 60%,transparent)}
+70%{box-shadow:0 0 0 9px transparent}
+100%{box-shadow:0 0 0 0 transparent}
+}
+.hero h1{font-size:clamp(44px,6.6vw,86px);font-weight:800;margin-top:22px;letter-spacing:-.035em}
+.hero h1 .line{display:block;overflow:hidden;padding-bottom:.06em}
+.hero h1 .line span{display:inline-block;animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
+.hero h1 .line:nth-child(2) span{animation-delay:.08s}
+.hero h1 .line:nth-child(3) span{animation-delay:.16s}
+.hero h1 em{font-style:normal;position:relative;background:linear-gradient(92deg,var(--brand),#7FE0FF 45%,var(--signal));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 30px rgba(0,174,239,.35))}
+@keyframes rise{from{transform:translateY(60%)}
+to{transform:none}
+}
+.hero .lede{font-size:clamp(17px,1.6vw,19px);color:var(--muted);max-width:52ch;margin-top:22px}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.trust{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:30px;font-size:14px;color:var(--muted)}
+.trust b{color:var(--ink);font-weight:600}
+.stars{color:var(--signal);letter-spacing:2px}
+.console{background:var(--con-bg);color:var(--con-fg);border-radius:20px;padding:18px;box-shadow:0 40px 90px -30px rgba(5,20,45,.6),0 0 0 1px var(--con-line);position:relative;min-width:0}
+.console::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(380px circle at 100% 0%,color-mix(in srgb,var(--brand) 30%,transparent),transparent 70%);pointer-events:none}
+.con-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 4px 14px;border-bottom:1px solid var(--con-line)}
+.dots{display:flex;gap:6px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--con-line)}
+.con-title{font-family:var(--f-mono);font-size:12px;color:var(--con-muted);display:flex;align-items:center;gap:8px}
+.live{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--signal)}
+.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--signal);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}
+}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 0}
+.kpi{border:1px solid var(--con-line);border-radius:12px;padding:12px}
+.kpi small{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--con-muted)}
+.kpi strong{display:block;font:700 24px/1.2 var(--f-display);margin-top:4px;font-variant-numeric:tabular-nums}
+.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;height:288px;overflow:hidden;position:relative}
+.feed::after{content:"";position:absolute;inset:auto 0 0;height:60px;background:linear-gradient(transparent,var(--con-bg))}
+.ev{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:11px 12px;border-radius:12px;background:color-mix(in srgb,var(--con-fg) 4%,transparent);border:1px solid var(--con-line);animation:slidein .55s cubic-bezier(.2,.8,.2,1)}
+@keyframes slidein{from{transform:translateY(-14px);opacity:.2}
+to{transform:none;opacity:1}
+}
+.ev .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--con-fg);font-size:14px}
+.ev .tx{min-width:0}
+.ev .tx b{display:block;font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev .tx span{display:block;font-family:var(--f-mono);font-size:11px;color:var(--con-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{font-family:var(--f-mono);font-size:10.5px;padding:4px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:color-mix(in srgb,var(--good) 20%,transparent);color:#7FE3AE}
+.pill.wait{background:color-mix(in srgb,var(--signal) 22%,transparent);color:#FFD27A}
+.pill.info{background:color-mix(in srgb,var(--accent) 28%,transparent);color:#C3CDFF}
+.con-foot{display:flex;justify-content:space-between;gap:8px;padding:12px 4px 2px;font-family:var(--f-mono);font-size:11px;color:var(--con-muted);border-top:1px solid var(--con-line);margin-top:10px}
+.marquee{border-block:1px solid var(--line);overflow:hidden;padding-block:18px;background:var(--surface)}
+.mq-row{display:flex;align-items:center;gap:20px}
+.mq-label{flex:none;font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mq-track{overflow:hidden;min-width:0;flex:1;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.mq-inner{display:flex;gap:40px;width:max-content;animation:scroll 34s linear infinite}
+.mq-inner span{font:700 20px/1 var(--f-display);color:var(--muted);letter-spacing:-.01em;white-space:nowrap}
+@keyframes scroll{to{transform:translateX(-50%)}
+}
+@media (max-width:640px){.mq-label{display:none}
+}
+section{padding-block:96px}
+.sec-head{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:end;margin-bottom:48px}
+.sec-head h2{font-size:clamp(34px,4.6vw,58px);font-weight:800}
+.sec-head p{color:var(--muted);font-size:18px;max-width:46ch}
+@media (max-width:860px){.sec-head{grid-template-columns:1fr}
+section{padding-block:72px}
+}
+.svc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media (max-width:760px){.svc-grid{grid-template-columns:1fr}
+}
+.svc{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px;overflow:hidden;min-width:0;transition:transform .3s ease,border-color .3s}
+.svc::before{content:"";position:absolute;inset:0;background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),var(--accent-soft),transparent 45%);opacity:0;transition:opacity .3s}
+.svc:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+.svc:hover::before{opacity:1}
+.svc>*{position:relative}
+.svc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.svc h3{font-size:28px;font-weight:700}
+.svc .tag{font-family:var(--f-mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 10px;white-space:nowrap}
+.svc p{color:var(--muted);margin-top:12px;max-width:48ch}
+.svc ul{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.svc li{font-size:13px;padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+.split{display:grid;grid-template-columns:1fr auto 1fr;gap:0;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--surface)}
+@media (max-width:860px){.split{grid-template-columns:1fr}
+}
+.side{padding:36px;min-width:0}
+.side h3{font-size:26px;display:flex;align-items:center;gap:12px}
+.side h3 .badge{font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;padding:6px 9px;border-radius:999px}
+.side.ai .badge{background:var(--accent-soft);color:var(--accent)}
+.side.hu .badge{background:color-mix(in srgb,var(--signal) 18%,transparent);color:color-mix(in srgb,var(--signal) 70%,var(--ink))}
+.side ul{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:14px}
+.side li{display:grid;grid-template-columns:22px 1fr;gap:10px;color:var(--muted)}
+.side li b{color:var(--ink);font-weight:600}
+.side li svg{margin-top:4px}
+.join{display:grid;place-items:center;padding:24px;border-inline:1px solid var(--line);background:var(--bg)}
+@media (max-width:860px){.join{border-inline:none;border-block:1px solid var(--line)}
+}
+.orb{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;position:relative;font:800 15px/1.1 var(--f-display);text-align:center;color:var(--ink)}
+.orb::before,.orb::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px dashed var(--accent);animation:spin 14s linear infinite}
+.orb::after{inset:14px;border-color:var(--signal);animation-direction:reverse;animation-duration:10s}
+@keyframes spin{to{transform:rotate(360deg)}
+}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:s;position:relative}
+@media (max-width:960px){.steps{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:560px){.steps{grid-template-columns:1fr}
+}
+.step{padding:26px 22px;border-top:2px solid var(--line);position:relative;min-width:0}
+.step::before{counter-increment:s;content:"0" counter(s);font:500 13px/1 var(--f-mono);color:var(--accent);display:block;margin-bottom:18px}
+.step::after{content:"";position:absolute;top:-2px;left:0;height:2px;width:0;background:var(--accent);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.step.on::after{width:100%}
+.step h3{font-size:22px;font-weight:700}
+.step p{color:var(--muted);margin-top:10px;font-size:15px}
+.xray{background:radial-gradient(700px 400px at 100% 0%,rgba(0,174,239,.16),transparent 60%),var(--con-bg);color:var(--con-fg);border-radius:26px;box-shadow:0 0 0 1px var(--con-line),0 40px 90px -40px rgba(0,0,0,.6);padding:clamp(24px,4vw,52px);display:grid;grid-template-columns:1fr 1fr;gap:40px;position:relative;overflow:hidden}
+@media (max-width:900px){.xray{grid-template-columns:1fr}
+}
+.xray h2{font-size:clamp(34px,4.4vw,54px);font-weight:800}
+.xray .eyebrow{color:var(--con-muted)}
+.xray p.sub{color:var(--con-muted);margin-top:16px;font-size:17px;max-width:44ch}
+.xform{display:flex;gap:8px;margin-top:28px;background:color-mix(in srgb,var(--con-fg) 6%,transparent);border:1px solid var(--con-line);border-radius:999px;padding:6px;max-width:480px}
+.xform input{flex:1;min-width:0;background:transparent;border:0;color:var(--con-fg);font:500 15px var(--f-mono);padding:10px 14px}
+.xform input::placeholder{color:var(--con-muted)}
+.xform input:focus{outline:none}
+.xnote{font-size:12.5px;color:var(--con-muted);margin-top:12px;font-family:var(--f-mono)}
+.report{background:color-mix(in srgb,var(--con-fg) 4%,transparent);border:1px solid var(--con-line);border-radius:18px;padding:20px;min-width:0;position:relative;overflow:hidden}
+.report-h{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--f-mono);font-size:12px;color:var(--con-muted)}
+.scanbar{height:4px;border-radius:4px;background:var(--con-line);margin:14px 0 6px;overflow:hidden}
+.scanbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--accent),var(--signal));transform-origin:left;transform:scaleX(1);transition:transform 2.2s cubic-bezier(.4,0,.2,1)}
+.scanstep{font-family:var(--f-mono);font-size:12px;color:var(--con-muted);min-height:18px}
+.finds{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:8px}
+.finds li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:11px 12px;border-radius:12px;border:1px solid var(--con-line);font-size:14px;transition:opacity .4s,transform .4s}
+.finds li.dim{opacity:.25;transform:translateY(4px)}
+.sev{font-family:var(--f-mono);font-size:10px;padding:3px 7px;border-radius:6px;margin-top:2px}
+.sev.hi{background:color-mix(in srgb,#FF6B5A 25%,transparent);color:#FFA79C}
+.sev.md{background:color-mix(in srgb,var(--signal) 22%,transparent);color:#FFD27A}
+.leak{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--con-line)}
+.leak small{font-family:var(--f-mono);font-size:11px;color:var(--con-muted);text-transform:uppercase;letter-spacing:.08em}
+.leak strong{font:800 26px/1 var(--f-display);color:var(--signal);font-variant-numeric:tabular-nums}
+.sample-tag{position:absolute;top:14px;right:-34px;transform:rotate(35deg);background:var(--signal);color:#1A1405;font:600 10px/1 var(--f-mono);letter-spacing:.12em;padding:5px 40px;text-transform:uppercase}
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:960px){.rev-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){.rev-grid{grid-template-columns:1fr}
+}
+.rev{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.rev.big{grid-column:span 2;background:var(--accent);color:var(--accent-ink);border-color:transparent}
+@media (max-width:640px){.rev.big{grid-column:auto}
+}
+.rev q{quotes:none;font-size:17px;line-height:1.5}
+.rev.big q{font:700 clamp(22px,2.6vw,30px)/1.25 var(--f-display);letter-spacing:-.01em}
+.rev-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:auto;font-size:13px;color:var(--muted)}
+.rev.big .rev-meta{color:color-mix(in srgb,var(--accent-ink) 80%,transparent)}
+.verified{font-family:var(--f-mono);font-size:11px;display:inline-flex;gap:6px;align-items:center}
+.rev-sum{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;margin-top:28px;color:var(--muted);font-size:15px}
+.rev-sum a{color:var(--accent);font-weight:600;text-decoration:none}
+.rev-sum a:hover{text-decoration:underline}
+.band{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+@media (max-width:760px){.band{grid-template-columns:1fr 1fr}
+}
+.band div{padding:26px 22px;border-right:1px solid var(--line)}
+.band div:last-child{border-right:0}
+@media (max-width:760px){.band div:nth-child(2){border-right:0}
+.band div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+}
+.band strong{display:block;font:800 clamp(32px,4vw,46px)/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.band span{display:block;color:var(--muted);font-size:14px;margin-top:8px}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:900px){.plans{grid-template-columns:1fr}
+}
+.plan{border:1px solid var(--line);border-radius:var(--r);padding:28px;background:var(--surface);display:flex;flex-direction:column;gap:14px;min-width:0}
+.plan.pop{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.plan h3{font-size:24px}
+.plan .price{font:800 40px/1 var(--f-display);letter-spacing:-.02em}
+.plan .price small{font:500 15px var(--f-body);color:var(--muted);letter-spacing:0}
+.plan p{color:var(--muted);font-size:15px}
+.plan ul{list-style:none;padding:0;margin:4px 0 8px;display:flex;flex-direction:column;gap:10px;font-size:15px}
+.plan li{display:grid;grid-template-columns:18px 1fr;gap:10px}
+.plan .btn{margin-top:auto;justify-content:center}
+.pop-tag{align-self:flex-start;font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);padding:6px 10px;border-radius:999px}
+.faq{max-width:820px}
+.faq details{border-bottom:1px solid var(--line);padding-block:20px}
+.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;font:700 20px/1.3 var(--f-display)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:var(--f-mono);color:var(--accent);transition:transform .25s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq details p{color:var(--muted);margin-top:12px;max-width:65ch}
+.book{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+@media (max-width:900px){.book{grid-template-columns:1fr}
+}
+.book h2{font-size:clamp(38px,5vw,64px);font-weight:800}
+.book .sub{color:var(--muted);font-size:18px;margin-top:18px;max-width:42ch}
+.form{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px;display:grid;gap:14px;min-width:0}
+.field{display:grid;gap:6px}
+.field label{font-size:13px;font-weight:600}
+.field input,.field select,.field textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:100%}
+.field textarea{resize:vertical;min-height:90px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.two{grid-template-columns:1fr}
+}
+.form-msg{font-size:14px;color:var(--good);font-weight:500}
+footer{border-top:1px solid var(--line);padding-block:40px;color:var(--muted);font-size:14px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px;align-items:center}
+.foot nav{display:flex;flex-wrap:wrap;gap:20px}
+.foot a{text-decoration:none}
+.foot a:hover{color:var(--ink)}
+.about-hero{padding-block:64px 32px}
+.about-hero h1{font-size:clamp(44px,6.4vw,84px);font-weight:800;letter-spacing:-.035em;max-width:14ch}
+.about-hero p{color:var(--muted);font-size:19px;max-width:56ch;margin-top:22px}
+.mv{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.mv{grid-template-columns:1fr}
+}
+.mv div{border:1px solid var(--line);border-radius:var(--r);padding:30px;background:var(--surface)}
+.mv h3{font-size:30px;margin-top:10px}
+.mv p{color:var(--muted);margin-top:12px}
+.timeline{position:relative;display:flex;flex-direction:column;gap:0;max-width:860px}
+.timeline::before{content:"";position:absolute;left:94px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--accent),var(--signal))}
+@media (max-width:560px){.timeline::before{left:7px}
+}
+.tl{display:grid;grid-template-columns:80px 1fr;gap:34px;padding-block:18px;position:relative}
+@media (max-width:560px){.tl{grid-template-columns:1fr;gap:4px;padding-left:30px}
+}
+.tl::before{content:"";position:absolute;left:88px;top:26px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--accent)}
+@media (max-width:560px){.tl::before{left:1px}
+}
+.tl .yr{font:500 15px/1.6 var(--f-mono);color:var(--accent);padding-top:2px}
+.tl h3{font-size:22px}
+.tl p{color:var(--muted);margin-top:6px;max-width:58ch}
+.founder{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;border:1px solid var(--line);border-radius:var(--r);padding:28px;background:var(--surface);max-width:860px}
+@media (max-width:560px){.founder{grid-template-columns:1fr}
+}
+.avatar{width:88px;height:88px;border-radius:22px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:800 32px var(--f-display)}
+.founder p{color:var(--muted);margin-top:8px}
+.values{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:860px){.values{grid-template-columns:1fr}
+}
+.values div{padding:24px;border-top:2px solid var(--ink)}
+.values h3{font-size:22px}
+.values p{color:var(--muted);margin-top:8px}
+.mark-img{display:block;width:38px;height:38px;max-width:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));animation:spinMark 16s linear infinite;position:relative}
+.word-wrap{position:relative;display:block;height:24px}
+.word-img{display:block;height:24px;width:auto;max-width:none}
+.word-shine{position:absolute;inset:0;-webkit-mask:url(/logo-word.svg) center/100% 100% no-repeat;mask:url(/logo-word.svg) center/100% 100% no-repeat;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.9) 50%,transparent 65%) no-repeat;background-size:250% 100%;animation:shine 4.8s ease-in-out infinite}
+@keyframes shine{0%,55%{background-position:120% 0}
+100%{background-position:-120% 0}
+}
+@media (max-width:420px){.word-wrap,.word-img{height:20px}
+}
+.live-logo{gap:10px}
+.mark-wrap{position:relative;display:grid;place-items:center;width:40px;height:40px}
+.mark-glow{position:absolute;inset:2px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--brand) 55%,transparent),transparent 70%);filter:blur(6px);animation:glow 3.2s ease-in-out infinite}
+@keyframes glow{0%,100%{transform:scale(.75);opacity:.45}
+50%{transform:scale(1.15);opacity:.9}
+}
+.mark-svg{position:relative;overflow:visible;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}
+.mark-spin{transform-box:fill-box;transform-origin:50% 50%;animation:spinMark 16s linear infinite}
+@keyframes spinMark{to{transform:rotate(360deg)}
+}
+.live-logo:hover .mark-wrap{animation:boop .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes boop{0%{transform:scale(1)}
+40%{transform:scale(1.22) rotate(-18deg)}
+100%{transform:scale(1) rotate(0)}
+}
+.word-svg{display:block;overflow:visible;width:auto}
+.wm-sweep{animation:sweep 4.8s ease-in-out infinite}
+@keyframes sweep{0%,55%{transform:skewX(-20deg) translateX(0)}
+100%{transform:skewX(-20deg) translateX(720px)}
+}
+@media (max-width:420px){.word-svg{height:20px}
+}
+body{overflow-x:clip}
+.page{position:sticky;top:0;isolation:isolate;transform-origin:50% 40%;will-change:transform}
+.page + .page{background:var(--page-bg);border-radius:36px 36px 0 0;box-shadow:0 -1px 0 color-mix(in srgb,var(--ink) 10%,transparent),0 -40px 90px -20px rgba(0,0,0,.55);padding-top:26px;margin-top:-1px;color:var(--ink)}
+.page + .page::before{content:"";position:absolute;top:12px;left:50%;width:46px;height:5px;margin-left:-23px;border-radius:5px;background:color-mix(in srgb,var(--ink) 18%,transparent)}
+.page-tag{position:absolute;top:26px;left:max(16px,env(safe-area-inset-left,0px));font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center}
+.page-tag b{color:var(--accent);font-weight:500}
+@media (min-width:1220px){.page-tag{left:calc(50% - 590px + 16px)}
+}
+.page::after{content:"";position:absolute;inset:0;border-radius:inherit;background:#02060d;opacity:var(--dim,0);pointer-events:none;z-index:5}
+.page>section:first-of-type,.page>.page-tag + section{padding-top:84px}
+.page:last-child{padding-bottom:24px}
+@media (max-width:860px){.page + .page{border-radius:26px 26px 0 0}
+.page>section:first-of-type,.page>.page-tag + section{padding-top:70px}
+}
+@media (prefers-reduced-motion:reduce){.page{position:relative}
+}
+footer{background:var(--bg);z-index:2;position:relative;box-shadow:0 -1px 0 var(--line)}
+.case{display:grid;gap:40px}
+.case-head{max-width:860px}
+.case-head h2{font-size:clamp(34px,4.8vw,62px);font-weight:800;margin-top:14px}
+.case-head p{font-size:19px;margin-top:20px;max-width:62ch;color:color-mix(in srgb,var(--ink) 78%,var(--bg))}
+.case-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width:900px){.case-nums{grid-template-columns:1fr 1fr}
+}
+.cn{background:var(--con-bg);color:var(--con-fg);border-radius:18px;padding:26px 22px;position:relative;min-width:0;box-shadow:0 24px 60px -30px rgba(5,20,45,.55)}
+.cn strong{display:block;font:800 clamp(30px,3.6vw,48px)/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--brand);transform:translateZ(30px)}
+.cn span{display:block;margin-top:10px;color:var(--con-muted);font-size:14px;transform:translateZ(18px)}
+.growth{position:relative}
+.g-track{height:6px;border-radius:6px;background:var(--line);overflow:hidden}
+.g-fill{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--brand),var(--signal));transform-origin:left;transform:scaleX(1);transition:transform 1.6s cubic-bezier(.2,.8,.2,1)}
+.g-fill.pre{transform:scaleX(.08)}
+.g-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+@media (max-width:700px){.g-steps{grid-template-columns:1fr}
+}
+.g-steps b{display:block;font:700 20px/1.2 var(--f-display)}
+.g-steps span{display:block;color:var(--muted);font-size:15px;margin-top:4px}
+body{font-size:17px}
+.hero .lede,.sec-head p,.svc p,.step p,.plan p,.faq details p,.book .sub,.mv p,.tl p,.values p,.founder p,.about-hero p{color:color-mix(in srgb,var(--ink) 78%,var(--bg))}
+.mq-inner span{color:color-mix(in srgb,var(--ink) 62%,var(--bg))}
+.eyebrow{color:var(--accent);font-weight:500}
+.xray .eyebrow{color:var(--brand)}
+.bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bgfx::after{content:"";position:absolute;inset:-50%;opacity:.06;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.bgfx .grid{position:absolute;inset:0;background-image:radial-gradient(color-mix(in srgb,var(--dot) 16%,transparent) 1px,transparent 1.5px);background-size:26px 26px;mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 30%,transparent 80%)}
+.bgfx .blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:.55;will-change:transform}
+.bgfx .b1{width:560px;height:560px;background:var(--blob1);top:-160px;right:-120px;animation:drift1 24s ease-in-out infinite alternate}
+.bgfx .b2{width:460px;height:460px;background:var(--blob2);top:42%;left:-180px;opacity:.26;animation:drift2 28s ease-in-out infinite alternate}
+.bgfx .b3{width:520px;height:520px;background:var(--blob3);bottom:-220px;right:18%;opacity:.28;animation:drift3 32s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(-160px,140px) scale(1.15)}
+}
+@keyframes drift2{to{transform:translate(200px,-120px) scale(.9)}
+}
+@keyframes drift3{to{transform:translate(-180px,-160px) scale(1.1)}
+}
+header.nav,main,footer{position:relative;z-index:1}
+header.nav{z-index:50}
+.marquee,.svc,.plan,.rev,.form,.band,.split,.mv div,.founder,.status{background:color-mix(in srgb,var(--surface) 82%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.svc,.plan,.rev,.band,.split,.form{box-shadow:0 1px 0 color-mix(in srgb,var(--ink) 6%,transparent) inset,0 18px 40px -28px rgba(0,0,0,.45)}
+.rev.big{background:var(--accent)}
+.hero{position:relative}
+#globe{position:absolute;top:50%;right:-6%;width:min(760px,90vw);height:min(760px,90vw);transform:translateY(-50%);pointer-events:none;opacity:.9;z-index:0}
+.hero .wrap{position:relative;z-index:1}
+@media (max-width:960px){#globe{top:auto;bottom:-10%;right:-30%;transform:none;opacity:.5}
+}
+.tilt{transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(0);transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.tilt.tracking{transition:transform .12s linear}
+.tilt .z1{transform:translateZ(26px)}
+.tilt .z2{transform:translateZ(46px)}
+.svc:hover{transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
+.tilt .glare{position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(500px circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.14),transparent 40%);opacity:0;transition:opacity .3s}
+.tilt.tracking .glare{opacity:1}
+.cur-dot,.cur-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:200;border-radius:50%;opacity:0;transition:opacity .3s}
+.cur-dot{width:8px;height:8px;margin:-4px 0 0 -4px;background:var(--brand)}
+.cur-ring{width:38px;height:38px;margin:-19px 0 0 -19px;border:1.5px solid color-mix(in srgb,var(--brand) 70%,transparent);transition:opacity .3s,width .25s,height .25s,margin .25s,background .25s,border-color .25s}
+.cur-ring.hover{width:64px;height:64px;margin:-32px 0 0 -32px;background:color-mix(in srgb,var(--brand) 14%,transparent);border-color:var(--brand)}
+.cur-ring.down{width:28px;height:28px;margin:-14px 0 0 -14px}
+@media (hover:hover) and (pointer:fine){html.has-cursor,html.has-cursor a,html.has-cursor button,html.has-cursor summary,html.has-cursor .svc{cursor:none}
+html.has-cursor input,html.has-cursor textarea,html.has-cursor select{cursor:text}
+html.has-cursor .cur-dot,html.has-cursor .cur-ring{opacity:1}
+}
+.rv{transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.rv.pre{transform:translateY(22px)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}
+html{scroll-behavior:auto}
+.rv.pre{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="bgfx" aria-hidden="true"><div class="grid"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="cur-ring" id="curRing" aria-hidden="true"></div><div class="cur-dot" id="curDot" aria-hidden="true"></div>
+<header class="nav" id="top">
+<div class="wrap nav-in">
+<a class="logo live-logo" href="#home" aria-label="Assistaa home"><span class="mark-wrap"><span class="mark-glow"></span><img class="mark-img" src="/logo-mark.svg" alt="" width="38" height="38"></span><span class="word-wrap"><img src="/logo-word.svg" alt="Assistaa" height="24" class="word-img"><span class="word-shine" aria-hidden="true"></span></span></a>
+<nav class="nav-links" aria-label="Main">
+<a href="#services">Services</a>
+<a href="#how">How it works</a>
+<a href="#xray">Store X-Ray</a>
+<a href="#case">Case study</a>
+<a href="#reviews">Reviews</a>
+<a href="#pricing">Pricing</a>
+<a href="#about">About</a>
+</nav>
+<a class="btn btn-primary" href="#book">Book a call <span class="arrow">→</span></a>
+</div>
+</header>
+<main id="view-home">
+<div class="page" data-page="Home">
+<section class="hero">
+<canvas id="globe" aria-hidden="true"></canvas>
+<div class="wrap hero-grid">
+<div>
+<span class="status"><span class="pulse"></span>Taking on new ecommerce brands for 2026</span>
+<h1>
+<span class="line"><span>The back office</span></span>
+<span class="line"><span>your store</span></span>
+<span class="line"><span><em>runs on.</em></span></span>
+</h1>
+<p class="lede">Customer support, disputes, product listings and creatives, handled by an experienced ecommerce team working alongside AI. One team, one dashboard, one monthly bill.</p>
+<div class="cta">
+<a class="btn btn-primary" href="#xray">Get a free Store X-Ray <span class="arrow">→</span></a>
+<a class="btn btn-ghost" href="#book">Book a strategy call</a>
+</div>
+<div class="trust">
+<span><span class="stars">★★★★★</span> <b>125</b> five-star client reviews</span>
+<span><b>300,000+</b> tickets resolved</span>
+<span>Clients in <b>9+ countries</b></span>
+<span>Shopify specialists since <b>2019</b></span>
+</div>
+</div>
+<div class="console tilt" aria-label="Example of the Assistaa live operations dashboard">
+<div class="con-top">
+<div class="dots"><i></i><i></i><i></i></div>
+<div class="con-title">ops.assistaa · example store</div>
+<span class="live">LIVE</span>
+</div>
+<div class="kpis z1">
+<div class="kpi"><small>Resolved today</small><strong id="k1">184</strong></div>
+<div class="kpi"><small>First reply</small><strong id="k2">6m</strong></div>
+<div class="kpi"><small>Disputes won</small><strong id="k3">11/12</strong></div>
+</div>
+<ul class="feed z1" id="feed" aria-live="off"></ul><span class="glare"></span>
+<div class="con-foot"><span>Example activity, not client data</span><span id="clock">--:--</span></div>
+</div>
+</div>
+</section>
+<div class="marquee" aria-label="Platforms we work in">
+<div class="wrap mq-row">
+<span class="mq-label">We work inside</span>
+<div class="mq-track">
+<div class="mq-inner">
+<span>Shopify</span><span>PayPal</span><span>Stripe</span><span>Klarna</span><span>Gorgias</span><span>Zendesk</span><span>Commslayer</span><span>Slack</span><span>Google Sheets</span><span>Meta Ads</span><span>WooCommerce</span>
+<span aria-hidden="true">Shopify</span><span aria-hidden="true">PayPal</span><span aria-hidden="true">Stripe</span><span aria-hidden="true">Klarna</span><span aria-hidden="true">Gorgias</span><span aria-hidden="true">Zendesk</span><span aria-hidden="true">Commslayer</span><span aria-hidden="true">Slack</span><span aria-hidden="true">Google Sheets</span><span aria-hidden="true">Meta Ads</span><span aria-hidden="true">WooCommerce</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="page p-light" data-page="Services">
+<section id="services">
+<div class="wrap">
+<div class="sec-head rv">
+<div><span class="eyebrow">What we run for you</span><h2>Everything behind the checkout button.</h2></div>
+<p>Pick one service or hand us the whole back office. Either way, we work in your tools, follow your policies and write in your brand's voice.</p>
+</div>
+<div class="svc-grid">
+<article class="svc rv tilt"><span class="glare"></span>
+<div class="svc-top"><h3>Customer support</h3><span class="tag">Email · Chat · Social</span></div>
+<p>Fast, human replies to every ticket. Order tracking, returns, refunds and sizing questions handled the way you would handle them.</p>
+<ul><li>Where-is-my-order</li><li>Returns and exchanges</li><li>Refunds logged</li><li>Comment moderation</li></ul>
+</article>
+<article class="svc rv tilt"><span class="glare"></span>
+<div class="svc-top"><h3>Disputes and chargebacks</h3><span class="tag">PayPal · Stripe · Klarna</span></div>
+<p>We gather tracking, order and conversation evidence and submit strong responses on time, so less of your revenue gets clawed back.</p>
+<ul><li>Evidence packs</li><li>Deadline tracking</li><li>Item not received</li><li>Not as described</li></ul>
+</article>
+<article class="svc rv tilt"><span class="glare"></span>
+<div class="svc-top"><h3>Listings and catalog</h3><span class="tag">Shopify · WooCommerce</span></div>
+<p>Product pages that sell and stay accurate: titles, descriptions, variants, size charts, collections and cost of goods.</p>
+<ul><li>Bulk uploads</li><li>Size charts</li><li>COGS updates</li><li>Catalog clean-up</li></ul>
+</article>
+<article class="svc rv tilt"><span class="glare"></span>
+<div class="svc-top"><h3>Creatives and content</h3><span class="tag">Ads · Reels · Social</span></div>
+<p>Scroll-stopping ad creatives and short videos for new launches, with variations ready to test from day one.</p>
+<ul><li>Ad creatives</li><li>Motion graphics</li><li>Product videos</li><li>Launch packs</li></ul>
+</article>
+</div>
+</div>
+</section>
+<section style="padding-top:0">
+<div class="wrap">
+<div class="sec-head rv">
+<div><span class="eyebrow">How we're different</span><h2>Experienced people. AI speed.</h2></div>
+<p>AI does the repetitive groundwork in seconds. Our team makes every call that needs judgment, so your customers always talk to someone who understands them.</p>
+</div>
+<div class="split rv">
+<div class="side ai">
+<h3>The AI layer <span class="badge">Seconds</span></h3>
+<ul>
+<li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Drafts first replies</b> using your policies and order data</span></li>
+<li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Pulls evidence</b> for disputes from orders, tracking and chats</span></li>
+<li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Writes listing copy</b> and builds size charts from supplier data</span></li>
+<li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Flags risks</b> before they turn into refunds or chargebacks</span></li>
+</ul>
+</div>
+<div class="join"><div class="orb">One<br>team</div></div>
+<div class="side hu">
+<h3>Our team <span class="badge">Judgment</span></h3>
+<ul>
+<li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--signal)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Approves every reply</b> and adjusts tone for the customer</span></li>
+<li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--signal)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Handles the hard cases:</b> angry customers, edge cases, escalations</span></li>
+<li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--signal)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Checks quality</b> on listings before anything goes live</span></li>
+<li><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="var(--signal)" stroke-width="2" stroke-linecap="round"/></svg><span><b>Reports to you</b> with clear numbers every week</span></li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div class="page" data-page="How it works">
+<section id="how" style="padding-top:0">
+<div class="wrap">
+<div class="sec-head rv">
+<div><span class="eyebrow">How it works</span><h2>From first call to fully handled.</h2></div>
+<p>Most brands are fully onboarded within a week. You keep control of every policy and decision.</p>
+</div>
+<div class="steps" id="steps">
+<div class="step"><h3>Free Store X-Ray</h3><p>We review your store and show you where support, policies and listings are costing you money.</p></div>
+<div class="step"><h3>Strategy call</h3><p>We agree on scope, response times, refund rules and how you want customers spoken to.</p></div>
+<div class="step"><h3>Onboarding</h3><p>We join your Shopify, helpdesk and payment accounts with the access you choose, and learn your SOPs.</p></div>
+<div class="step"><h3>We run it</h3><p>Your back office runs every day. You follow it on a live dashboard and get a weekly report.</p></div>
+</div>
+</div>
+</section>
+<section id="xray" style="padding-top:0">
+<div class="wrap">
+<div class="xray rv">
+<div>
+<span class="eyebrow">Store X-Ray</span>
+<h2>See what your store is quietly losing.</h2>
+<p class="sub">Missing size charts, vague refund policies and slow replies all cost money in returns, disputes and lost sales. Enter your store and we'll show you where.</p>
+<form class="xform" id="xform" novalidate>
+<label for="store" class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Your store URL</label>
+<input id="store" name="store" type="text" placeholder="yourstore.com" autocomplete="url">
+<button class="btn btn-primary" type="submit">Scan <span class="arrow">→</span></button>
+</form>
+<p class="xnote">This preview shows sample findings. Full scans of your own store are coming soon.</p>
+</div>
+<div class="report tilt" aria-live="polite">
+<span class="sample-tag">Sample</span>
+<div class="report-h"><span id="rep-store">example-store.com</span><span id="rep-state">Scan complete</span></div>
+<div class="scanbar"><i id="bar"></i></div>
+<div class="scanstep" id="scanstep">6 issues found across 48 pages</div>
+<ul class="finds" id="finds">
+<li><span class="sev hi">HIGH</span><span>Refund policy gives no timeframe, a common trigger for PayPal disputes</span></li>
+<li><span class="sev hi">HIGH</span><span>14 apparel products have no size chart</span></li>
+<li><span class="sev md">MED</span><span>Shipping emails don't include a tracking link</span></li>
+<li><span class="sev md">MED</span><span>Contact page shows no expected response time</span></li>
+<li><span class="sev md">MED</span><span>3 products share the same description</span></li>
+</ul>
+<div class="leak"><small>Estimated monthly leak</small><strong id="leak">$2,100 – $3,400</strong></div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div class="page p-light" data-page="Case study">
+<section id="case">
+<div class="wrap">
+<div class="case rv">
+<div class="case-head">
+<span class="eyebrow">Case study · Health and hair-growth brand</span>
+<h2>From first sale to an 8-figure brand. We handled every ticket along the way.</h2>
+<p>We've run customer support and product listings for a subscription health brand in the hair-growth niche since its first day. As it grew into an 8-figure brand doing six figures a month, our team grew with it, up to 29 specialists working tickets at peak.</p>
+</div>
+<div class="case-nums">
+<div class="cn tilt"><strong data-count="300000" data-suffix="+">300,000+</strong><span>Support tickets resolved</span></div>
+<div class="cn tilt"><strong data-count="5000">5,000</strong><span>Tickets a day at peak</span></div>
+<div class="cn tilt"><strong data-count="29">29</strong><span>Support specialists at peak</span></div>
+<div class="cn tilt"><strong data-count="500000" data-prefix="~">~500,000</strong><span>Product pages listed</span></div>
+</div>
+<div class="growth" aria-label="Brand growth with Assistaa">
+<div class="g-track"><i class="g-fill"></i></div>
+<div class="g-steps">
+<div><b>Day one</b><span>First orders. We set up support and listings.</span></div>
+<div><b>Scaling</b><span>Subscription growth. Team grows to 29 at peak.</span></div>
+<div><b>Today</b><span>8-figure brand, six figures a month, thousands of tickets a day.</span></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div class="page" data-page="Reviews">
+<section style="padding-top:0">
+<div class="wrap">
+<div class="band rv">
+<div><strong data-count="125">125</strong><span>Five-star client reviews</span></div>
+<div><strong data-count="60" data-suffix="+">60+</strong><span>Ecommerce clients served</span></div>
+<div><strong data-count="9" data-suffix="+">9+</strong><span>Countries our clients sell from</span></div>
+<div><strong data-count="2019" data-plain="1">2019</strong><span>Running store support since</span></div>
+</div>
+</div>
+</section>
+<section id="reviews" style="padding-top:0">
+<div class="wrap">
+<div class="sec-head rv">
+<div><span class="eyebrow">Client reviews</span><h2>Store owners trust us with their customers.</h2></div>
+<p>Every quote below is a verified review, word for word, from a client who hired us.</p>
+</div>
+<div class="rev-grid">
+<figure class="rev big rv" style="margin:0">
+<q>He treats each project like it's his own business. Highly recommend.</q>
+<figcaption class="rev-meta"><span>Ecommerce brand · United States</span><span class="verified">✓ Verified Fiverr review</span></figcaption>
+</figure>
+<figure class="rev rv" style="margin:0">
+<q>Provided customer service for our Shopify store, handling email and live chat channels as well as disputes and chargebacks.</q>
+<figcaption class="rev-meta"><span>Shopify store · Venezuela</span><span class="verified">✓ Verified</span></figcaption>
+</figure>
+<figure class="rev rv" style="margin:0">
+<q>They respond quickly, handle every situation with empathy, and always find effective solutions.</q>
+<figcaption class="rev-meta"><span>Online store · Chile</span><span class="verified">✓ Verified</span></figcaption>
+</figure>
+<figure class="rev rv" style="margin:0">
+<q>Handled perfectly easy to very difficult situations with the customers with a lot of patience and professionalism.</q>
+<figcaption class="rev-meta"><span>Online store · France</span><span class="verified">✓ Verified</span></figcaption>
+</figure>
+<figure class="rev rv" style="margin:0">
+<q>Helped our business grow by delivering great customer service.</q>
+<figcaption class="rev-meta"><span>Ecommerce brand · Canada</span><span class="verified">✓ Verified</span></figcaption>
+</figure>
+</div>
+<div class="rev-sum rv">
+<span><span class="stars">★★★★★</span> 5.0 average from 125 reviews</span>
+<span>5.0 for communication, service and "would recommend"</span>
+<a href="https://www.fiverr.com/atique_va" target="_blank" rel="noopener">Read all reviews on Fiverr →</a>
+</div>
+</div>
+</section>
+</div>
+<div class="page p-light" data-page="Pricing">
+<section id="pricing" style="padding-top:0">
+<div class="wrap">
+<div class="sec-head rv">
+<div><span class="eyebrow">Pricing</span><h2>One monthly plan. No hiring headaches.</h2></div>
+<p>Every plan is shaped around your order volume and catalog size. These are starting points; we'll confirm your price on the call.</p>
+</div>
+<div class="plans">
+<div class="plan rv tilt">
+<h3>Support</h3>
+<div class="price">From $500<small> / month</small></div>
+<p>For stores that need their inbox handled well, every day.</p>
+<ul>
+<li><span>✓</span><span>Email, chat and social support</span></li>
+<li><span>✓</span><span>Refunds and returns handled</span></li>
+<li><span>✓</span><span>Weekly report</span></li>
+</ul>
+<a class="btn btn-ghost" href="#book">Talk to us</a>
+</div>
+<div class="plan pop rv tilt">
+<span class="pop-tag">Most chosen</span>
+<h3>Growth</h3>
+<div class="price">From $750<small> / month</small></div>
+<p>Support plus disputes, so fewer sales turn into chargebacks.</p>
+<ul>
+<li><span>✓</span><span>Everything in Support</span></li>
+<li><span>✓</span><span>PayPal, Stripe and Klarna disputes</span></li>
+<li><span>✓</span><span>Live client dashboard</span></li>
+</ul>
+<a class="btn btn-primary" href="#book">Book a call <span class="arrow">→</span></a>
+</div>
+<div class="plan rv tilt">
+<h3>Full back office</h3>
+<div class="price">From $1,000<small> / month</small></div>
+<p>Support, disputes, listings and creatives from one team.</p>
+<ul>
+<li><span>✓</span><span>Everything in Growth</span></li>
+<li><span>✓</span><span>Product listings and size charts</span></li>
+<li><span>✓</span><span>Ad creatives and launch packs</span></li>
+</ul>
+<a class="btn btn-ghost" href="#book">Talk to us</a>
+</div>
+</div>
+</div>
+</section>
+<section style="padding-top:0">
+<div class="wrap">
+<div class="sec-head rv"><div><span class="eyebrow">Questions</span><h2>Before you book.</h2></div></div>
+<div class="faq">
+<details><summary>Will customers know they're talking to an agency?</summary><p>No. We reply under your brand, in your tone, from your helpdesk. To your customers, we are your support team.</p></details>
+<details><summary>Does AI reply to my customers on its own?</summary><p>AI drafts and researches; our team reviews and sends. You decide which kinds of replies, if any, can go out automatically.</p></details>
+<details><summary>What access do you need?</summary><p>Staff or collaborator access to your store, your helpdesk and your payment dispute centers. You choose the permission level, and you can remove it anytime.</p></details>
+<details><summary>How fast can we start?</summary><p>Most brands are live within a week of the strategy call. Urgent dispute backlogs can usually start sooner.</p></details>
+<details><summary>Do you lock me into a long contract?</summary><p>No. Plans run month to month, so we keep earning your business.</p></details>
+</div>
+</div>
+</section>
+</div>
+<div class="page" data-page="Contact">
+<section id="book" style="padding-top:0">
+<div class="wrap book">
+<div class="rv">
+<span class="eyebrow">Let's talk</span>
+<h2>Hand off the back office this month.</h2>
+<p class="sub">Tell us about your store. We'll come back with your Store X-Ray and a plan for what we'd take off your plate first.</p>
+</div>
+<form class="form rv" id="bookform" novalidate>
+<div class="two">
+<div class="field"><label for="bname">Your name</label><input id="bname" name="name" type="text" autocomplete="name" required></div>
+<div class="field"><label for="bemail">Work email</label><input id="bemail" name="email" type="email" autocomplete="email" required></div>
+</div>
+<div class="field"><label for="bstore">Store URL</label><input id="bstore" name="store" type="text" placeholder="yourstore.com"></div>
+<div class="field"><label for="bneed">What do you need most?</label>
+<select id="bneed" name="need"><option>Customer support</option><option>Disputes and chargebacks</option><option>Product listings</option><option>Creatives and content</option><option>The full back office</option></select>
+</div>
+<div class="field"><label for="bnote">Anything else?</label><textarea id="bnote" name="note" placeholder="Monthly orders, tools you use, what's not working"></textarea></div>
+<button class="btn btn-primary" type="submit" style="justify-content:center">Request my call <span class="arrow">→</span></button>
+<p class="form-msg" id="formmsg" hidden></p>
+</form>
+</div>
+</section>
+</div>
+</main>
+<main id="view-about" hidden>
+<section class="about-hero">
+<div class="wrap">
+<span class="eyebrow">About Assistaa</span>
+<h1>Built from the support inbox up.</h1>
+<p>Assistaa started with one person answering store tickets in 2019. Today it's a team running the back office for ecommerce brands, with AI doing the groundwork and people doing the thinking.</p>
+</div>
+</section>
+<section style="padding-top:24px">
+<div class="wrap">
+<div class="mv">
+<div class="rv"><span class="eyebrow">Mission</span><h3>Give every independent store a back office as good as a big brand's.</h3><p>Small teams shouldn't have to choose between growing the business and answering every ticket. We take the operational load so founders can focus on products and growth.</p></div>
+<div class="rv"><span class="eyebrow">Vision</span><h3>The AI-first operations partner for ecommerce.</h3><p>We combine years of hands-on store experience with AI that works around the clock, and we hold ourselves to the same standard our clients' customers do.</p></div>
+</div>
+</div>
+</section>
+<section style="padding-top:0">
+<div class="wrap">
+<div class="sec-head rv"><div><span class="eyebrow">How Assistaa started</span><h2>From one freelancer to a full team.</h2></div></div>
+<div class="timeline">
+<div class="tl rv"><span class="yr">2019</span><div><h3>One person, one inbox</h3><p>Our founder, Atiq, starts freelancing in ecommerce customer support, learning store operations ticket by ticket.</p></div></div>
+<div class="tl rv"><span class="yr">2020</span><div><h3>First international clients</h3><p>Store owners on Fiverr start hiring him for support, refunds and order issues, and many keep coming back.</p></div></div>
+<div class="tl rv"><span class="yr">2021</span><div><h3>A dedicated team</h3><p>Demand grows past one person. A trained team forms around support, disputes and product listings.</p></div></div>
+<div class="tl rv"><span class="yr">2022–25</span><div><h3>125 five-star reviews</h3><p>The team serves 60+ clients selling from 9+ countries, keeping a perfect 5.0 rating along the way.</p></div></div>
+<div class="tl rv"><span class="yr">2026</span><div><h3>Assistaa, powered by AI</h3><p>The team becomes Assistaa: an agency that pairs experienced people with AI to run complete ecommerce back offices.</p></div></div>
+</div>
+</div>
+</section>
+<section style="padding-top:0">
+<div class="wrap">
+<div class="founder rv">
+<div class="avatar" aria-hidden="true">AR</div>
+<div>
+<span class="eyebrow">Founder</span>
+<h3 style="font-size:26px;margin-top:6px">Atikur Rahman</h3>
+<p>Seven years in ecommerce support and operations, from a solo freelancer to leading the Assistaa team. <a href="https://www.fiverr.com/atique_va" target="_blank" rel="noopener" style="color:var(--accent)">See his client reviews →</a></p>
+</div>
+</div>
+</div>
+</section>
+<section style="padding-top:0">
+<div class="wrap">
+<div class="sec-head rv"><div><span class="eyebrow">What we stand for</span><h2>How we work.</h2></div></div>
+<div class="values">
+<div class="rv"><h3>Your store, our responsibility</h3><p>We treat every client's business as if it were our own, from the first ticket to the last refund.</p></div>
+<div class="rv"><h3>People first, AI second</h3><p>AI makes us fast. People make the decisions your customers feel.</p></div>
+<div class="rv"><h3>Numbers you can see</h3><p>Live dashboards and weekly reports, so you always know what was done and what it was worth.</p></div>
+</div>
+<div style="margin-top:48px"><a class="btn btn-primary" href="#book">Book a call with the team <span class="arrow">→</span></a></div>
+</div>
+</section>
+</main>
+<footer>
+<div class="wrap foot">
+<a class="logo" href="#home" aria-label="Assistaa home"><img src="/mark.svg" alt="" width="28" height="28" class="logo-mark"><img src="/wordmark.svg" alt="Assistaa" height="18" class="logo-word"></a>
+<nav aria-label="Footer">
+<a href="#services">Services</a><a href="#xray">Store X-Ray</a><a href="#pricing">Pricing</a><a href="#about">About</a><a href="#book">Contact</a>
+</nav>
+<span>© 2026 Assistaa · Based in Dhaka, serving stores worldwide · <a href="/privacy.html">Privacy</a></span>
+</div>
+</footer>
+<script>
+(function(){
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const home = document.getElementById('view-home');
+const about = document.getElementById('view-about');
+const sectionIds = ['services','how','xray','case','reviews','pricing','book'];
+function route(){
+const h = (location.hash || '').replace('#','');
+if (h === 'about'){ home.hidden = true; about.hidden = false; window.scrollTo(0,0); return; }
+if (h === 'book' && !about.hidden){ about.hidden = true; home.hidden = false; }
+about.hidden = true; home.hidden = false;
+if (sectionIds.includes(h)){ const el = document.getElementById(h); if (el) requestAnimationFrame(()=>el.scrollIntoView({behavior: reduce?'auto':'smooth'}
+)); }
+else if (h === 'home'){ window.scrollTo({top:0,behavior: reduce?'auto':'smooth'}
+); }
+}
+window.addEventListener('hashchange', route);
+route();
+const nav = document.querySelector('header.nav');
+addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY > 8), {passive:true}
+);
+const events = [
+['✉','Where is my order? · #48213','Email · tracking link sent','Resolved 4m','ok'],
+['⚖','PayPal dispute PP-D-7731','Item not received · evidence pack','Submitted','info'],
+['▦','12 products listed','Size charts and variants added','Live','ok'],
+['↺','Refund issued · #10294','Damaged item · logged to sheet','Done','ok'],
+['⚖','Stripe chargeback','Fraud claim · delivery proof','Won','ok'],
+['💬','Live chat · sizing question','Answered with size chart','58s','ok'],
+['⚖','Klarna claim · #10877','Tracking proof uploaded','Pending','wait'],
+['$','COGS updated','140 SKUs · supplier price change','Done','ok'],
+['▶','Ad creative batch','5 variations for spring launch','Ready','info'],
+['✉','Exchange request · #10912','Wrong size · label created','Resolved 7m','ok'],
+['!','Delayed shipment flagged','8 orders · customers updated','Handled','wait']
+];
+const feed = document.getElementById('feed');
+let i = 0;
+function makeEv(e){
+const li = document.createElement('li'); li.className='ev';
+li.innerHTML = '<span class="ic" aria-hidden="true">'+e[0]+'</span><span class="tx"><b></b><span></span></span><span class="pill '+e[4]+'"></span>';
+li.querySelector('b').textContent = e[1];
+li.querySelector('.tx span').textContent = e[2];
+li.querySelector('.pill').textContent = e[3];
+return li;
+}
+for (let n=0;n<5;n++){ feed.appendChild(makeEv(events[n])); }
+i = 5;
+const k1 = document.getElementById('k1');
+let resolved = 184;
+function tick(){
+const li = makeEv(events[i % events.length]); i++;
+feed.insertBefore(li, feed.firstChild);
+while (feed.children.length > 6) feed.removeChild(feed.lastChild);
+resolved += 1 + Math.floor(Math.random()*2); k1.textContent = resolved;
+}
+if (!reduce) setInterval(tick, 2400);
+const clock = document.getElementById('clock');
+function setClock(){ const d=new Date(); clock.textContent = d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}
+); }
+setClock(); setInterval(setClock, 1000);
+document.querySelectorAll('.svc').forEach(c=>{
+c.addEventListener('pointermove', e=>{
+const r = c.getBoundingClientRect();
+c.style.setProperty('--mx', (e.clientX-r.left)+'px');
+c.style.setProperty('--my', (e.clientY-r.top)+'px');
+}
+);
+}
+);
+const rvs = [...document.querySelectorAll('.rv')];
+const steps = document.querySelectorAll('.step');
+if ('IntersectionObserver' in window && !reduce){
+const vh = innerHeight;
+rvs.forEach(el=>{ if (el.getBoundingClientRect().top > vh) el.classList.add('pre'); }
+);
+const io = new IntersectionObserver(es=>{
+es.forEach(en=>{ if (en.isIntersecting){ en.target.classList.remove('pre'); io.unobserve(en.target);}
+ }
+);
+}
+, {threshold:.12}
+);
+rvs.forEach(el=>io.observe(el));
+const so = new IntersectionObserver(es=>{
+es.forEach(en=>{ if (en.isIntersecting){ steps.forEach((s,idx)=>setTimeout(()=>s.classList.add('on'), idx*220)); so.disconnect(); }
+ }
+);
+}
+, {threshold:.3}
+);
+so.observe(document.getElementById('steps'));
+}
+ else { steps.forEach(s=>s.classList.add('on')); }
+const gf=document.querySelector('.g-fill');
+if (gf && 'IntersectionObserver' in window && !reduce){
+if (gf.getBoundingClientRect().top > innerHeight) gf.classList.add('pre');
+const go=new IntersectionObserver(es=>{ es.forEach(en=>{ if(en.isIntersecting){ gf.classList.remove('pre'); go.disconnect(); }
+ }
+); }
+,{threshold:.4}
+);
+go.observe(gf);
+}
+const nums = document.querySelectorAll('[data-count]');
+if ('IntersectionObserver' in window && !reduce){
+const co = new IntersectionObserver(es=>{
+es.forEach(en=>{
+if (!en.isIntersecting) return;
+const el = en.target, end = +el.dataset.count, suf = el.dataset.suffix||'', pre = el.dataset.prefix||'', plain = el.dataset.plain;
+const start = plain ? end - 7 : 0, t0 = performance.now(), dur = 1200;
+function f(t){ const p = Math.min(1,(t-t0)/dur), v = Math.round(start + (end-start)*(1-Math.pow(1-p,3))); el.textContent = pre + (plain ? v : v.toLocaleString('en-US')) + (p===1?suf:''); if (p<1) requestAnimationFrame(f); }
+requestAnimationFrame(f); co.unobserve(el);
+}
+);
+}
+, {threshold:.5}
+);
+nums.forEach(n=>co.observe(n));
+}
+const xform = document.getElementById('xform');
+const bar = document.getElementById('bar');
+const step = document.getElementById('scanstep');
+const state = document.getElementById('rep-state');
+const repStore = document.getElementById('rep-store');
+const finds = [...document.querySelectorAll('#finds li')];
+const leak = document.getElementById('leak');
+const phases = ['Reading product pages…','Checking refund and shipping policies…','Reviewing size charts and variants…','Estimating revenue at risk…'];
+let scanning = false;
+xform.addEventListener('submit', e=>{
+e.preventDefault();
+if (scanning) return; scanning = true;
+const v = document.getElementById('store').value.trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+repStore.textContent = v || 'example-store.com';
+state.textContent = 'Scanning…';
+finds.forEach(f=>f.classList.add('dim'));
+leak.textContent = '$ —';
+bar.style.transition = 'none'; bar.style.transform = 'scaleX(0)';
+void bar.offsetWidth;
+bar.style.transition = reduce ? 'none' : 'transform 2.4s cubic-bezier(.4,0,.2,1)';
+bar.style.transform = 'scaleX(1)';
+let p = 0; step.textContent = phases[0];
+const iv = setInterval(()=>{ p++; if (p < phases.length) step.textContent = phases[p]; }
+, reduce?0:600);
+setTimeout(()=>{
+clearInterval(iv);
+state.textContent = 'Sample report';
+step.textContent = '6 issues found across 48 pages (sample)';
+finds.forEach((f,idx)=>setTimeout(()=>f.classList.remove('dim'), reduce?0:idx*160));
+leak.textContent = '$2,100 – $3,400';
+scanning = false;
+}
+, reduce?50:2500);
+}
+);
+const cv = document.getElementById('globe');
+if (cv && cv.getContext){
+const ctx = cv.getContext('2d');
+let W=0,H=0,R=0,dpr=Math.min(2,window.devicePixelRatio||1);
+const N = 900, pts = [];
+const gold = Math.PI*(3-Math.sqrt(5));
+for (let n=0;n<N;n++){ const y=1-(n/(N-1))*2, r=Math.sqrt(1-y*y), th=gold*n; pts.push([Math.cos(th)*r,y,Math.sin(th)*r]); }
+// client "cities": lat/lon roughly for US, UK, FR, CA, AU, IT, PL, CL, VE, BD
+const cities=[[39,-98],[52,-1],[47,2],[56,-106],[-25,134],[42,12],[52,19],[-33,-71],[8,-66],[23.7,90.4]];
+const toV=(la,lo)=>{const a=la*Math.PI/180,b=lo*Math.PI/180;return [Math.cos(a)*Math.cos(b),Math.sin(a),Math.cos(a)*Math.sin(b)];}
+;
+const cityV=cities.map(c=>toV(c[0],c[1]));
+const hub=cityV[cityV.length-1];
+let rotY=0, rotX=-.35, tX=-.35, mx=0, my=0;
+function col(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||'#00AEEF'; }
+let cBrand=col('--brand'), cSig=col('--signal'), cInk=col('--dot');
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+const refresh=()=>{cBrand=col('--brand');cSig=col('--signal');cInk=col('--dot');}
+;
+mq.addEventListener && mq.addEventListener('change',refresh);
+new MutationObserver(refresh).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']}
+);
+function size(){ const r=cv.getBoundingClientRect(); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); R=Math.min(W,H)*.42; }
+size(); addEventListener('resize',size);
+function rot(v){ let [x,y,z]=v; const cy=Math.cos(rotY),sy=Math.sin(rotY); [x,z]=[x*cy-z*sy,x*sy+z*cy]; const cx=Math.cos(rotX),sx=Math.sin(rotX); [y,z]=[y*cx-z*sx,y*sx+z*cx]; return [x,y,z]; }
+function proj(v){ const p=3.2/(3.2-v[2]); return [W/2+v[0]*R*p, H/2-v[1]*R*p, v[2], p]; }
+let t0=performance.now();
+function frame(t){
+const dt=Math.min(50,t-t0); t0=t;
+rotY += dt*0.00012 + mx*0.0006; rotX += (tX+my*0.25-rotX)*0.04;
+ctx.clearRect(0,0,W,H);
+// halo
+const g=ctx.createRadialGradient(W/2,H/2,R*.2,W/2,H/2,R*1.25);
+g.addColorStop(0,'transparent'); g.addColorStop(.75,cBrand+'14'); g.addColorStop(1,'transparent');
+ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+// dots
+for (const v of pts){ const r=rot(v), q=proj(r); const front=(r[2]+1)/2; ctx.globalAlpha=.08+front*.5; ctx.fillStyle = front>.5? cBrand : cInk; ctx.beginPath(); ctx.arc(q[0],q[1],(0.6+front*1.1)*q[3],0,Math.PI*2); ctx.fill(); }
+// arcs from hub to each client city
+const hp=rot(hub);
+cityV.slice(0,-1).forEach((c,idx)=>{
+const cp=rot(c);
+const steps=36; ctx.beginPath();
+for(let s=0;s<=steps;s++){ const k=s/steps; let x=hp[0]+(cp[0]-hp[0])*k, y=hp[1]+(cp[1]-hp[1])*k, z=hp[2]+(cp[2]-hp[2])*k; const L=Math.hypot(x,y,z)||1, lift=1+Math.sin(Math.PI*k)*.28; x=x/L*lift; y=y/L*lift; z=z/L*lift; const q=proj([x,y,z]); s?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); }
+const vis=(hp[2]+cp[2])/2; ctx.globalAlpha=Math.max(.06,.25+vis*.45); ctx.strokeStyle=cBrand; ctx.lineWidth=1.2; ctx.stroke();
+// travelling pulse
+const k=((t/2600)+idx*.13)%1; let x=hp[0]+(cp[0]-hp[0])*k, y=hp[1]+(cp[1]-hp[1])*k, z=hp[2]+(cp[2]-hp[2])*k; const L=Math.hypot(x,y,z)||1, lift=1+Math.sin(Math.PI*k)*.28; const q=proj([x/L*lift,y/L*lift,z/L*lift]);
+ctx.globalAlpha=.9; ctx.fillStyle=cSig; ctx.beginPath(); ctx.arc(q[0],q[1],2.4,0,Math.PI*2); ctx.fill();
+const cq=proj(cp); if (cp[2]>-0.2){ ctx.globalAlpha=.85; ctx.fillStyle=cBrand; ctx.beginPath(); ctx.arc(cq[0],cq[1],3.2,0,Math.PI*2); ctx.fill(); }
+}
+);
+const hq=proj(hp); if (hp[2]>-0.3){ ctx.globalAlpha=1; ctx.fillStyle=cSig; ctx.beginPath(); ctx.arc(hq[0],hq[1],4.5,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=.35; ctx.beginPath(); ctx.arc(hq[0],hq[1],9+4*Math.sin(t/300),0,Math.PI*2); ctx.fill(); }
+ctx.globalAlpha=1;
+if (!reduce) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+addEventListener('pointermove',e=>{ mx=(e.clientX/innerWidth-.5); my=(e.clientY/innerHeight-.5); }
+,{passive:true}
+);
+}
+if (!reduce && window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+document.querySelectorAll('.tilt').forEach(el=>{
+const max = el.classList.contains('console') ? 9 : 6;
+el.addEventListener('pointermove',e=>{
+const r=el.getBoundingClientRect(), px=(e.clientX-r.left)/r.width, py=(e.clientY-r.top)/r.height;
+el.classList.add('tracking');
+el.style.setProperty('--ry',((px-.5)*max*2).toFixed(2)+'deg');
+el.style.setProperty('--rx',((.5-py)*max*2).toFixed(2)+'deg');
+el.style.setProperty('--gx',(px*100)+'%'); el.style.setProperty('--gy',(py*100)+'%');
+}
+);
+el.addEventListener('pointerleave',()=>{ el.classList.remove('tracking'); el.style.setProperty('--rx','0deg'); el.style.setProperty('--ry','0deg'); }
+);
+}
+);
+}
+const pages=[...document.querySelectorAll('#view-home .page')];
+pages.forEach((pg,idx)=>{
+if (idx===0) return;
+const tag=document.createElement('div'); tag.className='page-tag'; tag.setAttribute('aria-hidden','true');
+tag.innerHTML='<b>'+String(idx+1).padStart(2,'0')+'</b><span>/ '+pg.dataset.page+'</span>';
+pg.prepend(tag);
+}
+);
+function pinTops(){ pages.forEach(pg=>{ pg.style.top = Math.min(0, innerHeight - pg.offsetHeight) + 'px'; }
+); }
+function stack(){
+if (reduce || home.hidden) return;
+const vh=innerHeight;
+for (let k=0;k<pages.length;k++){
+const nx=pages[k+1];
+let q=0;
+if (nx){ const t=nx.getBoundingClientRect().top; q=Math.max(0,Math.min(1,(vh-t)/vh)); }
+const pg=pages[k];
+pg.style.setProperty('--dim',(q*.42).toFixed(3));
+pg.style.transform = q>0 ? 'scale('+(1-q*.06).toFixed(4)+') translateY('+(-q*20).toFixed(1)+'px)' : '';
+}
+}
+if (!reduce){
+pinTops(); stack();
+addEventListener('resize',()=>{ pinTops(); stack(); }
+);
+addEventListener('scroll',stack,{passive:true}
+);
+window.addEventListener('load',pinTops);
+addEventListener('hashchange',()=>requestAnimationFrame(()=>{pinTops();stack();}
+));
+if ('ResizeObserver' in window){ const ro=new ResizeObserver(()=>pinTops()); pages.forEach(pg=>ro.observe(pg)); }
+}
+const blobs=document.querySelectorAll('.bgfx .blob');
+if (!reduce){ addEventListener('scroll',()=>{ const y=scrollY; blobs.forEach((b,idx)=>{ b.style.translate = '0 ' + (-y*(.05+idx*.03)) + 'px'; }
+); }
+,{passive:true}
+); }
+if (window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+const dot=document.getElementById('curDot'), ring=document.getElementById('curRing');
+let x=innerWidth/2,y=innerHeight/2,rx=x,ry=y,shown=false;
+addEventListener('pointermove',e=>{
+x=e.clientX; y=e.clientY;
+if(!shown){ document.documentElement.classList.add('has-cursor'); shown=true; rx=x; ry=y; }
+dot.style.transform='translate('+x+'px,'+y+'px)';
+const tgt=e.target.closest && e.target.closest('a,button,summary,.svc,.plan,.console,.report');
+ring.classList.toggle('hover',!!tgt && !e.target.closest('input,textarea,select'));
+}
+,{passive:true}
+);
+addEventListener('pointerdown',()=>ring.classList.add('down'));
+addEventListener('pointerup',()=>ring.classList.remove('down'));
+document.addEventListener('pointerleave',()=>{ document.documentElement.classList.remove('has-cursor'); shown=false; }
+);
+(function loop(){ const k=reduce?1:.18; rx+=(x-rx)*k; ry+=(y-ry)*k; ring.style.transform='translate('+rx+'px,'+ry+'px)'; requestAnimationFrame(loop); }
+)();
+}
+const bf = document.getElementById('bookform');
+const msg = document.getElementById('formmsg');
+bf.addEventListener('submit', e=>{
+e.preventDefault();
+const name = document.getElementById('bname').value.trim();
+const email = document.getElementById('bemail').value.trim();
+msg.hidden = false;
+if (!name || !/^\S+@\S+\.\S+$/.test(email)){
+msg.style.color = 'var(--signal)';
+msg.textContent = 'Add your name and a valid work email so we can reach you.';
+return;
+}
+const btn = bf.querySelector('button[type=submit]');
+btn.disabled = true; msg.style.color = 'var(--muted)'; msg.textContent = 'Sending…';
+fetch('https://zciuchdximmzwiisdkqu.supabase.co/rest/v1/website_leads', {
+method:'POST',
+headers:{'Content-Type':'application/json','apikey':'sb_publishable_WMggW823F5JaQWI5tZUn3A_2RCcqKcA','Prefer':'return=minimal'}
+,
+body: JSON.stringify({
+name: name.slice(0,120), email: email.slice(0,200),
+store_url: document.getElementById('bstore').value.trim().slice(0,300) || null,
+need: document.getElementById('bneed').value.slice(0,80),
+note: document.getElementById('bnote').value.trim().slice(0,3000) || null
+}
+)
+}
+).then(r=>{
+if (!r.ok) throw new Error(r.status);
+msg.style.color = 'var(--good)';
+msg.textContent = 'Thanks, ' + name.split(' ')[0] + '. We got your request and will reply within one business day.';
+bf.reset();
+}
+).catch(()=>{
+msg.style.color = 'var(--signal)';
+msg.textContent = 'That didn\'t go through. Please try again in a minute.';
+}
+).finally(()=>{ btn.disabled = false; }
+);
+}
+);
+}
+)();
+</script>
+</body>
+</html>

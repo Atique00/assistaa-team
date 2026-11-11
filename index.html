@@ -723,6 +723,19 @@ footer a:hover{color:#fff}
 .calc-out .btn{align-self:flex-start;margin-top:auto}
 .pp-svc{--c1:#0091D4;--c2:#7A4BD6}
 .pp-svc .sec-head p{color:#B9C5D4}
+
+/* Track record + tools */
+.case-nums-wrap{display:grid;gap:14px}
+.cn-label{font:500 11.5px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:#FFC14A}
+.pp .cn strong{font-size:clamp(26px,3vw,42px)}
+.tools-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:4px}
+.tools-l{font:500 11.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:#9AA6B6}
+.tools-chips{display:flex;flex-wrap:wrap;gap:8px}
+.tools-chips i{font-style:normal;font-size:13.5px;color:#DCE4EE;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);transition:border-color .3s,background .3s,transform .3s}
+.tools-chips i:hover{border-color:rgba(0,174,239,.6);background:rgba(0,174,239,.12);transform:translateY(-2px)}
+
+.pp .case-nums{grid-template-columns:repeat(3,1fr)}
+@media (max-width:700px){.pp .case-nums{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -762,7 +775,7 @@ footer a:hover{color:#fff}
 </div>
 <div class="trust">
 <span><span class="stars">★★★★★</span> <b>125</b> five-star client reviews</span>
-<span><b>300,000+</b> tickets resolved</span>
+<span><b>1M+</b> tickets resolved</span>
 <span>Clients in <b>16 countries</b></span>
 <span>Shopify specialists since <b>2019</b></span>
 </div>
@@ -922,12 +935,18 @@ footer a:hover{color:#fff}
 <h2>From first sale to an 8-figure brand. We handled every ticket along the way.</h2>
 <p>We've run customer support and product listings for a subscription health brand in the hair-growth niche since its first day. As it grew into an 8-figure brand doing six figures a month, our team grew with it, up to 29 specialists working tickets at peak.</p>
 </div>
-<div class="case-nums">
-<div class="cn tilt"><strong data-count="300000" data-suffix="+">300,000+</strong><span>Support tickets resolved</span></div>
-<div class="cn tilt"><strong data-count="5000">5,000</strong><span>Tickets a day at peak</span></div>
-<div class="cn tilt"><strong data-count="29">29</strong><span>Support specialists at peak</span></div>
-<div class="cn tilt"><strong data-count="500000" data-prefix="~">~500,000</strong><span>Product pages listed</span></div>
-</div>
+<div class="case-nums-wrap">
+          <span class="cn-label">Our track record, 2019 to today</span>
+          <div class="case-nums">
+            <div class="cn tilt"><strong data-count="1000000" data-suffix="+">1,000,000+</strong><span>Support tickets resolved</span></div>
+            <div class="cn tilt"><strong data-count="2000000" data-prefix="$" data-suffix="+">$2,000,000+</strong><span>Recovered in disputes and chargebacks</span></div>
+            <div class="cn tilt"><strong data-count="300000" data-suffix="+">300,000+</strong><span>Fashion products published</span></div>
+            <div class="cn tilt"><strong data-count="29">29</strong><span>Support specialists at peak</span></div>
+            <div class="cn tilt"><strong data-count="7" data-suffix="+">7+</strong><span>Years in the field, since 2019</span></div>
+            <div class="cn tilt"><strong data-count="16" data-suffix="+">16+</strong><span>Countries our clients and dropshippers sell from</span></div>
+          </div>
+          <div class="tools-row"><span class="tools-l">Inboxes we've worked in</span><span class="tools-chips"><i>Gmail</i><i>Outlook</i><i>Zendesk</i><i>Freshdesk</i><i>Gorgias</i><i>Zoho Desk</i><i>Commslayer</i><i>Shopify Inbox</i><i>Re:amaze</i><i>Help Scout</i><i>Tidio</i></span></div>
+        </div>
 <div class="growth" aria-label="Brand growth with Assistaa">
 <div class="g-track"><i class="g-fill"></i></div>
 <div class="g-steps">

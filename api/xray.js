@@ -115,16 +115,16 @@ async function scan(domain) {
     contact.ok ? contact : (async () => { const l = findLink(html, origin, /contact/i); return l ? await get(l) : contact; })(),
   ]);
   const refundT = policyText(refundP), shipT = policyText(shippingP);
-  if (!refundP.ok || words(refundT) < 40) add('hi', 'Policies', 'No refund policy page found. Missing policies are a common reason PayPal and card disputes are lost.');
+  if (!refundP.ok || words(refundT) < 40) add('hi', 'Policies', 'We could not find a refund policy at the standard address or in the homepage links. Missing policies are a common reason disputes are lost.');
   else if (!/\b\d{1,3}\s*(-|–|to)?\s*\d{0,3}\s*(calendar |business |working )?(day|days|week|weeks)\b/i.test(refundT)) add('hi', 'Policies', 'Refund policy gives no clear timeframe (for example "30 days"), a common trigger for disputes.');
   else passed.push('Refund policy with a clear timeframe');
 
-  if (!shippingP.ok || words(shipT) < 30) add('hi', 'Policies', 'No shipping policy page found. Customers and payment processors look for delivery times.');
+  if (!shippingP.ok || words(shipT) < 30) add('hi', 'Policies', 'We could not find a shipping policy at the standard address or in the homepage links. Customers and payment processors look for delivery times.');
   else if (!/\b\d{1,2}\s*(-|–|to)\s*\d{1,2}\s*(business |working )?(day|days)\b|\b\d{1,2}\+?\s*(business |working )?days\b/i.test(shipT)) add('md', 'Policies', 'Shipping policy does not state delivery times in days.');
   else passed.push('Shipping policy states delivery times');
 
-  if (!privacy.ok) add('md', 'Policies', 'No privacy policy page found.'); else passed.push('Privacy policy');
-  if (!terms.ok) add('lo', 'Policies', 'No terms of service page found.'); else passed.push('Terms of service');
+  if (!privacy.ok) add('md', 'Policies', 'We could not find a privacy policy page.'); else passed.push('Privacy policy');
+  if (!terms.ok) add('lo', 'Policies', 'We could not find a terms of service page.'); else passed.push('Terms of service');
 
   // Apps like reviews and size charts often load only on product pages, so check one too.
   let appHtml = html;
@@ -133,9 +133,9 @@ async function scan(domain) {
   if (firstHandle) { productPage = await get(`${origin}/products/${firstHandle}`); if (productPage.ok) appHtml += productPage.text; }
 
   // ---- Support ----
-  if (!APPS.chat.test(appHtml)) add('md', 'Support', 'No live chat or help desk widget found.');
+  if (!APPS.chat.test(appHtml)) add('md', 'Support', 'No live chat or help desk widget detected.');
   else passed.push('Live chat or help desk widget');
-  if (!contactP.ok) add('md', 'Support', 'No contact page found.');
+  if (!contactP.ok) add('md', 'Support', 'We could not find a contact page linked from the homepage.');
   else {
     const ct = strip(contactP.text);
     if (!/within\s+\d+|\d+\s*(-|–|to)?\s*\d*\s*(hours|hrs|business days)|24\s*\/\s*7|same day/i.test(ct)) add('md', 'Support', 'Contact page shows no expected response time.');

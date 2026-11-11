@@ -411,6 +411,50 @@ html.has-cursor .cur-dot,html.has-cursor .cur-ring{opacity:1}
 html{scroll-behavior:auto}
 .rv.pre{transform:none}
 }
+
+/* Premium service cards: dark glass, rotating light border, live icon per service */
+.svc-grid .svc{background:radial-gradient(520px 260px at 100% 0%,color-mix(in srgb,var(--c) 26%,transparent),transparent 70%),radial-gradient(420px 220px at 0% 100%,color-mix(in srgb,var(--c) 10%,transparent),transparent 70%),linear-gradient(160deg,#0D1728,#060B15);color:#EEF3F9;border:0;border-radius:22px;padding:30px;isolation:isolate;box-shadow:0 30px 60px -34px rgba(4,12,28,.75),0 0 0 1px rgba(255,255,255,.05) inset;backdrop-filter:none;-webkit-backdrop-filter:none}
+.svc-grid .svc:nth-child(1){--c:#00AEEF}
+.svc-grid .svc:nth-child(2){--c:#FFB43A}
+.svc-grid .svc:nth-child(3){--c:#3CD58A}
+.svc-grid .svc:nth-child(4){--c:#FF6B9A}
+.svc-grid .svc .ring{position:absolute;inset:0;border-radius:inherit;padding:1.5px;background:rgba(255,255,255,.08);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);overflow:hidden;pointer-events:none;z-index:2}
+.svc-grid .svc .ring::before{content:"";position:absolute;inset:-70%;background:conic-gradient(from 0deg,transparent 0 62%,color-mix(in srgb,var(--c) 80%,transparent) 78%,#fff 84%,transparent 90%);animation:ringspin 6s linear infinite}
+.svc-grid .svc:nth-child(2) .ring::before{animation-delay:-1.5s}
+.svc-grid .svc:nth-child(3) .ring::before{animation-delay:-3s}
+.svc-grid .svc:nth-child(4) .ring::before{animation-delay:-4.5s}
+@keyframes ringspin{to{transform:rotate(360deg)}}
+.svc-grid .svc::before{background:radial-gradient(380px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--c) 22%,transparent),transparent 50%)}
+.svc-grid .svc .svc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.svc-grid .svc .svc-title{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-width:0}
+.svc-grid .svc h3{font-size:clamp(26px,2.6vw,32px);background:linear-gradient(100deg,#FFFFFF 30%,var(--c) 52%,#FFFFFF 74%);background-size:250% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;color:transparent;transition:background-position .9s ease}
+.svc-grid .svc:hover h3{background-position:0 0}
+.svc-grid .svc .tag{color:color-mix(in srgb,var(--c) 70%,#fff);border-color:color-mix(in srgb,var(--c) 35%,transparent);background:color-mix(in srgb,var(--c) 10%,transparent)}
+.svc-grid .svc p{color:#B9C5D4}
+.svc-grid .svc li{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#DCE4EE;transition:border-color .3s,background .3s,transform .3s}
+.svc-grid .svc li:hover{border-color:color-mix(in srgb,var(--c) 60%,transparent);background:color-mix(in srgb,var(--c) 14%,transparent);transform:translateY(-2px)}
+.svc-grid .svc .viz{flex:none;width:68px;height:68px;color:var(--c);filter:drop-shadow(0 8px 22px color-mix(in srgb,var(--c) 45%,transparent));transform:translateZ(40px)}
+.viz .v-soft{fill:color-mix(in srgb,currentColor 16%,transparent);stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.viz .v-solid{fill:currentColor}
+.viz .v-dot{fill:#06101A;animation:vdot 1.2s ease-in-out infinite}
+.viz .d2{animation-delay:.15s}.viz .d3{animation-delay:.3s}
+@keyframes vdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+.viz .v-check{fill:none;stroke:#fff;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:vcheck 3s ease-in-out infinite}
+@keyframes vcheck{0%,15%{stroke-dashoffset:40}45%,85%{stroke-dashoffset:0}100%{stroke-dashoffset:-40}}
+.viz .v-scan{fill:currentColor;opacity:.75;animation:vscan 3s ease-in-out infinite}
+@keyframes vscan{0%{transform:translateY(0);opacity:0}10%{opacity:.8}50%{transform:translateY(40px);opacity:.6}60%,100%{transform:translateY(40px);opacity:0}}
+.viz .v-grid rect{fill:currentColor;opacity:.14;animation:vgrid 3.6s ease-in-out infinite}
+.viz .v-grid rect:nth-child(2){animation-delay:.2s}.viz .v-grid rect:nth-child(3){animation-delay:.4s}.viz .v-grid rect:nth-child(4){animation-delay:.6s}.viz .v-grid rect:nth-child(5){animation-delay:.8s}.viz .v-grid rect:nth-child(6){animation-delay:1s}.viz .v-grid rect:nth-child(7){animation-delay:1.2s}.viz .v-grid rect:nth-child(8){animation-delay:1.4s}.viz .v-grid rect:nth-child(9){animation-delay:1.6s}
+@keyframes vgrid{0%,100%{opacity:.14;transform:scale(.9)}25%,60%{opacity:1;transform:scale(1)}}
+.viz .v-grid rect{transform-box:fill-box;transform-origin:center}
+.viz .v-play{fill:currentColor}
+.viz .v-pulse{fill:none;stroke:currentColor;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:vpulse 2.4s ease-out infinite}
+.viz .p2{animation-delay:1.2s}
+@keyframes vpulse{from{transform:scale(1);opacity:.8}to{transform:scale(2.1);opacity:0}}
+.viz .v-eq rect{fill:currentColor;opacity:.7;transform-box:fill-box;transform-origin:bottom;animation:veq .9s ease-in-out infinite alternate}
+.viz .v-eq rect:nth-child(2){animation-delay:.2s}.viz .v-eq rect:nth-child(3){animation-delay:.35s}.viz .v-eq rect:nth-child(4){animation-delay:.5s}
+@keyframes veq{from{transform:scaleY(.4)}to{transform:scaleY(1.15)}}
+@media (max-width:420px){.svc-grid .svc .viz{width:54px;height:54px}}
 </style>
 </head>
 <body>
@@ -492,22 +536,22 @@ html{scroll-behavior:auto}
 </div>
 <div class="svc-grid">
 <article class="svc rv tilt"><span class="glare"></span>
-<div class="svc-top"><h3>Customer support</h3><span class="tag">Email · Chat · Social</span></div>
+<span class="ring" aria-hidden="true"></span><div class="svc-top"><div class="svc-title"><h3>Customer support</h3><span class="tag">Email · Chat · Social</span></div><svg class="viz" viewBox="0 0 64 64" aria-hidden="true"><rect x="5" y="8" width="36" height="24" rx="9" class="v-soft"/><path d="M13 31l-3 8 11-7" class="v-soft"/><rect x="22" y="28" width="37" height="24" rx="9" class="v-solid"/><circle cx="32" cy="40" r="2.6" class="v-dot d1"/><circle cx="40.5" cy="40" r="2.6" class="v-dot d2"/><circle cx="49" cy="40" r="2.6" class="v-dot d3"/></svg></div>
 <p>Fast, human replies to every ticket. Order tracking, returns, refunds and sizing questions handled the way you would handle them.</p>
 <ul><li>Where-is-my-order</li><li>Returns and exchanges</li><li>Refunds logged</li><li>Comment moderation</li></ul>
 </article>
 <article class="svc rv tilt"><span class="glare"></span>
-<div class="svc-top"><h3>Disputes and chargebacks</h3><span class="tag">PayPal · Stripe · Klarna</span></div>
+<span class="ring" aria-hidden="true"></span><div class="svc-top"><div class="svc-title"><h3>Disputes and chargebacks</h3><span class="tag">PayPal · Stripe · Klarna</span></div><svg class="viz" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5l21 7.5V29c0 14.5-9 24-21 30C20 53 11 43.5 11 29V12.5z" class="v-soft"/><path d="M22 31l7.5 7.5L43 24" class="v-check"/><rect x="11" y="10" width="42" height="3" rx="1.5" class="v-scan"/></svg></div>
 <p>We gather tracking, order and conversation evidence and submit strong responses on time, so less of your revenue gets clawed back.</p>
 <ul><li>Evidence packs</li><li>Deadline tracking</li><li>Item not received</li><li>Not as described</li></ul>
 </article>
 <article class="svc rv tilt"><span class="glare"></span>
-<div class="svc-top"><h3>Listings and catalog</h3><span class="tag">Shopify · WooCommerce</span></div>
+<span class="ring" aria-hidden="true"></span><div class="svc-top"><div class="svc-title"><h3>Listings and catalog</h3><span class="tag">Shopify · WooCommerce</span></div><svg class="viz" viewBox="0 0 64 64" aria-hidden="true"><g class="v-grid"><rect x="6" y="6" width="15" height="15" rx="4"/><rect x="24.5" y="6" width="15" height="15" rx="4"/><rect x="43" y="6" width="15" height="15" rx="4"/><rect x="6" y="24.5" width="15" height="15" rx="4"/><rect x="24.5" y="24.5" width="15" height="15" rx="4"/><rect x="43" y="24.5" width="15" height="15" rx="4"/><rect x="6" y="43" width="15" height="15" rx="4"/><rect x="24.5" y="43" width="15" height="15" rx="4"/><rect x="43" y="43" width="15" height="15" rx="4"/></g></svg></div>
 <p>Product pages that sell and stay accurate: titles, descriptions, variants, size charts, collections and cost of goods.</p>
 <ul><li>Bulk uploads</li><li>Size charts</li><li>COGS updates</li><li>Catalog clean-up</li></ul>
 </article>
 <article class="svc rv tilt"><span class="glare"></span>
-<div class="svc-top"><h3>Creatives and content</h3><span class="tag">Ads · Reels · Social</span></div>
+<span class="ring" aria-hidden="true"></span><div class="svc-top"><div class="svc-title"><h3>Creatives and content</h3><span class="tag">Ads · Reels · Social</span></div><svg class="viz" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="14" class="v-pulse p1"/><circle cx="32" cy="32" r="14" class="v-pulse p2"/><circle cx="32" cy="32" r="16" class="v-soft"/><path d="M27.5 24.5v15l13-7.5z" class="v-play"/><g class="v-eq"><rect x="6" y="50" width="4" height="8" rx="2"/><rect x="12" y="46" width="4" height="12" rx="2"/><rect x="48" y="44" width="4" height="14" rx="2"/><rect x="54" y="49" width="4" height="9" rx="2"/></g></svg></div>
 <p>Scroll-stopping ad creatives and short videos for new launches, with variations ready to test from day one.</p>
 <ul><li>Ad creatives</li><li>Motion graphics</li><li>Product videos</li><li>Launch packs</li></ul>
 </article>

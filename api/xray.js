@@ -259,8 +259,10 @@ async function scan(domain) {
 
   g('Secure HTTPS website', origin.startsWith('https://'), 'hi', 'The store does not load over HTTPS. Google requires a valid SSL certificate.');
   g('Clear refund and return policy', refundOk, null, null);
-  g('Return shipping costs explained', !refundOk || returnCost, 'md', 'The refund policy does not say who pays for return shipping. Google asks stores to disclose return costs before purchase.');
-  g('Shipping costs stated', !(shippingP.ok && words(shipT) >= 30) || shipCost, 'md', 'The shipping policy does not state shipping costs (for example "Free shipping over $50"). Google requires all shipping costs to be disclosed.');
+  const refundFound = refundP.ok && words(refundT) >= 40, shipFound = shippingP.ok && words(shipT) >= 30;
+  // When the policy itself is missing, that is already reported above, so only the readiness meter records it.
+  g('Return shipping costs explained', refundFound && returnCost, 'md', refundFound ? 'The refund policy does not say who pays for return shipping. Google asks stores to disclose return costs before purchase.' : null);
+  g('Shipping policy with costs', shipFound && shipCost, 'md', shipFound ? 'The shipping policy does not state shipping costs (for example "Free shipping over $50"). Google requires all shipping costs to be disclosed.' : null);
   g('Privacy policy and terms', privacy.ok && terms.ok, null, null);
   g('Policies linked on every page', linkedRefund && linkedShip && linkedPrivacy, 'md', 'Refund, shipping and privacy policies are not all linked from the homepage. Google reviewers look for them in the footer.');
   g('Ways for shoppers to contact you', emails.length || phone || contactForm || social, 'hi', 'No email, phone, contact form or social link found. Google flags stores with insufficient contact information.');

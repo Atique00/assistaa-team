@@ -96,6 +96,10 @@ async function scan(domain) {
   }
   const origin = new URL(home.url).origin;
   const html = home.text;
+  // Headless or custom storefronts redirect to a checkout host or serve an empty shell we cannot read fairly.
+  if (/(^|\.)checkout\./i.test(new URL(home.url).hostname) || (!/<title[^>]*>[^<]+</i.test(html) && Buffer.byteLength(html) < 8000)) {
+    return { error: 'This store uses a custom storefront the X-Ray cannot read reliably. Book a call and we will review it by hand.' };
+  }
   const shopify = /cdn\.shopify\.com|Shopify\.theme|shopify-section|myshopify\.com/i.test(html) || !!home.headers.get('x-shopid') || /shopify/i.test(home.headers.get('powered-by') || '');
 
   const [prodRes, refund, shipping, privacy, terms, contact] = await Promise.all([

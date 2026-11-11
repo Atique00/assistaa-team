@@ -41,6 +41,20 @@ async function getProducts(origin) {
   }
   return last;
 }
+function findLink(html, origin, re) {
+  const hrefs = [...String(html || '').matchAll(/href=["']([^"'#]+)["']/gi)].map(m => m[1]);
+  for (const h of hrefs) {
+    let u; try { u = new URL(h, origin); } catch { continue; }
+    if (u.origin !== origin) continue;
+    if (re.test(u.pathname)) return u.href;
+  }
+  return null;
+}
+async function fallback(page, html, origin, re) {
+  if (page && page.ok && words(policyText(page)) >= 30) return page;
+  const link = findLink(html, origin, re);
+  return link ? await get(link) : page;
+}
 function json(text) { try { return JSON.parse(text); } catch { return null; } }
 function strip(html) {
   return String(html || '')
@@ -94,12 +108,18 @@ async function scan(domain) {
   ]);
 
   // ---- Policies ----
-  const refundT = policyText(refund), shipT = policyText(shipping);
-  if (!refund.ok || words(refundT) < 40) add('hi', 'Policies', 'No refund policy page found. Missing policies are a common reason PayPal and card disputes are lost.');
+  // Some stores keep policies or contact info on their own pages; follow homepage links when the standard URL is missing.
+  const [refundP, shippingP, contactP] = await Promise.all([
+    fallback(refund, html, origin, /refund|return/i),
+    fallback(shipping, html, origin, /shipping|delivery/i),
+    contact.ok ? contact : (async () => { const l = findLink(html, origin, /contact/i); return l ? await get(l) : contact; })(),
+  ]);
+  const refundT = policyText(refundP), shipT = policyText(shippingP);
+  if (!refundP.ok || words(refundT) < 40) add('hi', 'Policies', 'No refund policy page found. Missing policies are a common reason PayPal and card disputes are lost.');
   else if (!/\b\d{1,3}\s*(-|–|to)?\s*\d{0,3}\s*(calendar |business |working )?(day|days|week|weeks)\b/i.test(refundT)) add('hi', 'Policies', 'Refund policy gives no clear timeframe (for example "30 days"), a common trigger for disputes.');
   else passed.push('Refund policy with a clear timeframe');
 
-  if (!shipping.ok || words(shipT) < 30) add('hi', 'Policies', 'No shipping policy page found. Customers and payment processors look for delivery times.');
+  if (!shippingP.ok || words(shipT) < 30) add('hi', 'Policies', 'No shipping policy page found. Customers and payment processors look for delivery times.');
   else if (!/\b\d{1,2}\s*(-|–|to)\s*\d{1,2}\s*(business |working )?(day|days)\b|\b\d{1,2}\+?\s*(business |working )?days\b/i.test(shipT)) add('md', 'Policies', 'Shipping policy does not state delivery times in days.');
   else passed.push('Shipping policy states delivery times');
 
@@ -115,9 +135,9 @@ async function scan(domain) {
   // ---- Support ----
   if (!APPS.chat.test(appHtml)) add('md', 'Support', 'No live chat or help desk widget found.');
   else passed.push('Live chat or help desk widget');
-  if (!contact.ok) add('md', 'Support', 'No contact page at /pages/contact.');
+  if (!contactP.ok) add('md', 'Support', 'No contact page found.');
   else {
-    const ct = strip(contact.text);
+    const ct = strip(contactP.text);
     if (!/within\s+\d+|\d+\s*(-|–|to)?\s*\d*\s*(hours|hrs|business days)|24\s*\/\s*7|same day/i.test(ct)) add('md', 'Support', 'Contact page shows no expected response time.');
     else passed.push('Contact page with response time');
   }
@@ -171,7 +191,7 @@ async function scan(domain) {
         if (t.length > 12 && t === t.toUpperCase() && /[A-Z]/.test(t)) caps++;
         const im = Array.isArray(p.images) ? p.images : [];
         if (im.length === 0) noImg++; else if (im.length < 3) fewImg++;
-        for (const i of im) { imgs++; if (!i.alt || !String(i.alt).trim()) noAlt++; }
+        for (const i of im) { if ('alt' in i) { imgs++; if (!i.alt || !String(i.alt).trim()) noAlt++; } }
         if (!p.product_type) noType++;
         const vars = Array.isArray(p.variants) ? p.variants : [];
         if (vars.length && vars.every(v => v.available === false)) soldOut++;
@@ -180,12 +200,11 @@ async function scan(domain) {
       }
       let dupes = 0; for (const c of bodies.values()) if (c > 1) dupes += c;
 
-      const sampleNote = productCount >= 250 ? ' (first 250 products checked)' : '';
-      if (thin) add(pct(thin, n) >= 30 ? 'hi' : 'md', 'Listings', `${thin} of ${productCount} products ${thin === 1 ? 'has a thin description' : 'have thin descriptions'} (under 40 words)${sampleNote}.`);
+      if (thin) add(pct(thin, n) >= 60 ? 'hi' : 'md', 'Listings', `${thin} of ${productCount} products have under 40 words in their main description. Thin pages convert and rank worse.`);
       else passed.push('Product descriptions have enough detail');
-      if (dupes) add('md', 'Listings', `${np(dupes, 'product shares', 'products share')} a copied description with another product.`);
+      if (dupes) add('md', 'Listings', `${dupes} of ${productCount} products reuse the same description as another product.`);
       if (noImg) add('hi', 'Listings', `${np(noImg, 'product has', 'products have')} no images at all.`);
-      if (fewImg) add(pct(fewImg, n) >= 30 ? 'md' : 'lo', 'Listings', `${np(fewImg, 'product has', 'products have')} fewer than 3 images.`);
+      if (fewImg) add(pct(fewImg, n) >= 30 ? 'md' : 'lo', 'Listings', `${fewImg} of ${productCount} products have fewer than 3 images.`);
       if (!noImg && !fewImg) passed.push('Every product has 3+ images');
       if (imgs && pct(noAlt, imgs) >= 30) add('lo', 'SEO', `${pct(noAlt, imgs)}% of product images have no alt text, which hurts Google Images and accessibility.`);
       if (longTitle) add('lo', 'Listings', `${np(longTitle, 'product title is', 'product titles are')} over 80 characters.`);

@@ -782,6 +782,30 @@ footer a:hover{color:#fff}
 .viz-shield .sh-sheen{transform:skewX(-20deg);animation:shsheen 3.4s ease-in-out infinite}
 @keyframes shsheen{0%,36%{transform:skewX(-20deg) translateX(0)}62%,100%{transform:skewX(-20deg) translateX(120px)}}
 @media (prefers-reduced-motion:reduce){.svc-grid .svc .viz.viz-shield,.viz-shield .sh-check,.viz-shield .sh-sheen{animation:none}.viz-shield .sh-check{stroke-dashoffset:0}}
+
+/* Disputes icon: radar -> money back -> lock, 2.5s each */
+.svc-grid .svc .viz.viz-cycle{animation:none;filter:drop-shadow(0 0 16px rgba(255,180,58,.55)) drop-shadow(0 10px 24px rgba(224,123,0,.4));overflow:visible}
+.viz-cycle .cy{transform-box:view-box;transform-origin:32px 33px}
+.viz-cycle .cy1{animation:cy1 7.5s ease-in-out infinite}
+.viz-cycle .cy2{opacity:0;animation:cy2 7.5s ease-in-out infinite}
+.viz-cycle .cy3{opacity:0;animation:cy3 7.5s ease-in-out infinite}
+@keyframes cy1{0%,30%{opacity:1;transform:scale(1)}34%,96%{opacity:0;transform:scale(.8)}100%{opacity:1;transform:scale(1)}}
+@keyframes cy2{0%,30%{opacity:0;transform:scale(.8)}34%,63%{opacity:1;transform:scale(1)}67%,100%{opacity:0;transform:scale(.8)}}
+@keyframes cy3{0%,63%{opacity:0;transform:scale(.8)}67%,96%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.8)}}
+.viz-cycle .cy-r{transform-box:view-box;transform-origin:32px 33px;animation:cyring 2.4s ease-out infinite}
+.viz-cycle .cy-r2{animation-delay:.8s}.viz-cycle .cy-r3{animation-delay:1.6s}
+@keyframes cyring{from{transform:scale(.7);opacity:.9}to{transform:scale(1.7);opacity:0}}
+.viz-cycle .cy-chk{stroke-dasharray:42;animation:cychk 7.5s ease-in-out infinite}
+@keyframes cychk{0%,2%{stroke-dashoffset:42}14%,92%{stroke-dashoffset:0}96%,100%{stroke-dashoffset:42}}
+.viz-cycle .cy-orbit{transform-box:view-box;transform-origin:32px 33px;animation:cyspin 4s linear infinite}
+@keyframes cyspin{to{transform:rotate(360deg)}}
+.viz-cycle .cy-usd{transform-box:fill-box;transform-origin:center;animation:cyusd 7.5s ease-in-out infinite}
+@keyframes cyusd{0%,34%{transform:scale(.4);opacity:0}43%,100%{transform:scale(1);opacity:1}}
+.viz-cycle .cy-shk{animation:cyshk 7.5s cubic-bezier(.3,1.6,.5,1) infinite}
+@keyframes cyshk{0%,68%{transform:translateY(-6px)}75%,100%{transform:translateY(0)}}
+.viz-cycle .cy-kh{animation:cykh 7.5s ease-in-out infinite}
+@keyframes cykh{0%,74%{opacity:0}80%,100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.viz-cycle .cy,.viz-cycle .cy-r,.viz-cycle .cy-chk,.viz-cycle .cy-orbit{animation:none}.viz-cycle .cy2,.viz-cycle .cy3{display:none}.viz-cycle .cy-chk{stroke-dashoffset:0}}
 </style>
 </head>
 <body>
@@ -868,7 +892,7 @@ footer a:hover{color:#fff}
 <ul><li>Where-is-my-order</li><li>Returns and exchanges</li><li>Refunds logged</li><li>Comment moderation</li></ul>
 </article>
 <article class="svc rv tilt"><span class="glare"></span>
-<span class="ring" aria-hidden="true"></span><div class="svc-top"><div class="svc-title"><h3>Disputes and chargebacks</h3><span class="tag">PayPal · Stripe · Klarna · Shopify</span></div><svg class="viz viz-shield" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="shGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE29A"/><stop offset=".55" stop-color="#FFB43A"/><stop offset="1" stop-color="#E07B00"/></linearGradient><clipPath id="shClip"><path d="M32 3.5l24 8.6V29.5c0 16.2-10.1 26.8-24 32.5C18.1 56.3 8 45.7 8 29.5V12.1z"/></clipPath></defs><path d="M32 3.5l24 8.6V29.5c0 16.2-10.1 26.8-24 32.5C18.1 56.3 8 45.7 8 29.5V12.1z" fill="url(#shGrad)"/><path d="M32 10.5l17.5 6.3v12.7c0 11.9-7.3 19.9-17.5 24.6-10.2-4.7-17.5-12.7-17.5-24.6V16.8z" fill="#2A1A02" opacity=".18"/><path d="M32 3.5l24 8.6V29.5c0 16.2-10.1 26.8-24 32.5C18.1 56.3 8 45.7 8 29.5V12.1z" fill="none" stroke="#FFF1C8" stroke-width="1.6" stroke-linejoin="round" opacity=".7"/><g clip-path="url(#shClip)"><rect class="sh-sheen" x="-34" y="-4" width="14" height="72" fill="#fff" opacity=".5"/></g><path class="sh-check" d="M21 32l7.8 7.8L43.5 24.6" fill="none" stroke="#1A1205" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<span class="ring" aria-hidden="true"></span><div class="svc-top"><div class="svc-title"><h3>Disputes and chargebacks</h3><span class="tag">PayPal · Stripe · Klarna · Shopify</span></div><svg class="viz viz-shield viz-cycle" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cyG1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE29A"/><stop offset="1" stop-color="#E88A00"/></linearGradient><linearGradient id="cyG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE29A"/><stop offset="1" stop-color="#F59E0B"/></linearGradient><linearGradient id="cyG3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE29A"/><stop offset="1" stop-color="#E07B00"/></linearGradient></defs><g class="cy cy1"><circle class="cy-r" cx="32" cy="33" r="22" fill="none" stroke="#FFB43A" stroke-width="1.6"/><circle class="cy-r cy-r2" cx="32" cy="33" r="22" fill="none" stroke="#FFB43A" stroke-width="1.6"/><circle class="cy-r cy-r3" cx="32" cy="33" r="22" fill="none" stroke="#FFB43A" stroke-width="1.6"/><path d="M32 8l20 7.2V29c0 13.8-8.5 22.7-20 27.6C20.5 51.7 12 42.8 12 29V15.2z" fill="url(#cyG1)"/><path class="cy-chk" d="M23 32l6.5 6.5L42 26" fill="none" stroke="#1A1205" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></g><g class="cy cy2"><g class="cy-orbit"><path d="M32 2.5a30.5 30.5 0 1 1-21.6 8.9" fill="none" stroke="#3CD58A" stroke-width="3" stroke-linecap="round"/><path d="M6 5.5l4.6 6.2 6.9-3.6" fill="none" stroke="#3CD58A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M32 10l18 6.5v12.7c0 12.3-7.6 20.3-18 24.8-10.4-4.5-18-12.5-18-24.8V16.5z" fill="url(#cyG2)"/><text class="cy-usd" x="32" y="40" text-anchor="middle" font-family="Bricolage Grotesque,Arial,sans-serif" font-weight="800" font-size="22" fill="#1A1205">$</text></g><g class="cy cy3"><path d="M32 3.5l24 8.6V29.5c0 16.2-10.1 26.8-24 32.5C18.1 56.3 8 45.7 8 29.5V12.1z" fill="url(#cyG3)"/><path class="cy-shk" d="M25 30v-5a7 7 0 0 1 14 0v5" fill="none" stroke="#1A1205" stroke-width="4" stroke-linecap="round"/><rect x="21" y="29" width="22" height="17" rx="4" fill="#1A1205"/><g class="cy-kh"><circle cx="32" cy="36" r="2.6" fill="#FFD27A"/><rect x="31" y="37" width="2" height="5" rx="1" fill="#FFD27A"/></g></g></svg></div>
 <p>We gather tracking, order and conversation evidence and submit strong responses on time, so less of your revenue gets clawed back.</p>
 <ul><li>Evidence packs</li><li>Deadline tracking</li><li>Item not received</li><li>Not as described</li></ul>
 </article>

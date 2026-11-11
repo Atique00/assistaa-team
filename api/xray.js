@@ -30,6 +30,17 @@ async function get(url, ms = 7000) {
   } finally { clearTimeout(t); }
 }
 
+async function getProducts(origin) {
+  const tries = [`${origin}/products.json?limit=250`, `${origin}/collections/all/products.json?limit=250`, `${origin}/products.json`];
+  let last = null;
+  for (const u of tries) {
+    const r = await get(u);
+    last = r;
+    const j = r.ok ? json(r.text) : null;
+    if (j && Array.isArray(j.products)) return r;
+  }
+  return last;
+}
 function json(text) { try { return JSON.parse(text); } catch { return null; } }
 function strip(html) {
   return String(html || '')
@@ -74,7 +85,7 @@ async function scan(domain) {
   const shopify = /cdn\.shopify\.com|Shopify\.theme|shopify-section|myshopify\.com/i.test(html) || !!home.headers.get('x-shopid') || /shopify/i.test(home.headers.get('powered-by') || '');
 
   const [prodRes, refund, shipping, privacy, terms, contact] = await Promise.all([
-    shopify ? get(`${origin}/products.json?limit=250`) : Promise.resolve(null),
+    shopify ? getProducts(origin) : Promise.resolve(null),
     get(`${origin}/policies/refund-policy`),
     get(`${origin}/policies/shipping-policy`),
     get(`${origin}/policies/privacy-policy`),
@@ -95,8 +106,14 @@ async function scan(domain) {
   if (!privacy.ok) add('md', 'Policies', 'No privacy policy page found.'); else passed.push('Privacy policy');
   if (!terms.ok) add('lo', 'Policies', 'No terms of service page found.'); else passed.push('Terms of service');
 
+  // Apps like reviews and size charts often load only on product pages, so check one too.
+  let appHtml = html;
+  const firstHandle = (html.match(/href=["'](?:https?:\/\/[^"']+)?\/(?:collections\/[^\/"']+\/)?products\/([a-z0-9][a-z0-9\-_%.]*)/i) || [])[1];
+  let productPage = null;
+  if (firstHandle) { productPage = await get(`${origin}/products/${firstHandle}`); if (productPage.ok) appHtml += productPage.text; }
+
   // ---- Support ----
-  if (!APPS.chat.test(html)) add('md', 'Support', 'No live chat or help desk widget found on the homepage.');
+  if (!APPS.chat.test(appHtml)) add('md', 'Support', 'No live chat or help desk widget found.');
   else passed.push('Live chat or help desk widget');
   if (!contact.ok) add('md', 'Support', 'No contact page at /pages/contact.');
   else {
@@ -106,9 +123,9 @@ async function scan(domain) {
   }
 
   // ---- Trust and marketing ----
-  if (!APPS.reviews.test(html)) add('md', 'Trust', 'No product reviews app detected on the homepage.');
+  if (!APPS.reviews.test(appHtml)) add('md', 'Trust', 'No product reviews found on the homepage or a product page.');
   else passed.push('Product reviews app');
-  if (!APPS.email.test(html)) add('lo', 'Marketing', 'No email signup or email marketing tool detected.');
+  if (!APPS.email.test(appHtml)) add('lo', 'Marketing', 'No email signup or email marketing tool detected.');
   else passed.push('Email signup');
 
   // ---- SEO basics ----
@@ -175,7 +192,7 @@ async function scan(domain) {
       if (caps) add('lo', 'Listings', `${np(caps, 'product title is', 'product titles are')} written in ALL CAPS.`);
       if (noType && pct(noType, n) >= 20) add('lo', 'Listings', `${np(noType, 'product has', 'products have')} no product type, which makes collections and filters harder.`);
       if (soldOut && pct(soldOut, n) >= 15) add('md', 'Listings', `${np(soldOut, 'product', 'products')} (${pct(soldOut, n)}%) ${soldOut === 1 ? 'is' : 'are'} fully sold out but still listed.`);
-      if (sizeProducts && noSize && !APPS.sizing.test(html)) {
+      if (sizeProducts && noSize && !APPS.sizing.test(appHtml)) {
         add(pct(noSize, sizeProducts) >= 30 ? 'hi' : 'md', 'Listings', `${noSize} of ${sizeProducts} products with sizes ${noSize === 1 ? 'has' : 'have'} no size chart in the description. Wrong sizes are a top cause of returns.`);
       } else if (sizeProducts) passed.push('Size info on sized products');
     }
@@ -187,7 +204,7 @@ async function scan(domain) {
   const order = { hi: 0, md: 1, lo: 2 };
   issues.sort((a, b) => order[a.sev] - order[b.sev]);
   const score = Math.max(5, 100 - issues.reduce((s, i) => s + weight[i.sev], 0));
-  return { domain, origin, shopify, score, productsChecked: productCount, issues, passed, ms: Date.now() - t0, scannedAt: new Date().toISOString() };
+  return { domain, origin, shopify, score, productsChecked: productCount, diag: { productsStatus: prodRes ? prodRes.status : null, productPage: productPage ? productPage.status : null }, issues, passed, ms: Date.now() - t0, scannedAt: new Date().toISOString() };
 }
 
 // ---------- Supabase (log + rate limit) ----------

@@ -23,6 +23,8 @@ open('next/js/config.js', 'w').write("/* TEST copy (Supabase). Built by tools/bu
 
 h = open('index.html').read()
 h = h.replace('<title>Assistaa Team</title>', '<title>Assistaa Team · TEST</title>')
+import time
+h = re.sub(r"\?v=(\d+)", lambda m: f"?v={m.group(1)}-t{int(time.time())}", h)  # fresh files on every test build
 h = h.replace('</body>', '  <div style="position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translateX(-50%);z-index:9999;background:#ffb547;color:#1a1200;font:700 11px/1 Inter,sans-serif;letter-spacing:.08em;padding:5px 10px;border-radius:99px;pointer-events:none">TEST · NEW SYSTEM</div>\n</body>')
 open('next/index.html', 'w').write(h)
 

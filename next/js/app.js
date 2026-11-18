@@ -317,13 +317,18 @@
     nav([
       { id: 'home', icon: 'home', label: 'Home' },
       { id: 'tasks', icon: D.support ? 'headset' : 'tasks', label: D.support ? 'Tickets' : 'Tasks' },
+      ...(!D.support && store.get('csvOk.' + S.name, false) ? [{ id: 'list', icon: 'spark', label: 'Listings' }] : []),
       { id: 'inbox', icon: 'inbox', label: 'Inbox', badge: unread || '' },
       { id: 'me', icon: 'user', label: 'Me' }
     ]);
+    if (!D.support && !csvChecked) {
+      csvChecked = true;
+      csvApi({ action: 'csvAccess' }).then((ok) => { const was = store.get('csvOk.' + S.name, false); store.set('csvOk.' + S.name, !!ok); if (was !== !!ok) render(true); }).catch(() => { csvChecked = false; });
+    }
     $('#fabSlot').innerHTML = tab === 'me' ? '' : `<button class="fab" id="fab" aria-label="Message ${esc(C.owner)}">${I('msg')}</button>`;
     if ($('#fab')) $('#fab').onclick = sheetMessage;
     const scroll = window.scrollY;
-    const html = tab === 'tasks' ? pageTasks() : tab === 'inbox' ? pageInbox() : tab === 'me' ? pageMe() : pageHome();
+    const html = tab === 'tasks' ? pageTasks() : tab === 'list' && store.get('csvOk.' + S.name, false) ? `${header()}<div class="stagger">${listingsPage()}</div>` : tab === 'inbox' ? pageInbox() : tab === 'me' ? pageMe() : pageHome();
     app.innerHTML = `<div class="${soft ? '' : 'view'}">${html}</div>`;
     if (soft) window.scrollTo(0, scroll);
     bind();
@@ -372,7 +377,7 @@
   function pageTasks() {
     const items = D.items || [];
     const title = D.support ? 'Tickets waiting over 20 h' : 'My tasks';
-    return `${header()}<div class="stagger">${D.support ? '' : `<button class="btn" id="lstBtn" style="margin-bottom:14px">${I('spark')} Listing tool</button><button class="btn ghost" id="csvBtn" style="margin-bottom:14px"${store.get('csvOk.' + S.name, false) ? '' : ' hidden'}>${I('tasks')} Shopify CSV generator</button>`}<div class="card"><h3>${I(D.support ? 'headset' : 'tasks')} ${title}<span class="cnt">${items.length}</span></h3>
+    return `${header()}<div class="stagger">${D.support ? '' : `<button class="btn" id="lstBtn" style="margin-bottom:14px">${I('spark')} Listing tool</button>`}<div class="card"><h3>${I(D.support ? 'headset' : 'tasks')} ${title}<span class="cnt">${items.length}</span></h3>
       ${items.map((it) => `<div class="item"><span class="dot ${it.bad ? 'bad' : it.status === 'In progress' ? 'amber' : ''}"></span><div class="body">
         <div class="t">${esc(it.title)}</div><div class="s">${esc(it.sub)}</div>
         ${!D.support && it.row ? `<div class="acts">${it.status !== 'In progress' ? `<button class="btn sm ghost" data-task="${it.row}" data-st="In progress" data-title="${esc(it.title)}">${I('play')} Start</button>` : '<span class="pill amber">In progress</span>'}<button class="btn sm green" data-task="${it.row}" data-st="Done" data-title="${esc(it.title)}">${I('check')} Done</button></div>` : ''}
@@ -454,11 +459,7 @@
     const pb = $('#pinBtn'); if (pb) pb.onclick = sheetPin;
     const sb = $('#sndBtn'); if (sb) sb.onclick = sheetSound;
     const lb = $('#lstBtn'); if (lb) lb.onclick = sheetListing;
-    const cb = $('#csvBtn');
-    if (cb) {
-      cb.onclick = sheetCsv;
-      csvApi({ action: 'csvAccess' }).then((ok) => { store.set('csvOk.' + S.name, !!ok); const b = $('#csvBtn'); if (b) b.hidden = !ok; }).catch(() => {});
-    }
+    bindListings();
     if (D && D.stores) store.set('lstStores', D.stores);
     const lo = $('#logout'); if (lo) lo.onclick = () => { logout(); toast('Signed out', '', 'ok'); };
   }
@@ -649,6 +650,19 @@
       }).catch((e) => { $('#lerr2', sh).textContent = e.message; });
     });
   }
+  /* ---------- Listings tab (Atiq + people in store.csv_tool_people) ---------- */
+  let csvChecked = false;
+  function listingsPage() {
+    return `<div class="card"><h3>${I('tasks')} Shopify CSV generator</h3><p class="small muted" style="margin:0 0 12px">Paste competitor product links, pick the store, and get one Shopify import file with titles, descriptions, category, tags, SEO, variants and prices in the store's language and currency. Products import as Draft.</p>
+        <button class="btn" id="csvOpen">${I('spark')} Open CSV generator</button></div>
+      <div class="card"><h3>${I('spark')} Single listing</h3><p class="small muted" style="margin:0 0 12px">One supplier link or the client's product details, written as a ready-to-paste listing.</p>
+        <button class="btn ghost" id="lstOpen">${I('spark')} Open listing tool</button></div>`;
+  }
+  function bindListings() {
+    const a = $('#csvOpen'); if (a) a.onclick = sheetCsv;
+    const b = $('#lstOpen'); if (b) b.onclick = sheetListing;
+  }
+
   /* ---------- Shopify CSV generator (Atiq + Sabuj): competitor links -> one Shopify import CSV ---------- */
   const csvWho = () => (S.team === 'boss' ? C.owner : S.name);
   async function csvApi(body) {
@@ -837,7 +851,7 @@
     $('#fabSlot').innerHTML = `<button class="fab" id="fab" aria-label="Announcement">${I('megaphone')}</button>`;
     $('#fab').onclick = () => sheetSend('all');
     const pendingReplies = Object.values(B).reduce((a, x) => a + (x.inbox || []).filter((m) => m.reply).length, 0);
-    nav([{ id: 'team', icon: 'team', label: 'Team' }, { id: 'btasks', icon: 'tasks', label: 'Tasks' }, { id: 'bmsg', icon: 'inbox', label: 'Messages' }, { id: 'breports', icon: 'history', label: 'Reports' }, { id: 'badmin', icon: 'crown', label: 'Admin' }]);
+    nav([{ id: 'team', icon: 'team', label: 'Team' }, { id: 'btasks', icon: 'tasks', label: 'Tasks' }, { id: 'blist', icon: 'spark', label: 'Listings' }, { id: 'bmsg', icon: 'inbox', label: 'Messages' }, { id: 'breports', icon: 'history', label: 'Reports' }, { id: 'badmin', icon: 'crown', label: 'Admin' }]);
     $$('#nav button').forEach((b) => b.onclick = () => { bossTab = b.dataset.tab; tab = bossTab; renderBoss(); });
     $$('#nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === bossTab));
     requestAnimationFrame(() => { const on = $('#nav button.on'), hl = $('#nav .hl'); if (on) { hl.style.left = on.offsetLeft + 'px'; hl.style.width = on.offsetWidth + 'px'; } });
@@ -847,7 +861,8 @@
     const head = `<div class="top"><label style="cursor:pointer" aria-label="Change photo">${avatar(C.owner, oPhoto, 52)}<input type="file" accept="image/*" id="bPhoto" hidden></label><div><div class="sub">${greet()},</div><h1>${esc(C.owner)} <span style="font-size:18px">👑</span></h1></div><div class="sp"></div><button class="iconbtn" id="refresh">${I('refresh')}</button><button class="iconbtn" id="bellB" style="margin-left:8px" aria-label="Notifications">${I('bell')}</button><button class="iconbtn" id="moreB" style="margin-left:8px" aria-label="Settings">${I('user')}</button></div>
       <div class="tabs">${teams.map((k) => `<button data-bt="${k}" class="${k === bossTeam ? 'on' : ''}">${esc(C.backends[k].label)}</button>`).join('')}</div>`;
     let body = '';
-    if (!d && bossTab !== 'badmin') body = `<div class="sk" style="height:120px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`;
+    if (bossTab === 'blist') body = listingsPage();
+    else if (!d && bossTab !== 'badmin') body = `<div class="sk" style="height:120px;margin-bottom:12px"></div><div class="sk" style="height:300px"></div>`;
     else if (bossTab === 'btasks') body = bossTasks(d);
     else if (bossTab === 'bmsg') body = bossMsgs(d);
     else if (bossTab === 'breports') body = bossReports(d);
@@ -878,7 +893,7 @@
     $$('[data-edit]').forEach((b) => b.onclick = () => sheetTask(d.tasks.find((t) => String(t.row) === b.dataset.edit)));
     if (bossTab === 'badmin') bindAdmin();
     const lbb = $('#lstBtnB'); if (lbb) lbb.onclick = sheetListing;
-    const cbb = $('#csvBtnB'); if (cbb) cbb.onclick = sheetCsv;
+    bindListings();
   }
   const stLabel = { off: 'Not started', working: 'Working', break: 'On break', done: 'Done' };
   function bossTeamView(d) {
@@ -897,7 +912,6 @@
     const done = d.tasks.filter((t) => t.status === 'Done');
     const row = (t) => `<div class="item"><span class="dot ${t.overdue ? 'bad' : t.status === 'Done' ? 'ok' : t.status === 'In progress' ? 'amber' : ''}"></span><div class="body"><div class="t">${esc(t.task)}</div><div class="s">${esc([t.store, t.owner || 'No owner', t.status, t.deadline ? 'due ' + t.deadline : ''].filter(Boolean).join(' · '))}</div></div><button class="iconbtn" data-edit="${t.row}" aria-label="Edit">${I('chev')}</button></div>`;
     return `<div class="row" style="margin-bottom:14px"><button class="btn" data-newtask="">${I('plus')} New task</button><button class="btn ghost" id="lstBtnB">${I('spark')} Listing tool</button></div>
-      <button class="btn ghost" id="csvBtnB" style="margin-bottom:14px">${I('tasks')} Shopify CSV generator</button>
       <div class="card"><h3>${I('tasks')} Open <span class="cnt">${open.length}</span></h3>${open.map(row).join('') || emptyBox('check', 'No open tasks.')}</div>
       ${done.length ? `<div class="card"><h3>${I('check')} Done recently <span class="cnt">${done.length}</span></h3>${done.map(row).join('')}</div>` : ''}`;
   }
@@ -1206,12 +1220,12 @@
     checkVersion();
     const h = location.hash.slice(1);
     if (S.team === 'boss') {
-      bossTab = ['team', 'btasks', 'bmsg', 'breports', 'badmin'].includes(h) ? h : 'team';
+      bossTab = ['team', 'btasks', 'blist', 'bmsg', 'breports', 'badmin'].includes(h) ? h : 'team';
       Object.keys(C.backends).forEach((k) => { if (!B[k]) { const c = store.get('bossCache.' + k, null); if (c) B[k] = c; } });
       renderBoss(); if (stale(20000)) loadBoss(true);
       timer = setInterval(() => { if (!document.hidden) { loadBoss(true); } }, 60000);
     } else {
-      tab = ['home', 'tasks', 'inbox', 'me'].includes(h) ? h : 'home';
+      tab = ['home', 'tasks', 'list', 'inbox', 'me'].includes(h) ? h : 'home';
       D = store.get('cache.' + S.team + '.' + S.name, null);
       if (D) render(); else app.innerHTML = `<div class="view"><div class="sk" style="height:60px;margin-bottom:16px"></div><div class="sk" style="height:200px;margin-bottom:14px"></div><div class="sk" style="height:180px"></div></div>`;
       if (!D || stale(20000)) loadMe(!!D);
@@ -1242,8 +1256,8 @@
   window.addEventListener('hashchange', () => {
     const h = location.hash.slice(1);
     if (!S) return;
-    if (S.team === 'boss' && ['team', 'btasks', 'bmsg', 'breports', 'badmin'].includes(h)) { bossTab = h; renderBoss(); }
-    else if (S.team !== 'boss' && ['home', 'tasks', 'inbox', 'me'].includes(h) && h !== tab) { tab = h; render(); }
+    if (S.team === 'boss' && ['team', 'btasks', 'blist', 'bmsg', 'breports', 'badmin'].includes(h)) { bossTab = h; renderBoss(); }
+    else if (S.team !== 'boss' && ['home', 'tasks', 'list', 'inbox', 'me'].includes(h) && h !== tab) { tab = h; render(); }
   });
 
   let seen = false; try { seen = sessionStorage.getItem(PFX + 'splash') === '1'; sessionStorage.setItem(PFX + 'splash', '1'); } catch (e) {}

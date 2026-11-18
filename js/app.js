@@ -36,6 +36,7 @@
     history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>',
     spark: '<path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/>',
     refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
+    download: '<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>',
     megaphone: '<path d="M3 11v2a2 2 0 0 0 2 2h2l5 4V5L7 9H5a2 2 0 0 0-2 2z"/><path d="M16 8a5 5 0 0 1 0 8"/>',
     phone: '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
     lock: '<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
@@ -371,7 +372,7 @@
   function pageTasks() {
     const items = D.items || [];
     const title = D.support ? 'Tickets waiting over 20 h' : 'My tasks';
-    return `${header()}<div class="stagger">${D.support ? '' : `<button class="btn" id="lstBtn" style="margin-bottom:14px">${I('spark')} Listing tool</button>`}<div class="card"><h3>${I(D.support ? 'headset' : 'tasks')} ${title}<span class="cnt">${items.length}</span></h3>
+    return `${header()}<div class="stagger">${D.support ? '' : `<button class="btn" id="lstBtn" style="margin-bottom:14px">${I('spark')} Listing tool</button><button class="btn ghost" id="csvBtn" style="margin-bottom:14px"${store.get('csvOk.' + S.name, false) ? '' : ' hidden'}>${I('tasks')} Shopify CSV generator</button>`}<div class="card"><h3>${I(D.support ? 'headset' : 'tasks')} ${title}<span class="cnt">${items.length}</span></h3>
       ${items.map((it) => `<div class="item"><span class="dot ${it.bad ? 'bad' : it.status === 'In progress' ? 'amber' : ''}"></span><div class="body">
         <div class="t">${esc(it.title)}</div><div class="s">${esc(it.sub)}</div>
         ${!D.support && it.row ? `<div class="acts">${it.status !== 'In progress' ? `<button class="btn sm ghost" data-task="${it.row}" data-st="In progress" data-title="${esc(it.title)}">${I('play')} Start</button>` : '<span class="pill amber">In progress</span>'}<button class="btn sm green" data-task="${it.row}" data-st="Done" data-title="${esc(it.title)}">${I('check')} Done</button></div>` : ''}
@@ -453,6 +454,11 @@
     const pb = $('#pinBtn'); if (pb) pb.onclick = sheetPin;
     const sb = $('#sndBtn'); if (sb) sb.onclick = sheetSound;
     const lb = $('#lstBtn'); if (lb) lb.onclick = sheetListing;
+    const cb = $('#csvBtn');
+    if (cb) {
+      cb.onclick = sheetCsv;
+      csvApi({ action: 'csvAccess' }).then((ok) => { store.set('csvOk.' + S.name, !!ok); const b = $('#csvBtn'); if (b) b.hidden = !ok; }).catch(() => {});
+    }
     if (D && D.stores) store.set('lstStores', D.stores);
     const lo = $('#logout'); if (lo) lo.onclick = () => { logout(); toast('Signed out', '', 'ok'); };
   }
@@ -643,6 +649,135 @@
       }).catch((e) => { $('#lerr2', sh).textContent = e.message; });
     });
   }
+  /* ---------- Shopify CSV generator (Atiq + Sabuj): competitor links -> one Shopify import CSV ---------- */
+  const csvWho = () => (S.team === 'boss' ? C.owner : S.name);
+  async function csvApi(body) {
+    if (!C.csvUrl) throw new Error('The CSV generator is not connected yet.');
+    const r = await fetch(C.csvUrl, { method: 'POST', body: JSON.stringify(Object.assign({ name: csvWho(), pin: S.pin }, body)) });
+    if (!r.ok) throw new Error('Network problem. Try again.');
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'Something went wrong.');
+    return j.data;
+  }
+  function saveCsv(filename, text) {
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 3000);
+  }
+  const csvDot = (st) => st === 'done' ? 'ok' : st === 'failed' ? 'bad' : st === 'working' ? 'amber' : '';
+  function csvItems(items) {
+    return items.map((x) => `<div class="item" data-pos="${x.pos}"><span class="dot ${csvDot(x.status)}"></span><div class="body"><div class="t" style="word-break:break-word">${esc(x.title || x.url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 70))}</div>
+      <div class="s">${x.status === 'done' ? (x.flags ? `${x.flags} thing${x.flags === 1 ? '' : 's'} to check` : 'Ready') : x.status === 'failed' ? esc(x.error || 'Failed') : x.status === 'working' ? 'Reading and writing…' : 'Waiting'}</div></div></div>`).join('');
+  }
+  function csvReport(r) {
+    if (!r) return '';
+    const ok = r.items.filter((x) => x.ok), bad = r.items.filter((x) => !x.ok);
+    return `<div class="kpis" style="margin-top:14px"><div class="kpi"><b>${r.products}</b><span>Products</span></div><div class="kpi"><b>${r.rows}</b><span>CSV rows</span></div><div class="kpi"><b>${bad.length}</b><span>Failed links</span></div></div>
+      ${Object.keys(r.fx || {}).length ? `<div class="small muted" style="margin:0 2px 10px">Exchange rates: ${Object.entries(r.fx).map(([k, v]) => `${esc(k.replace('>', ' → '))} ${esc(v.rate)} (${esc(v.source)}, ${esc(v.date)})`).join(' · ')}</div>` : ''}
+      <div class="warnbox" style="margin-bottom:12px">${I('warn')}<div><b>Before importing</b><br>${(r.always || []).map(esc).join('<br>')}</div></div>
+      <div class="card" style="padding:12px 14px"><div class="label" style="margin:0 0 4px">Products</div>${ok.map((x) => `<div class="item"><span class="dot ${x.flags.length ? 'amber' : 'ok'}"></span><div class="body"><div class="t">${esc(x.title)}</div>
+        <div class="s">${esc([x.category || 'Category needs review', `${x.variants} variant${x.variants === 1 ? '' : 's'}`, `${x.images} image${x.images === 1 ? '' : 's'}`].join(' · '))}</div>
+        <div class="s">${esc(x.price_note)}</div>
+        ${x.flags.length ? `<div class="s" style="color:var(--amber)">${x.flags.map(esc).join('<br>')}</div>` : ''}
+        ${x.missing.length ? `<div class="s">Not in the source: ${x.missing.map(esc).join(', ')}</div>` : ''}
+        <div class="s"><a href="${esc(x.url)}" target="_blank" rel="noopener" style="color:var(--blue-2)">Competitor page</a> · handle ${esc(x.handle)}</div></div></div>`).join('') || '<div class="muted small">No products.</div>'}</div>
+      ${bad.length ? `<div class="card" style="padding:12px 14px"><div class="label" style="margin:0 0 4px">Not included</div>${bad.map((x) => `<div class="item"><span class="dot bad"></span><div class="body"><div class="t" style="word-break:break-all">${esc(x.url)}</div><div class="s">${esc(x.error)}</div></div></div>`).join('')}</div>` : ''}`;
+  }
+  function sheetCsv() {
+    openSheet(`<h2>Shopify CSV generator</h2><p class="lead">Paste competitor product links, pick the store, and get one Shopify import file. Products import as Draft.</p>
+      <div id="cv-form">
+        <label class="fl">Competitor links (one per line)</label><textarea class="field" id="cv-links" rows="6" placeholder="https://competitor.com/products/linen-midi-dress" style="font-family:ui-monospace,monospace;font-size:13px"></textarea>
+        <div class="small muted" id="cv-count" style="text-align:right;margin-top:4px">0 links</div>
+        <label class="fl">Store</label><select class="field" id="cv-store"><option value="">Loading stores…</option></select>
+        <div class="kpis" style="margin-top:10px"><div class="kpi"><b id="cv-v" style="font-size:15px">—</b><span>Vendor</span></div><div class="kpi"><b id="cv-l" style="font-size:15px">—</b><span>Language</span></div><div class="kpi"><b id="cv-c" style="font-size:15px">—</b><span>Currency</span></div></div>
+        <label class="fl">Instructions (optional)</label><input class="field" id="cv-notes" maxlength="1000" placeholder="e.g. skip sold-out sizes, softer tone">
+        <div class="err" id="cv-err"></div>
+        <button class="btn" id="cv-go">${I('spark')} Generate CSV</button>
+      </div>
+      <div id="cv-run"></div>
+      <div class="label" style="margin:18px 2px 6px">Recent batches</div><div id="cv-hist"><div class="sk" style="height:60px"></div></div>`, (sh) => {
+      let stores = [], max = 30;
+      const links = () => [...new Set($('#cv-links', sh).value.split(/\s+/).map((x) => x.trim()).filter(Boolean))];
+      $('#cv-links', sh).oninput = () => { const n = links().length; $('#cv-count', sh).textContent = `${n} link${n === 1 ? '' : 's'}${n > max ? ` · max ${max}` : ''}`; $('#cv-err', sh).textContent = ''; };
+      const pick = () => {
+        const st = stores.find((x) => x.name === $('#cv-store', sh).value);
+        $('#cv-v', sh).textContent = st ? st.name : '—'; $('#cv-l', sh).textContent = st ? st.language : '—'; $('#cv-c', sh).textContent = st ? st.currency : '—';
+        if (st) store.set('csvLastStore', st.name); $('#cv-err', sh).textContent = '';
+      };
+      $('#cv-store', sh).onchange = pick;
+      const hist = (list) => {
+        $('#cv-hist', sh).innerHTML = list.map((b) => `<button class="item" data-cvb="${b.id}" style="width:100%;text-align:left"><span class="dot ${b.status === 'done' ? 'ok' : 'amber'}"></span><div class="body"><div class="t">${esc(b.store)} · ${b.status === 'done' ? `${b.products} product${b.products === 1 ? '' : 's'}` : 'not finished'}</div><div class="s">${esc(b.time)} · ${b.links} link${b.links === 1 ? '' : 's'} · ${esc(b.who)}</div></div>${I('chev')}</button>`).join('') || emptyBox('history', 'No batches yet.');
+        $$('[data-cvb]', sh).forEach((el) => el.onclick = () => busy(el, async () => openBatch(await csvApi({ action: 'csvGet', id: Number(el.dataset.cvb), withCsv: true }))).catch((e) => toast('Could not open', e.message, 'bad')));
+      };
+      const load = () => csvApi({ action: 'csvList' }).then((d) => {
+        stores = d.stores || []; max = d.max || 30;
+        const last = store.get('csvLastStore', '');
+        $('#cv-store', sh).innerHTML = '<option value="">Choose a store</option>' + stores.map((x) => `<option value="${esc(x.name)}"${x.name === last ? ' selected' : ''}>${esc(x.name)} — ${esc(x.language)} / ${esc(x.currency)}</option>`).join('');
+        pick(); hist(d.batches || []);
+      }).catch((e) => { $('#cv-err', sh).textContent = e.message; $('#cv-hist', sh).innerHTML = ''; });
+      load();
+
+      function openBatch(b) {
+        $('#cv-form', sh).hidden = true;
+        const pending = b.items.filter((x) => x.status !== 'done').length;
+        $('#cv-run', sh).innerHTML = `<div class="card" style="padding:12px 14px;margin-top:6px"><div class="row" style="align-items:center;margin:0"><div><b>${esc(b.store)}</b> <span class="muted small">· ${esc(b.language)} / ${esc(b.currency)} · ${esc(b.time)}</span></div></div>
+          <div class="small muted" id="cv-prog" style="margin:6px 0 2px"></div><div id="cv-items">${csvItems(b.items)}</div></div>
+          <div id="cv-res"></div>
+          ${b.status === 'done' && b.csv ? `<button class="btn" id="cv-dl" style="margin-top:12px">${I('download')} Download CSV</button>` : ''}
+          ${pending ? `<button class="btn ${b.status === 'done' ? 'ghost' : ''}" id="cv-resume" style="margin-top:10px">${I('refresh')} ${b.items.some((x) => x.status === 'failed') ? 'Retry failed links' : 'Continue this batch'}</button>` : ''}
+          <button class="btn ghost" id="cv-new" style="margin-top:10px">${I('plus')} New batch</button>`;
+        if (b.status === 'done') $('#cv-res', sh).innerHTML = csvReport(b.report);
+        const dl = $('#cv-dl', sh); if (dl) dl.onclick = () => saveCsv(b.filename, b.csv);
+        const rs = $('#cv-resume', sh); if (rs) rs.onclick = () => run(b);
+        $('#cv-new', sh).onclick = () => { $('#cv-run', sh).innerHTML = ''; $('#cv-form', sh).hidden = false; load(); };
+      }
+
+      async function run(b) {
+        openBatch(Object.assign({}, b, { status: 'running', csv: null }));
+        ['#cv-resume', '#cv-new', '#cv-dl'].forEach((q) => { const el = $(q, sh); if (el) el.remove(); });
+        const items = b.items.map((x) => Object.assign({}, x));
+        const todo = items.filter((x) => x.status !== 'done');
+        const paint = () => {
+          const box = $('#cv-items', sh); if (!box) return;
+          box.innerHTML = csvItems(items);
+          const d = items.filter((x) => x.status === 'done' || x.status === 'failed').length;
+          $('#cv-prog', sh).textContent = `${d} of ${items.length} links checked · about 30–60 seconds per link, 3 at a time. Keep the app open.`;
+        };
+        paint();
+        let i = 0;
+        const worker = async () => {
+          while (i < todo.length) {
+            const it = todo[i++]; it.status = 'working'; paint();
+            try { const r = await csvApi({ action: 'csvItem', id: b.id, pos: it.pos }); Object.assign(it, r); }
+            catch (e) { it.status = 'failed'; it.error = e.message; }
+            paint();
+          }
+        };
+        await Promise.all([worker(), worker(), worker()]);
+        try {
+          const f = await csvApi({ action: 'csvFinish', id: b.id });
+          const full = await csvApi({ action: 'csvGet', id: b.id, withCsv: true });
+          if ($('#cv-run', sh)) { openBatch(full); }
+          saveCsv(f.filename, f.csv); playSound('Pop');
+          toast('CSV ready', `${f.report.products} products · ${f.report.rows} rows`, 'ok');
+        } catch (e) {
+          toast('No CSV yet', e.message, 'bad');
+          if ($('#cv-run', sh)) openBatch(await csvApi({ action: 'csvGet', id: b.id }).catch(() => b));
+        }
+      }
+
+      $('#cv-go', sh).onclick = () => {
+        const L = links(), st = $('#cv-store', sh).value;
+        const bad = L.find((x) => !/^https?:\/\/[^\s.]+\.[^\s]+/i.test(x));
+        const err = !L.length ? 'Paste at least one product link.' : bad ? 'Not a valid link: ' + bad.slice(0, 50) : L.length > max ? `Up to ${max} links per batch.` : !st ? 'Choose a store.' : '';
+        if (err) { $('#cv-err', sh).textContent = err; return; }
+        busy($('#cv-go', sh), async () => {
+          const b = await csvApi({ action: 'csvStart', store: st, links: L.join('\n'), notes: $('#cv-notes', sh).value.trim() });
+          $('#cv-links', sh).value = ''; run(b);
+        }).catch((e) => { $('#cv-err', sh).textContent = e.message; });
+      };
+    });
+  }
   function bossPhoto(file) {
     if (!file) return;
     const img = new Image();
@@ -743,6 +878,7 @@
     $$('[data-edit]').forEach((b) => b.onclick = () => sheetTask(d.tasks.find((t) => String(t.row) === b.dataset.edit)));
     if (bossTab === 'badmin') bindAdmin();
     const lbb = $('#lstBtnB'); if (lbb) lbb.onclick = sheetListing;
+    const cbb = $('#csvBtnB'); if (cbb) cbb.onclick = sheetCsv;
   }
   const stLabel = { off: 'Not started', working: 'Working', break: 'On break', done: 'Done' };
   function bossTeamView(d) {
@@ -761,6 +897,7 @@
     const done = d.tasks.filter((t) => t.status === 'Done');
     const row = (t) => `<div class="item"><span class="dot ${t.overdue ? 'bad' : t.status === 'Done' ? 'ok' : t.status === 'In progress' ? 'amber' : ''}"></span><div class="body"><div class="t">${esc(t.task)}</div><div class="s">${esc([t.store, t.owner || 'No owner', t.status, t.deadline ? 'due ' + t.deadline : ''].filter(Boolean).join(' · '))}</div></div><button class="iconbtn" data-edit="${t.row}" aria-label="Edit">${I('chev')}</button></div>`;
     return `<div class="row" style="margin-bottom:14px"><button class="btn" data-newtask="">${I('plus')} New task</button><button class="btn ghost" id="lstBtnB">${I('spark')} Listing tool</button></div>
+      <button class="btn ghost" id="csvBtnB" style="margin-bottom:14px">${I('tasks')} Shopify CSV generator</button>
       <div class="card"><h3>${I('tasks')} Open <span class="cnt">${open.length}</span></h3>${open.map(row).join('') || emptyBox('check', 'No open tasks.')}</div>
       ${done.length ? `<div class="card"><h3>${I('check')} Done recently <span class="cnt">${done.length}</span></h3>${done.map(row).join('')}</div>` : ''}`;
   }

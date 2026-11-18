@@ -6,6 +6,8 @@ self.ASSISTAA = {
   //   store   https://script.google.com/macros/s/AKfycbwMJQ65AJDtd5Mcm2o0tDrHQrrORhJ8Or2JZbgGp3YPE8-ulGO1udym8wdyft61ulI8/exec
   //   support https://script.google.com/macros/s/AKfycbw6sdvJeWbKmsVCFoCV6RrIRiRdJkG-k2eN4C-_fdIOeP2Nok1zk8ecHoPZjEJcesdT/exec
   issuesUrl: 'https://script.google.com/macros/s/AKfycbwMJQ65AJDtd5Mcm2o0tDrHQrrORhJ8Or2JZbgGp3YPE8-ulGO1udym8wdyft61ulI8/exec?view=issues',
+  // Shopify CSV generator (Atiq + Sabuj): Supabase function listing-csv
+  csvUrl: 'https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/listing-csv?forceFunctionRegion=ap-southeast-1',
   backends: {
     store: {
       label: 'Store team',

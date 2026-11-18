@@ -48,3 +48,13 @@ Put the two Apps Script URLs (kept as comments in `js/config.js`) back into `bac
 - Scheduled task "Peptonix ticket split" (trig_01VoUvubsnsANSg4zC9vNkUL): Sat–Thu 09:55, 12:55, 15:55 Dhaka (morning run: everyone not on leave). Unassigned open Commslayer tickets only, oldest first, by `current_split` scaled to 100%, only people who started today and are not on leave; Dipon only up to his fixed number; fills ticket requests first; logs to `ticket_assign_log`.
 - 10 Nov 19:52: proxy.gs installed in both Apps Scripts (support v8, store v11); old app addresses now answer from Supabase. Issue portal unchanged.
 - Not wired yet: the ৳50 "client not answered within 15 min" fine (`add_client_wait_fine`) inside the 3-hourly task.
+
+## 18 Nov 2026 — Shopify CSV generator (Atiq + Sabuj)
+Batch listing tool: competitor product links → one Shopify import CSV per batch, following the "Shopify Product Batch" playbook (MODE B).
+- Migration `0008_listing_csv.sql`: `shopify_categories` (Shopify Standard Product Taxonomy, 14,606 rows, loaded from github.com/Shopify/product-taxonomy `dist/en/categories.txt` via `pg_net`), `category_candidates(q)`, `listing_batches`, `listing_batch_items`; settings `store.csv_tool_people` (["Sabuj"]; Atiq always), `store.csv_stores` (12 stores: vendor, language, currency), `store.csv_batch_max` (30).
+- Edge function `listing-csv` (separate from team-api; same PINs, lockout and login log): `csvAccess`, `csvList`, `csvStart`, `csvItem` (one link per call, app runs 3 at a time), `csvFinish` (builds the CSV), `csvGet`.
+  - Shopify competitors: reads `/products/<handle>.json` (+ `.js` for sold-out, `/meta.json`); other sites: page text + JSON-LD, flagged for checking.
+  - Copy by Claude (`claude-sonnet-5-5`, needs secret `ANTHROPIC_API_KEY`): title "Name | Descriptive name", Caren HTML layout built in code, category chosen from taxonomy ids and validated, 8–15 tags, SEO, translated option names/values.
+  - Prices: competitor's own price when it is in the store currency; otherwise converted at the ECB rate (frankfurter.dev, fallback open.er-api.com) and rounded to x.99 (AUD: x4.99/x9.99), noted in the report.
+  - CSV: current Shopify product CSV columns, Type XXS, Status draft, SKUs `<STORE>-<batch>-<link>-<variant>`.
+- App: "Shopify CSV generator" button on the manager's Tasks tab and on Sabuj's Tasks page (`js/app.js` `sheetCsv`), `csvUrl` in `js/config.js`. First on the test copy /next/, then live after Atiq approves.

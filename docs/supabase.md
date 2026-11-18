@@ -58,3 +58,10 @@ Batch listing tool: competitor product links → one Shopify import CSV per batc
   - Prices: competitor's own price when it is in the store currency; otherwise converted at the ECB rate (frankfurter.dev, fallback open.er-api.com) and rounded to x.99 (AUD: x4.99/x9.99), noted in the report.
   - CSV: current Shopify product CSV columns, Type XXS, Status draft, SKUs `<STORE>-<batch>-<link>-<variant>`.
 - App: "Shopify CSV generator" button on the manager's Tasks tab and on Sabuj's Tasks page (`js/app.js` `sheetCsv`), `csvUrl` in `js/config.js`. First on the test copy /next/, then live after Atiq approves.
+
+## 19 Nov 2026 — tools.assistaa.com (Assistaa Tools)
+- Site: `tools-site/` (one HTML file), Vercel project **assistaa-tools** (team Assistaa), git-deployed from `main`, root dir `tools-site`. DNS: GoDaddy CNAME `tools` → `cname.vercel-dns.com`.
+- Logins: Supabase Auth email + password; only users in `tools_members` get in (owner = Atiq, edu.atique@gmail.com). Owner adds/removes people on the Team page.
+- Backend: edge function `tools-api` (own copy of the generator in `csv.ts`) — start/item/finish/get, `save` (preview edits), `upload` (Shopify `productSet`, API 2026-10, status DRAFT, SKUs `<STORE>-<batch>-<link>-<variant>`), `deleteProduct` (owner), stores, members, activity (`shop_actions`).
+- Stores: one Shopify Dev Dashboard app per store (custom distribution = one store). Client ID in `shop_connections`, client secret + Admin API token in Vault (`shop_secret_put/get`). Install link → `/tools-api/shopify/install?s=` → OAuth → `/tools-api/shopify/callback`. Scopes read_products, write_products, write_files.
+- Shopify IP allowlist (required from 20 Nov 2026 for custom apps on stores outside your org): edge functions in ap-southeast-1 leave from AS16509 (Amazon), Singapore, changing IPs (checked with `egress-check`). Allow ASN 16509 + country Singapore.

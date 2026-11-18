@@ -17,8 +17,8 @@ import re, sys
 api = sys.argv[1]
 c = open('js/config.js').read()
 c = re.sub(r"url: 'https://script\.google\.com/macros/s/[^']+'", lambda m, it=iter(['store', 'support']): f"url: '{api}?team={next(it)}&forceFunctionRegion=ap-southeast-1'", c, count=2)
-store = re.search(r"https://script\.google\.com/macros/s/[^']+", open('js/config.js').read()).group(0)
-c = c.replace("owner: 'Atiq',", f"owner: 'Atiq',\n  storagePrefix: 'assistaa-next.',\n  issuesUrl: '{store}?view=issues',\n  test: true,")
+# the live config already has issuesUrl; only the storage prefix and TEST flag differ
+c = c.replace("owner: 'Atiq',", "owner: 'Atiq',\n  storagePrefix: 'assistaa-next.',\n  test: true,")
 open('next/js/config.js', 'w').write("/* TEST copy (Supabase). Built by tools/build-next.sh: do not edit by hand. */\n" + c)
 
 h = open('index.html').read()

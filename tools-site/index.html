@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Assistaa Tools</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#03060b">
+<link rel="icon" href="mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#03060b;--card:rgba(255,255,255,.045);--card2:rgba(255,255,255,.075);--line:rgba(140,210,255,.13);--line2:rgba(140,210,255,.26);--text:#eaf6ff;--muted:#8aa3b8;--dim:#5b7184;--blue:#00aeef;--blue2:#38c6ff;--violet:#7c5cff;--green:#22d3a6;--amber:#ffb547;--red:#ff5a7a;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background:radial-gradient(1200px 600px at 10% -10%,rgba(0,174,239,.16),transparent 60%),radial-gradient(900px 600px at 110% 110%,rgba(124,92,255,.14),transparent 60%),var(--bg)}
+h1,h2,h3{font-family:'Space Grotesk',Inter,sans-serif;letter-spacing:-.02em;margin:0}h1{font-size:26px}h2{font-size:20px}h3{font-size:16px}
+a{color:var(--blue2)}button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}[hidden]{display:none!important}
+input,textarea,select{font:inherit;color:var(--text);width:100%;padding:11px 13px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid var(--line);outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,174,239,.15)}textarea{resize:vertical}select option{background:#0b1320}
+label.l{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 80px}
+.top{position:sticky;top:0;z-index:20;background:rgba(3,6,11,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:9px;font:700 17px 'Space Grotesk';white-space:nowrap}.brand img{width:28px;height:28px}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1}nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{padding:8px 12px;border-radius:10px;color:var(--muted);text-decoration:none;font-weight:500;font-size:14px;white-space:nowrap}
+nav.tabs a.on,nav.tabs a:hover{color:var(--text);background:var(--card2)}
+.who{font-size:13px;color:var(--muted);white-space:nowrap;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 18px;border-radius:12px;font-weight:600;background:linear-gradient(135deg,#00aeef,#7c5cff);color:#fff;box-shadow:0 8px 30px -10px rgba(0,174,239,.7)}
+.btn.ghost{background:var(--card2);box-shadow:inset 0 0 0 1px var(--line2)}.btn.green{background:linear-gradient(135deg,#22d3a6,#0ea5a0)}.btn.red{background:rgba(255,90,122,.14);color:var(--red);box-shadow:inset 0 0 0 1px rgba(255,90,122,.4)}
+.btn.sm{height:34px;padding:0 12px;font-size:13px;border-radius:10px}.btn[disabled]{opacity:.5;pointer-events:none}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.sp{flex:1}.muted{color:var(--muted)}.small{font-size:13px}.tiny{font-size:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpi{padding:12px;border-radius:14px;background:var(--card2);border:1px solid var(--line);text-align:center}.kpi b{display:block;font:700 18px 'Space Grotesk'}.kpi span{font-size:12px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;border:1px solid var(--line);color:var(--muted);background:var(--card2)}
+.pill.g{color:var(--green);border-color:rgba(34,211,166,.4)}.pill.a{color:var(--amber);border-color:rgba(255,181,71,.4)}.pill.r{color:var(--red);border-color:rgba(255,90,122,.4)}.pill.b{color:var(--blue2);border-color:rgba(0,174,239,.4)}
+.err{color:var(--red);font-size:13px;min-height:18px;margin:8px 0}.ok{color:var(--green)}
+.list .it{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.list .it:last-child{border-bottom:0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--dim);flex:none}.dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}.dot.bad{background:var(--red)}.dot.run{background:var(--amber);animation:pulse 1s infinite alternate}
+@keyframes pulse{to{opacity:.35}}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.pc{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.pc .img{aspect-ratio:1;background:#0b1320 center/cover no-repeat;position:relative}.pc .img .badge{position:absolute;top:8px;left:8px}
+.pc .bd{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}.pc .t{font-weight:600;line-height:1.3}
+.pc .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.flags{font-size:12px;color:var(--amber);margin:4px 0 0;padding-left:16px}.flags li{margin:2px 0}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;justify-content:flex-end}
+.drawer{width:min(760px,100%);height:100%;overflow:auto;background:#060b13;border-left:1px solid var(--line2);padding:18px 18px 90px}
+.drawer .bar{position:sticky;top:-18px;margin:-18px -18px 12px;padding:14px 18px;background:rgba(6,11,19,.95);border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;z-index:2}
+.imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px}.imgs .im{position:relative;aspect-ratio:1;border-radius:10px;background:#0b1320 center/cover;border:2px solid transparent}
+.imgs .im.off{opacity:.25}.imgs .im.first{border-color:var(--blue)}.imgs .im button{position:absolute;bottom:4px;padding:2px 6px;border-radius:7px;background:rgba(0,0,0,.7);font-size:11px}.imgs .im .x{right:4px}.imgs .im .f{left:4px}
+table.v{width:100%;border-collapse:collapse;font-size:13px}table.v th{color:var(--muted);font-weight:500;text-align:left;padding:6px 4px}table.v td{padding:4px}table.v input{padding:7px 8px;border-radius:8px}
+.prev{background:#fff;color:#111;border-radius:12px;padding:16px;max-height:520px;overflow:auto;font:15px/1.6 Georgia,serif}.prev img{max-width:100%;height:auto}
+.seg{display:inline-flex;background:var(--card2);border-radius:10px;padding:3px;gap:3px}.seg button{padding:6px 12px;border-radius:8px;font-size:13px;color:var(--muted)}.seg button.on{background:var(--blue);color:#fff}
+.cats{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:6px}.cats button{display:block;width:100%;text-align:left;padding:8px 10px;font-size:13px;border-bottom:1px solid var(--line)}.cats button:hover{background:var(--card2)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:90;background:#0d1626;border:1px solid var(--line2);padding:12px 18px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.5);max-width:92vw}
+.login{max-width:400px;margin:12vh auto 0;padding:0 16px}.login .card{padding:26px}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:sp .7s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:rgba(0,0,0,.4);border:1px solid var(--line);border-radius:10px;padding:9px 11px;word-break:break-all}
+ol.steps{padding-left:20px;margin:8px 0}ol.steps li{margin:6px 0;color:var(--muted)}ol.steps b{color:var(--text)}
+@media (max-width:640px){.grid3{grid-template-columns:1fr 1fr 1fr}.who span{display:none}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+
+const SUPA = 'https://zciuchdximmzwiisdkqu.supabase.co';
+const KEY = 'sb_publishable_WMggW823F5JaQWI5tZUn3A_2RCcqKcA';
+const API = `${SUPA}/functions/v1/tools-api?forceFunctionRegion=ap-southeast-1`;
+const CALLBACK = `${SUPA}/functions/v1/tools-api/shopify/callback`;
+const sb = createClient(SUPA, KEY, { auth: { persistSession: true, storageKey: 'assistaa-tools' } });
+
+const $ = (q, r = document) => r.querySelector(q), $$ = (q, r = document) => [...r.querySelectorAll(q)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const root = $('#root');
+let ME = null, STORES = [];
+
+async function api(action, body = {}) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { renderLogin(); throw new Error('Please log in.'); }
+  const r = await fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${session.access_token}`, apikey: KEY }, body: JSON.stringify({ action, ...body }) });
+  if (!r.ok) throw new Error('Network problem. Try again.');
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || 'Something went wrong.');
+  return j.data;
+}
+function toast(msg, bad) {
+  const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `<span class="${bad ? '' : 'ok'}" style="${bad ? 'color:var(--red)' : ''}">${esc(msg)}</span>`;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3800);
+}
+async function busy(btn, fn) {
+  const h = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+  try { return await fn(); } finally { btn.disabled = false; btn.innerHTML = h; }
+}
+function download(name, text) {
+  const u = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(u); a.remove(); }, 3000);
+}
+const copy = (t) => navigator.clipboard.writeText(t).then(() => toast('Copied'), () => toast('Select the text and copy it', true));
+const priceRange = (p, cur) => { const xs = (p.variants || []).map((v) => v.price); if (!xs.length) return ''; const lo = Math.min(...xs), hi = Math.max(...xs); return `${cur} ${lo.toFixed(2)}${hi > lo ? '–' + hi.toFixed(2) : ''}`; };
+
+/* ---------- login ---------- */
+function renderLogin(msg = '') {
+  root.innerHTML = `<div class="login"><div style="text-align:center;margin-bottom:18px"><img src="mark.svg" width="54" alt=""><h1 style="margin-top:10px">Assistaa Tools</h1><div class="muted small">Product listings, straight into your stores</div></div>
+    <form class="card" id="lf"><label class="l">Email</label><input id="le" type="email" autocomplete="username" required>
+    <label class="l">Password</label><input id="lp" type="password" autocomplete="current-password" required>
+    <div class="err" id="lerr">${esc(msg)}</div><button class="btn" style="width:100%">Log in</button>
+    <div class="muted tiny" style="margin-top:12px;text-align:center">No login or forgot your password? Ask Atiq.</div></form></div>`;
+  $('#lf').onsubmit = async (e) => {
+    e.preventDefault();
+    const b = $('#lf button');
+    await busy(b, async () => {
+      const { error } = await sb.auth.signInWithPassword({ email: $('#le').value.trim(), password: $('#lp').value });
+      if (error) { $('#lerr').textContent = error.message === 'Invalid login credentials' ? 'Wrong email or password.' : error.message; return; }
+      await boot();
+    });
+  };
+}
+
+/* ---------- shell ---------- */
+const TABS = () => [['new', 'New batch'], ['batches', 'Batches'], ...(ME.role === 'owner' ? [['stores', 'Stores'], ['team', 'Team']] : []), ['log', 'Activity']];
+function shell(active, html) {
+  root.innerHTML = `<div class="top"><div class="in"><div class="brand"><img src="mark.svg" alt="">Assistaa Tools</div>
+    <nav class="tabs">${TABS().map(([k, l]) => `<a href="#${k}" class="${k === active ? 'on' : ''}">${l}</a>`).join('')}</nav>
+    <div class="who" id="acct" title="Account">${esc(ME.name)} <span class="muted">▾</span></div></div></div><div class="wrap" id="page">${html}</div>`;
+  $('#acct').onclick = accountMenu;
+}
+function accountMenu() {
+  modal(`<h2>${esc(ME.name)}</h2><div class="muted small">${esc(ME.email)} · ${ME.role === 'owner' ? 'Owner' : 'Member'}</div>
+    <div class="card"><h3>Change password</h3><label class="l">New password (8+ characters)</label><input id="np" type="password" autocomplete="new-password"><div class="err" id="nperr"></div><button class="btn" id="npb">Save password</button></div>
+    <button class="btn ghost" id="lo">Log out</button>`, (m) => {
+    $('#npb', m).onclick = () => busy($('#npb', m), async () => {
+      const p = $('#np', m).value; if (p.length < 8) { $('#nperr', m).textContent = 'At least 8 characters.'; return; }
+      const { error } = await sb.auth.updateUser({ password: p }); if (error) { $('#nperr', m).textContent = error.message; return; }
+      toast('Password changed'); closeModal();
+    });
+    $('#lo', m).onclick = async () => { await sb.auth.signOut(); closeModal(); renderLogin(); };
+  });
+}
+function modal(html, onMount) {
+  closeModal();
+  const m = document.createElement('div'); m.className = 'modal'; m.id = 'modal';
+  m.innerHTML = `<div class="drawer">${html}</div>`;
+  m.onclick = (e) => { if (e.target === m) closeModal(); };
+  document.body.appendChild(m); document.body.style.overflow = 'hidden';
+  if (onMount) onMount(m);
+}
+function closeModal() { const m = $('#modal'); if (m) m.remove(); document.body.style.overflow = ''; }
+
+/* ---------- new batch ---------- */
+function pageNew() {
+  const last = localStorage.getItem('at-store') || '';
+  shell('new', `<div class="card"><h1>New batch</h1><div class="muted small" style="margin-top:4px">Paste competitor product links, pick the store, check the preview, then upload to the store as drafts.</div>
+    <label class="l">Competitor product links (one per line)</label><textarea id="nl" rows="8" placeholder="https://competitor.com/products/linen-midi-dress" style="font-family:ui-monospace,monospace;font-size:13px"></textarea>
+    <div class="muted tiny" id="nc" style="text-align:right;margin-top:4px">0 links</div>
+    <label class="l">Store</label><select id="ns"><option value="">Choose a store</option>${STORES.map((s) => `<option value="${esc(s.name)}"${s.name === last ? ' selected' : ''}>${esc(s.name)} — ${esc(s.language)} / ${esc(s.currency)}${s.connected ? ' · connected' : ''}</option>`).join('')}</select>
+    <div class="grid3" style="margin-top:10px"><div class="kpi"><b id="kv">—</b><span>Vendor</span></div><div class="kpi"><b id="kl">—</b><span>Language</span></div><div class="kpi"><b id="kc">—</b><span>Currency</span></div></div>
+    <div class="small" id="kconn" style="margin-top:8px"></div>
+    <label class="l">Instructions (optional)</label><input id="nn" maxlength="1000" placeholder="e.g. skip sold-out sizes, softer tone">
+    <div class="err" id="nerr"></div><button class="btn" id="ngo">Generate preview</button></div>`);
+  const links = () => [...new Set($('#nl').value.split(/\s+/).map((x) => x.trim()).filter(Boolean))];
+  $('#nl').oninput = () => { const n = links().length; $('#nc').textContent = `${n} link${n === 1 ? '' : 's'}`; $('#nerr').textContent = ''; };
+  const pick = () => {
+    const s = STORES.find((x) => x.name === $('#ns').value);
+    $('#kv').textContent = s ? s.name : '—'; $('#kl').textContent = s ? s.language : '—'; $('#kc').textContent = s ? s.currency : '—';
+    $('#kconn').innerHTML = !s ? '' : s.connected ? '<span class="pill g">● Connected — you can upload straight to this store</span>' : '<span class="pill a">Not connected yet — you can still preview and download the CSV</span>';
+    if (s) localStorage.setItem('at-store', s.name);
+  };
+  $('#ns').onchange = pick; pick();
+  $('#ngo').onclick = () => {
+    const L = links(), st = $('#ns').value, bad = L.find((x) => !/^https?:\/\/[^\s.]+\.[^\s]+/i.test(x));
+    const err = !L.length ? 'Paste at least one product link.' : bad ? 'Not a valid link: ' + bad.slice(0, 60) : L.length > 30 ? 'Up to 30 links per batch.' : !st ? 'Choose a store.' : '';
+    if (err) { $('#nerr').textContent = err; return; }
+    busy($('#ngo'), async () => { const b = await api('start', { store: st, links: L.join('\n'), notes: $('#nn').value.trim() }); location.hash = `b/${b.id}`; })
+      .catch((e) => { $('#nerr').textContent = e.message; });
+  };
+}
+
+/* ---------- batches ---------- */
+async function pageBatches() {
+  shell('batches', `<div class="card"><h1>Batches</h1><div class="list" id="bl" style="margin-top:8px"><div class="muted">Loading…</div></div></div>`);
+  try {
+    const d = await api('list');
+    $('#bl').innerHTML = d.batches.map((b) => `<a class="it" href="#b/${b.id}" style="text-decoration:none;color:inherit"><span class="dot ${b.status === 'done' ? 'ok' : 'run'}"></span>
+      <div style="flex:1;min-width:0"><b>${esc(b.store)}</b> <span class="muted small">· ${b.status === 'done' ? `${b.products} product${b.products === 1 ? '' : 's'}` : 'not finished'}${b.uploaded ? ` · ${b.uploaded} in store` : ''}</span><div class="muted tiny">${esc(b.time)} · ${b.links} link${b.links === 1 ? '' : 's'} · ${esc(b.who)}</div></div><span class="muted">›</span></a>`).join('') || '<div class="muted">No batches yet.</div>';
+  } catch (e) { $('#bl').innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+}
+
+/* ---------- one batch: run, preview, edit, upload ---------- */
+let RUN = null;
+async function pageBatch(id) {
+  shell('batches', `<div id="bh" class="card"><div class="muted">Loading…</div></div><div id="bp"></div>`);
+  let B;
+  try { B = await api('get', { id }); } catch (e) { $('#bh').innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
+  const store = STORES.find((s) => s.name === B.store) || {};
+  const draw = () => {
+    if (location.hash !== `#b/${id}`) return;
+    const done = B.items.filter((x) => x.status === 'done'), failed = B.items.filter((x) => x.status === 'failed');
+    const waiting = B.items.filter((x) => x.status === 'pending' || x.status === 'working');
+    const uploaded = done.filter((x) => x.product_id), toUpload = done.filter((x) => !x.product_id);
+    $('#bh').innerHTML = `<div class="row"><div><h1>${esc(B.store)}</h1><div class="muted small">${esc(B.language)} / ${esc(B.currency)} · ${esc(B.time)} · batch ${B.id}</div></div><div class="sp"></div>
+        ${store.connected ? '<span class="pill g">● Store connected</span>' : '<span class="pill a">Store not connected</span>'}</div>
+      <div class="grid3" style="margin-top:14px"><div class="kpi"><b>${done.length}</b><span>Ready</span></div><div class="kpi"><b>${uploaded.length}</b><span>In store</span></div><div class="kpi"><b>${failed.length}</b><span>Failed links</span></div></div>
+      ${waiting.length || RUN === id ? `<div class="small" style="margin-top:12px"><span class="spin" style="display:inline-block;vertical-align:-3px"></span> Reading and writing ${B.items.length - waiting.length} of ${B.items.length}… about 30–60 s per link, 3 at a time. Keep this page open.</div>` : ''}
+      <div class="row" style="margin-top:14px">
+        ${!waiting.length && done.length ? `<button class="btn ghost sm" id="dl">Download CSV</button>` : ''}
+        ${failed.length && !waiting.length ? `<button class="btn ghost sm" id="rt">Retry ${failed.length} failed link${failed.length === 1 ? '' : 's'}</button>` : ''}
+        ${!waiting.length && waiting.length === 0 && B.items.some((x) => x.status === 'pending') ? `<button class="btn ghost sm" id="rs">Continue</button>` : ''}
+        <div class="sp"></div>
+        ${!waiting.length && toUpload.length ? (store.connected ? `<button class="btn green" id="up">Upload ${toUpload.length} to ${esc(B.store)}</button>` : `<span class="muted small">Connect ${esc(B.store)} under Stores to upload directly.</span>`) : ''}
+      </div>
+      ${failed.length ? `<div class="list" style="margin-top:10px">${failed.map((x) => `<div class="it"><span class="dot bad"></span><div style="flex:1;min-width:0"><div class="small" style="word-break:break-all">${esc(x.url)}</div><div class="tiny" style="color:var(--red)">${esc(x.error)}</div></div></div>`).join('')}</div>` : ''}`;
+    $('#bp').innerHTML = `<div class="products">${B.items.filter((x) => x.status !== 'failed').map(cardHtml).join('')}</div>`;
+    const dl = $('#dl'); if (dl) dl.onclick = () => busy(dl, async () => { const f = await api('finish', { id }); download(f.filename, f.csv); });
+    const rt = $('#rt'); if (rt) rt.onclick = () => run(failed.map((x) => x.pos));
+    const rs = $('#rs'); if (rs) rs.onclick = () => run(B.items.filter((x) => x.status === 'pending').map((x) => x.pos));
+    const up = $('#up'); if (up) up.onclick = () => uploadAll(toUpload);
+    $$('[data-edit]').forEach((b) => b.onclick = () => editor(B, B.items.find((x) => x.pos === +b.dataset.edit), (out) => { B.items.find((x) => x.pos === +b.dataset.edit).output = out; draw(); }));
+    $$('[data-up]').forEach((b) => b.onclick = () => uploadAll([B.items.find((x) => x.pos === +b.dataset.up)]));
+    $$('[data-del]').forEach((b) => b.onclick = () => delProduct(B.items.find((x) => x.pos === +b.dataset.del), b));
+  };
+  const cardHtml = (x) => {
+    const p = x.output;
+    if (x.status !== 'done' || !p) return `<div class="pc"><div class="img" style="display:grid;place-items:center"><span class="dot ${x.status === 'working' ? 'run' : ''}" style="width:14px;height:14px"></span></div><div class="bd"><div class="small muted" style="word-break:break-all">${esc(x.url.replace(/^https?:\/\/(www\.)?/, ''))}</div><div class="tiny muted">${x.status === 'working' ? 'Reading and writing…' : 'Waiting'}</div></div></div>`;
+    const flags = p.flags || [];
+    return `<div class="pc"><div class="img" style="background-image:url('${esc(p.images?.[0] || '')}')"><span class="badge">${x.product_id ? '<span class="pill g">In store · draft</span>' : x.upload_error ? '<span class="pill r">Upload failed</span>' : flags.length ? `<span class="pill a">${flags.length} to check</span>` : '<span class="pill b">Ready</span>'}</span></div>
+      <div class="bd"><div class="t">${esc(p.title)}</div><div class="small muted">${esc(priceRange(p, B.currency))} · ${p.variants.length} variant${p.variants.length === 1 ? '' : 's'} · ${p.images.length} image${p.images.length === 1 ? '' : 's'}</div>
+      <div class="tiny muted">${esc(p.category?.path || 'Category needs review')}</div>
+      ${flags.length ? `<ul class="flags">${flags.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+      ${x.upload_error ? `<div class="tiny" style="color:var(--red)">${esc(x.upload_error)}</div>` : ''}
+      <div class="acts">${x.product_id ? `<a class="btn ghost sm" target="_blank" rel="noopener" href="https://${esc(store.shop)}/admin/products/${esc(x.product_id)}">Open in Shopify</a>${ME.role === 'owner' ? `<button class="btn red sm" data-del="${x.pos}">Delete from store</button>` : ''}`
+        : `<button class="btn ghost sm" data-edit="${x.pos}">Preview &amp; edit</button>${store.connected ? `<button class="btn sm" data-up="${x.pos}">Upload</button>` : ''}`}
+        <a class="btn ghost sm" target="_blank" rel="noopener" href="${esc(x.url)}">Source</a></div></div></div>`;
+  };
+  async function run(positions) {
+    RUN = id; positions.forEach((pos) => { const it = B.items.find((x) => x.pos === pos); it.status = 'pending'; }); draw();
+    let i = 0;
+    const worker = async () => {
+      while (i < positions.length) {
+        const pos = positions[i++], it = B.items.find((x) => x.pos === pos); it.status = 'working'; draw();
+        try {
+          const r = await api('item', { id, pos }); Object.assign(it, r);
+          if (r.status === 'done') { const g = await api('get', { id }); const f = g.items.find((x) => x.pos === pos); if (f) it.output = f.output; }
+        } catch (e) { it.status = 'failed'; it.error = e.message; }
+        draw();
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+    RUN = null;
+    try { await api('finish', { id }); } catch (_) {}
+    B = await api('get', { id }); draw();
+    toast(`Preview ready: ${B.items.filter((x) => x.status === 'done').length} products`);
+  }
+  async function uploadAll(items) {
+    const n = items.length;
+    if (!confirm(`Upload ${n} product${n === 1 ? '' : 's'} to ${B.store} as Draft?`)) return;
+    let ok = 0, bad = 0, i = 0;
+    const btn = $('#up'); if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spin"></span> Uploading 0 of ${n}`; }
+    const worker = async () => {
+      while (i < items.length) {
+        const it = items[i++];
+        try { const r = await api('upload', { id, pos: it.pos }); if (r.error) { it.upload_error = r.error; bad++; } else { it.product_id = r.product_id; it.upload_error = ''; ok++; } }
+        catch (e) { it.upload_error = e.message; bad++; }
+        const b = $('#up'); if (b) b.innerHTML = `<span class="spin"></span> Uploading ${ok + bad} of ${n}`;
+      }
+    };
+    await Promise.all([worker(), worker()]);
+    toast(bad ? `${ok} uploaded, ${bad} failed` : `${ok} product${ok === 1 ? '' : 's'} uploaded to ${B.store} as drafts`, !!bad);
+    B = await api('get', { id }); draw();
+  }
+  async function delProduct(it, btn) {
+    if (!confirm(`Delete "${it.output.title}" from ${B.store}? This removes the product from the store and can't be undone.`)) return;
+    await busy(btn, async () => { await api('deleteProduct', { id, pos: it.pos }); toast('Deleted from the store'); B = await api('get', { id }); draw(); }).catch((e) => toast(e.message, true));
+  }
+  draw();
+  const pending = B.items.filter((x) => x.status === 'pending').map((x) => x.pos);
+  if (pending.length && B.status !== 'done' && RUN !== id) run(pending);
+}
+
+/* ---------- product editor ---------- */
+function editor(B, it, onSaved) {
+  const p = JSON.parse(JSON.stringify(it.output));
+  const allImgs = [...p.images];
+  let imgs = [...p.images], remove = new Set(), view = 'preview';
+  modal(`<div class="bar"><h2 style="flex:1">Preview &amp; edit</h2><button class="btn ghost sm" id="ec">Close</button><button class="btn sm" id="es">Save</button></div>
+    <div class="err" id="eerr"></div>
+    <label class="l">Title <span class="muted">(Unique name | Descriptive name)</span></label><input id="et" value="${esc(p.title)}">
+    <label class="l">Images <span class="muted">(blue = main image; tap ✕ to leave one out)</span></label><div class="imgs" id="ei"></div>
+    <div class="row" style="margin:14px 0 6px"><label class="l" style="margin:0">Description</label><div class="sp"></div><div class="seg"><button data-v="preview" class="on">Preview</button><button data-v="html">HTML</button></div></div>
+    <div class="prev" id="epv"></div><textarea id="eh" rows="16" hidden style="font-family:ui-monospace,monospace;font-size:12.5px">${esc(p.html)}</textarea>
+    <label class="l">Variants (${esc(B.currency)})</label><div style="overflow-x:auto"><table class="v"><thead><tr>${p.options.map((o, k) => `<th><input data-on="${k}" value="${esc(o)}" style="font-weight:600"></th>`).join('') || '<th>Variant</th>'}<th>Price</th><th>Compare-at</th><th>Leave out</th></tr></thead>
+      <tbody>${p.variants.map((v, i) => `<tr>${(p.options.length ? v.options : ['Default']).map((o, k) => `<td><input data-ov="${i}:${k}" value="${esc(o)}"${p.options.length ? '' : ' disabled'}></td>`).join('')}
+        <td><input data-pr="${i}" type="number" step="0.01" min="0" value="${v.price}"></td><td><input data-cp="${i}" type="number" step="0.01" min="0" value="${v.compare_at ?? ''}"></td><td style="text-align:center"><input type="checkbox" data-rm="${i}" style="width:auto"></td></tr>`).join('')}</tbody></table></div>
+    <label class="l">Tags (comma separated)</label><input id="etg" value="${esc((p.tags || []).join(', '))}">
+    <label class="l">Shopify category</label><div class="small" id="ecat">${esc(p.category?.path || 'None — choose one')}</div><input id="ecq" placeholder="Search categories, e.g. dresses, wreaths" style="margin-top:6px"><div class="cats" id="ecl" hidden></div>
+    <label class="l">SEO title <span class="muted" id="cst"></span></label><input id="est" maxlength="70" value="${esc(p.seo_title)}">
+    <label class="l">SEO description <span class="muted" id="csd"></span></label><textarea id="esd" rows="3" maxlength="320">${esc(p.seo_description)}</textarea>
+    <label class="l">URL handle</label><input id="ehd" value="${esc(p.handle)}">
+    ${(p.missing || []).length ? `<div class="card small"><b>Not in the source:</b> <span class="muted">${p.missing.map(esc).join(', ')}</span></div>` : ''}
+    <div class="muted tiny" style="margin-top:12px">Price note: ${esc(p.price_note || '')}</div>`, (m) => {
+    let cat = p.category;
+    const drawImgs = () => {
+      $('#ei', m).innerHTML = allImgs.map((u) => `<div class="im ${remove.has(u) ? 'off' : ''} ${imgs[0] === u ? 'first' : ''}" style="background-image:url('${esc(u)}')">${imgs[0] !== u && !remove.has(u) ? `<button class="f" data-first="${esc(u)}">Main</button>` : ''}<button class="x" data-x="${esc(u)}">${remove.has(u) ? '↺' : '✕'}</button></div>`).join('');
+      $$('[data-x]', m).forEach((b) => b.onclick = () => { const u = b.dataset.x; remove.has(u) ? remove.delete(u) : remove.add(u); imgs = allImgs.filter((x) => !remove.has(x)).sort((a, c) => (a === imgs[0] ? -1 : c === imgs[0] ? 1 : 0)); drawImgs(); });
+      $$('[data-first]', m).forEach((b) => b.onclick = () => { const u = b.dataset.first; imgs = [u, ...imgs.filter((x) => x !== u)]; drawImgs(); });
+    };
+    const drawPrev = () => { $('#epv', m).innerHTML = $('#eh', m).value.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/ on\w+="[^"]*"/gi, ''); };
+    const counts = () => { $('#cst', m).textContent = `${$('#est', m).value.length}/70`; $('#csd', m).textContent = `${$('#esd', m).value.length}/160`; };
+    drawImgs(); drawPrev(); counts();
+    $('#est', m).oninput = counts; $('#esd', m).oninput = counts; $('#eh', m).oninput = drawPrev;
+    $$('.seg button', m).forEach((b) => b.onclick = () => { view = b.dataset.v; $$('.seg button', m).forEach((x) => x.classList.toggle('on', x === b)); $('#epv', m).hidden = view !== 'preview'; $('#eh', m).hidden = view !== 'html'; drawPrev(); });
+    let ct;
+    $('#ecq', m).oninput = () => {
+      clearTimeout(ct); const q = $('#ecq', m).value.trim();
+      if (q.length < 2) { $('#ecl', m).hidden = true; return; }
+      ct = setTimeout(async () => {
+        const r = await api('categories', { q }).catch(() => []);
+        $('#ecl', m).hidden = false;
+        $('#ecl', m).innerHTML = r.map((c) => `<button data-cat="${esc(c.id)}" data-path="${esc(c.path)}">${esc(c.path)}</button>`).join('') || '<div class="muted small" style="padding:8px">No match</div>';
+        $$('[data-cat]', m).forEach((b) => b.onclick = () => { cat = { id: b.dataset.cat, path: b.dataset.path }; $('#ecat', m).textContent = cat.path; $('#ecl', m).hidden = true; $('#ecq', m).value = ''; });
+      }, 250);
+    };
+    $('#ec', m).onclick = closeModal;
+    $('#es', m).onclick = () => busy($('#es', m), async () => {
+      const patch = {
+        title: $('#et', m).value, html: $('#eh', m).value, tags: $('#etg', m).value, seo_title: $('#est', m).value, seo_description: $('#esd', m).value, handle: $('#ehd', m).value,
+        category: cat ? cat.id : '', images: imgs,
+        options: p.options.map((o, k) => $(`[data-on="${k}"]`, m).value),
+        variants: p.variants.map((v, i) => ({ price: $(`[data-pr="${i}"]`, m).value, compare_at: $(`[data-cp="${i}"]`, m).value, options: p.options.length ? p.options.map((_, k) => $(`[data-ov="${i}:${k}"]`, m).value) : undefined })),
+        remove_variants: $$('[data-rm]', m).filter((c) => c.checked).map((c) => +c.dataset.rm),
+      };
+      const r = await api('save', { id: B.id, pos: it.pos, patch });
+      toast('Saved'); closeModal(); onSaved(r.output);
+    }).catch((e) => { $('#eerr', m).textContent = e.message; m.querySelector('.drawer').scrollTop = 0; });
+  });
+}
+
+/* ---------- stores (owner) ---------- */
+async function pageStores() {
+  shell('stores', `<div class="card"><h1>Stores</h1><div class="muted small" style="margin-top:4px">Each store needs its own small Shopify app ("Assistaa Products") so uploads go straight in as drafts. Set it up once per store.</div><div class="list" id="sl" style="margin-top:8px"></div></div>`);
+  const draw = () => {
+    $('#sl').innerHTML = STORES.map((s) => `<div class="it"><span class="dot ${s.connected ? 'ok' : s.pending ? 'run' : ''}"></span><div style="flex:1;min-width:0"><b>${esc(s.name)}</b> <span class="muted small">${esc(s.language)} / ${esc(s.currency)}</span>
+      <div class="tiny muted">${s.connected ? `Connected · ${esc(s.shop)}` : s.pending ? `Waiting for the store owner to install · ${esc(s.shop)}` : 'Not connected'}</div></div>
+      <button class="btn ${s.connected ? 'ghost' : ''} sm" data-st="${esc(s.name)}">${s.connected ? 'Manage' : s.pending ? 'Install link' : 'Connect'}</button></div>`).join('');
+    $$('[data-st]').forEach((b) => b.onclick = () => connect(STORES.find((s) => s.name === b.dataset.st)));
+  };
+  const connect = (s) => modal(`<div class="bar"><h2 style="flex:1">Connect ${esc(s.name)}</h2><button class="btn ghost sm" id="cc">Close</button></div>
+    <div class="card small"><b>One-time setup in Shopify</b> (in your Partner account's Dev Dashboard, dev.shopify.com):
+    <ol class="steps"><li>Create an app named <b>Assistaa Products – ${esc(s.name)}</b>.</li>
+    <li>In the version settings, set <b>App URL</b> and <b>Redirect URL</b> to the address below, and the scopes to <b>read_products, write_products, write_files</b>. Release the version.</li>
+    <li>Under <b>IP allowlist</b>, allow <b>ASN 16509 (Amazon)</b> and the country <b>Singapore</b> — that's where uploads run from.</li>
+    <li>Choose <b>Custom distribution</b> and enter the store's <b>.myshopify.com</b> address.</li>
+    <li>Copy the <b>Client ID</b> and <b>Client secret</b> into the form below and save.</li>
+    <li>Send the install link to the store owner (or open it yourself if you own the store). One click on <b>Install</b> and the store shows as connected here.</li></ol>
+    <label class="l">App URL and Redirect URL</label><div class="code" id="cb">${esc(CALLBACK)}</div><button class="btn ghost sm" style="margin-top:6px" id="cbc">Copy</button></div>
+    <label class="l">Store address</label><input id="cs" placeholder="druhnn.myshopify.com" value="${esc(s.shop)}">
+    <label class="l">Client ID</label><input id="ci" autocomplete="off">
+    <label class="l">Client secret ${s.has_app ? '<span class="muted">(leave empty to keep the saved one)</span>' : ''}</label><input id="cx" type="password" autocomplete="off">
+    <div class="err" id="cerr"></div><div class="row"><button class="btn" id="csv">Save and get install link</button>${s.has_app ? '<button class="btn ghost" id="cl">New install link</button>' : ''}${s.connected ? '<button class="btn red" id="cr">Disconnect</button>' : ''}</div>
+    <div id="clink"></div>`, (m) => {
+    $('#cc', m).onclick = closeModal; $('#cbc', m).onclick = () => copy(CALLBACK);
+    const showLink = (link) => { $('#clink', m).innerHTML = `<div class="card small"><b>Install link</b> — send it to the store owner. It works once and expires in 14 days.<div class="code" style="margin-top:8px">${esc(link)}</div><div class="row" style="margin-top:8px"><button class="btn ghost sm" id="lc">Copy link</button><a class="btn ghost sm" href="${esc(link)}" target="_blank" rel="noopener">Open it myself</a></div></div>`; $('#lc', m).onclick = () => copy(link); };
+    $('#csv', m).onclick = () => busy($('#csv', m), async () => {
+      const r = await api('storeSave', { store: s.name, shop: $('#cs', m).value, client_id: $('#ci', m).value, client_secret: $('#cx', m).value });
+      STORES = r.stores; draw(); showLink(r.link); toast('Saved');
+    }).catch((e) => { $('#cerr', m).textContent = e.message; });
+    const cl = $('#cl', m); if (cl) cl.onclick = () => busy(cl, async () => showLink((await api('storeLink', { store: s.name })).link)).catch((e) => { $('#cerr', m).textContent = e.message; });
+    const cr = $('#cr', m); if (cr) cr.onclick = () => { if (confirm(`Disconnect ${s.name}? Uploads stop until it's connected again.`)) busy(cr, async () => { STORES = await api('storeRemove', { store: s.name }); draw(); closeModal(); }); };
+  });
+  STORES = await api('stores').catch(() => STORES); draw();
+}
+
+/* ---------- team (owner) ---------- */
+async function pageTeam() {
+  shell('team', `<div class="card"><h1>Team logins</h1><div class="muted small" style="margin-top:4px">Everyone gets their own login. Switch one off to remove that person's access without changing anyone else's password.</div><div class="list" id="tl" style="margin-top:8px"></div></div>
+    <div class="card"><h3>Add a person (or set a new password)</h3><div class="grid3" style="grid-template-columns:1fr 1fr"><div><label class="l">Name</label><input id="tn"></div><div><label class="l">Email</label><input id="te" type="email"></div></div>
+    <div class="grid3" style="grid-template-columns:1fr 1fr"><div><label class="l">Password (8+ characters, share it with them)</label><input id="tp" autocomplete="new-password"></div><div><label class="l">Role</label><select id="tr"><option value="member">Member — generate, edit, upload</option><option value="owner">Owner — also stores, team, delete</option></select></div></div>
+    <div class="err" id="terr"></div><button class="btn" id="ta">Save login</button></div>`);
+  const draw = (list) => {
+    $('#tl').innerHTML = list.map((u) => `<div class="it"><span class="dot ${u.active ? 'ok' : ''}"></span><div style="flex:1;min-width:0"><b>${esc(u.name)}</b> <span class="pill ${u.role === 'owner' ? 'b' : ''}">${u.role}</span><div class="tiny muted">${esc(u.email)} · since ${esc(u.since)}</div></div>
+      ${u.email === ME.email ? '' : `<button class="btn ${u.active ? 'red' : 'ghost'} sm" data-tg="${esc(u.id)}" data-a="${u.active ? 0 : 1}">${u.active ? 'Switch off' : 'Switch on'}</button>`}</div>`).join('');
+    $$('[data-tg]').forEach((b) => b.onclick = () => busy(b, async () => draw(await api('memberActive', { id: b.dataset.tg, active: b.dataset.a === '1' }))).catch((e) => toast(e.message, true)));
+  };
+  $('#tp').value = Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6).toUpperCase();
+  $('#ta').onclick = () => busy($('#ta'), async () => {
+    draw(await api('memberAdd', { name: $('#tn').value, email: $('#te').value, password: $('#tp').value, role: $('#tr').value }));
+    toast('Login saved — share the email and password with them'); $('#terr').textContent = '';
+  }).catch((e) => { $('#terr').textContent = e.message; });
+  draw(await api('members').catch((e) => { $('#terr').textContent = e.message; return []; }));
+}
+
+/* ---------- activity ---------- */
+async function pageLog() {
+  shell('log', `<div class="card"><h1>Store activity</h1><div class="muted small">Every product added to or deleted from a store.</div><div class="list" id="al" style="margin-top:8px"></div></div>`);
+  const a = await api('activity').catch(() => []);
+  $('#al').innerHTML = a.map((x) => `<div class="it"><span class="dot ${x.ok ? 'ok' : 'bad'}"></span><div style="flex:1;min-width:0"><b>${x.action === 'create' ? 'Added' : 'Deleted'}</b> ${esc(x.title)} <span class="muted small">· ${esc(x.store)}</span>
+    <div class="tiny muted">${esc(x.time)} · ${esc(x.who)}${x.error ? ` · <span style="color:var(--red)">${esc(x.error)}</span>` : ''}</div></div></div>`).join('') || '<div class="muted">Nothing yet.</div>';
+}
+
+/* ---------- router ---------- */
+function route() {
+  if (!ME) return;
+  closeModal();
+  const h = location.hash.slice(1);
+  if (h.startsWith('b/')) return pageBatch(+h.slice(2));
+  if (h === 'batches') return pageBatches();
+  if (h === 'stores' && ME.role === 'owner') return pageStores();
+  if (h === 'team' && ME.role === 'owner') return pageTeam();
+  if (h === 'log') return pageLog();
+  return pageNew();
+}
+async function boot() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return renderLogin();
+  try { [ME, STORES] = await Promise.all([api('me'), api('stores')]); }
+  catch (e) { await sb.auth.signOut(); return renderLogin(e.message); }
+  route();
+}
+window.addEventListener('hashchange', route);
+boot();
+</script>
+</body>
+</html>

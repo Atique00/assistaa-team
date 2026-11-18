@@ -33,6 +33,7 @@ const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g,
 const strip = (h: string) => String(h || "").replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, " ").replace(/<br\s*\/?>|<\/(p|li|div|h\d|tr)>/gi, "\n")
   .replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n").trim();
 const cell = (v: unknown) => { const s = String(v ?? ""); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+const clean = (s: unknown) => String(s ?? "").replace(/\*\*|__|<\/?[a-z][^>]*>/gi, "").replace(/\s+/g, " ").trim();
 const money = (n: number) => (Math.round(n * 100) / 100).toFixed(2);
 const slug = (s: string) => String(s || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
   .normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80).replace(/-+$/, "");
@@ -128,8 +129,10 @@ DESCRIPTION (you return the parts; the layout is built for you):
 - styling: EXACTLY 3 practical styling, pairing, placement or occasion ideas.
 - final_note: one short bold recommendation only if the source supports it (e.g. "Runs small – we recommend sizing up"), otherwise "".
 FACTS: use ONLY what the source says or what the product images clearly show (e.g. colour). Never invent material, dimensions, batteries, waterproofing, medical/orthopedic claims, ratings, stock, delivery promises, discounts or variants. Do not mention the competitor, the source site, dropshipping or suppliers.
+PRICES, currency, stock and sold-out status are handled by the system from the store data: never mention them in the copy, flags or missing.
+PLAIN TEXT in every field: no markdown, no asterisks, no HTML tags.
 
-LANGUAGE: write title, description parts, tags, SEO title/description, image alt text and translated option names/values in the store's language, natively and naturally (not word-for-word). Sizes stay as they are (S, M, 38, EU 40...). Colours and option names are translated.
+LANGUAGE: flags and missing are notes for the team: always write them in English. Write title, description parts, tags, SEO title/description, image alt text and translated option names/values in the store's language, natively and naturally (not word-for-word). Sizes stay as they are (S, M, 38, EU 40...). Colours and option names are translated.
 
 CATEGORY: choose the single best Shopify Standard Product Taxonomy category by its id, from the CANDIDATES in the message or from the BASE LIST below. Use the function of the product first. Pick the most specific correct one. Return its id exactly; if nothing fits, return "" and add "category needs review" to flags.
 
@@ -312,7 +315,7 @@ export function csvTool(d: Deps) {
     const feats = (c.features || []).map(String).filter(Boolean), styl = (c.styling || []).map(String).filter(Boolean);
     if (feats.length < 5) flags.push(`Only ${feats.length} verified features (5 expected)`);
     if (styl.length < 3) flags.push(`Only ${styl.length} styling suggestions (3 expected)`);
-    const copy = { heading: c.heading, intro: c.intro, features: feats.slice(0, 5), specs: (c.specs || []).map(String).filter((x: string) => x && !/unknown|n\/a|not specified/i.test(x)), styling: styl.slice(0, 3), final_note: String(c.final_note || "") };
+    const copy = { heading: clean(c.heading), intro: clean(c.intro), features: feats.slice(0, 5).map(clean), specs: (c.specs || []).map(clean).filter((x: string) => x && !/unknown|n\/a|not specified/i.test(x)), styling: styl.slice(0, 3).map(clean), final_note: clean(c.final_note) };
     const tags = [...new Set((c.tags || []).map((t: string) => String(t).replace(/,/g, " ").trim()).filter((t: string) => t && !/^xxs$/i.test(t)))].slice(0, 15);
 
     return {
@@ -382,7 +385,7 @@ export function csvTool(d: Deps) {
     return { id: batch.id, filename: fileName(batch), csv, report };
   }
 
-  const fileName = (b: Dict) => `${slug(b.store)}-batch-${b.id}-${new Date(b.created_at).toISOString().slice(0, 10)}.csv`;
+  const fileName = (b: Dict) => `${slug(b.store)}-batch-${b.id}-${new Date(new Date(b.created_at).getTime() + 6 * 3600e3).toISOString().slice(0, 10)}.csv`;
 
   async function get(who: Dict, b: Dict) {
     await allowed(who);

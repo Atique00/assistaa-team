@@ -56,6 +56,7 @@ body{color:var(--fg);font:13px/1.45 var(--f-ui);padding-left:max(16px,env(safe-a
 .avs i{font-style:normal;width:20px;height:20px;border-radius:50%;margin-left:-6px;display:grid;place-items:center;font-size:8.5px;font-weight:700;color:#fff;border:2px solid var(--panel);background:linear-gradient(135deg,color-mix(in srgb,var(--c) 70%,#000),#262b36)}
 .avs i.flag{box-shadow:0 0 0 1.5px var(--bad)}
 .cnt{font-family:var(--f-num);font-size:10.5px;color:var(--mute);background:var(--inner);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.askdone{flex:none;width:22px;height:22px;border-radius:7px;border:1px solid var(--line2);background:transparent;color:var(--mute);cursor:pointer;font-size:12px;line-height:1}.askdone:hover{border-color:#34d399;color:#34d399}.askdone[disabled]{opacity:.4}
 .tagx{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);border:1px dashed var(--line2);border-radius:5px;padding:1px 5px}
 .box{background:var(--inner);border:1px solid var(--line);border-radius:11px;padding:9px 10px;min-height:0}
 .bh{display:flex;align-items:center;gap:7px;font-weight:600;font-size:11.5px;margin-bottom:6px}
@@ -240,7 +241,7 @@ html,body{margin:0;background:#07080b;color:#e8eaf0;color-scheme:dark}
  <div class="cap" id="cap"></div>
 </div>
 <div class="ctl"><button class="btn pri" id="play" type="button">▶ Play the tour</button><button class="btn" id="stop" type="button" hidden>Stop</button></div>
-<p class="foot">Support, listings, back office, sales and the activity feed are live from team.assistaa.com and assistaa.com, refreshed every 30 seconds. Panels marked "Example" show how a department will look once it's connected.</p>
+<p class="foot">Support, listings, back office, sales and the activity feed are live from team.assistaa.com and assistaa.com, refreshed every 30 seconds. Agents, the Task Shield, the content week and "Needs you" come from the Assistaa OS tables. Tick an item in Needs you when it's done. Panels marked "Example" are not connected yet.</p>
 <button class="lock" id="lock" type="button" hidden>Lock</button>
 <script>
 (function(){
@@ -263,7 +264,7 @@ const AGS={
  disputes:[['Dispute responder','mid'],['Deadline watch','off'],['Image studio','off']],
  money:[['Pricing sheet','on'],['Invoice sender','off'],['Payment chaser','off']]};
 const people=arr=>`<div class="avs">${arr.map(p=>`<i class="${p[1]?'flag':''}" title="${esc(p[0])}">${esc(p[0].slice(0,2).toUpperCase())}</i>`).join('')}</div>`;
-const ag=k=>{const list=AGS[k];return `<div class="box agents"><div class="bh"><span>Agents</span><span class="lv">${list.filter(a=>a[1]==='on').length} live</span><span class="sp"></span><small>${list.length} total</small></div>${list.map(a=>`<div class="ag"><i class="ic2"></i><span class="sp">${a[0]}</span><i class="tg ${a[1]}"></i></div>`).join('')}</div>`};
+const ag=k=>{const list=(M&&M.os&&M.os.agents&&M.os.agents[k])||AGS[k];return `<div class="box agents"><div class="bh"><span>Agents</span><span class="lv">${list.filter(a=>a[1]==='on').length} live</span><span class="sp"></span><small>${list.length} total</small></div>${list.map(a=>`<div class="ag" title="${esc(a[2]||'')}"><i class="ic2"></i><span class="sp">${esc(a[0])}</span><i class="tg ${esc(a[1])}"></i></div>`).join('')}</div>`};
 const head=(n,name,ppl,extra)=>`<div class="ph"><span class="no">${n}</span><span class="pn">${name}</span><span class="sp"></span>${extra||''}${ppl?people(ppl):''}</div>`;
 
 function needs(){const out=[];if(!M)return out;const s=M.support||{},w=s.waiting||[];
@@ -272,6 +273,7 @@ function needs(){const out=[];if(!M)return out;const s=M.support||{},w=s.waiting
  const low=(M.people||[]).filter(p=>p.score&&Number(p.score.s)<7);if(low.length)out.push(['mid','Team','Score under 7: '+low.map(p=>p.n+' '+p.score.s).join(', '),low[0].score.why||'']);
  const od=(M.tasks&&M.tasks.overdue)||[];if(od.length)out.push(['mid','Listings',od.length+' overdue task'+(od.length>1?'s':''),String(od[0].title).slice(0,70)+' · due '+od[0].due]);
  const sl=M.sales||{};if(sl.leads_today)out.push(['info','Sales',sl.leads_today+' new website lead'+(sl.leads_today>1?'s':'')+' today',(sl.recent&&sl.recent[0])?(sl.recent[0].need||'')+' · '+sl.recent[0].at:'']);
+ ((M.os&&M.os.asks)||[]).forEach(a=>out.push(['ask',a.area,a.t,a.d||'',a.id]));
  return out}
 
 const P=[
@@ -296,13 +298,13 @@ const P=[
   `<div class="box"><div class="bh"><span class="ic">AT</span>Shifts today<span class="sp"></span>${miss&&M&&M.dow!==5?`<span class="st bad">${miss} no report</span>`:`<span class="st ok">all in</span>`}</div>
   ${ppl.map(p=>`<div class="row" style="padding:0"><span style="width:44px;font-size:10px;color:${(p.ev||[]).length?'var(--fg)':'#ff9aa5'}">${esc(p.n.split(' ')[0].slice(0,8))}</span><div class="tl" style="flex:1">${line(p)}</div></div>`).join('')}
   <div class="axis" style="margin-left:51px"><span>10:00</span><span>13:00</span><span>16:00</span><span>19:00</span><span>22:00</span></div></div>`+ag('office')}},
- {id:'brain',c:'#60a5fa',col:3,row:0,cap:'THE AGENTS REPORT BACK.',html:()=>{const runs=(M&&M.runs)||[];
-  return head('04','Agent activity',null,`<span class="cnt">${runs.length} logged</span>`)+
-  `<div class="box" style="flex:1"><div class="bh"><span class="ic">AI</span>What the agents did<span class="sp"></span><small>runs log</small></div>${runs.length?runs.slice(0,5).map(r=>`<div class="row"><span class="st ${r.needs_atiq?'mid':'ok'}">${esc(r.agent)}</span><span class="sp">${esc(r.job)}</span><span class="num" ${mu}>${esc(r.at)}</span></div>`).join(''):`<div class="row"><span class="sp" style="white-space:normal;color:var(--mute)">The night brief logs its first run at 23:00 tonight. Every finished agent job shows up here.</span></div>`}</div>`+ag('brain')}},
- {id:'growth',c:'#f472b6',col:0,row:1,ex:1,cap:'CONTENT POSTS ITSELF.',html:()=>head('05','Growth',[['Atiq']],'<span class="tagx">Example</span>')+
-  `<div class="box"><div class="bh"><span class="ic">IG</span>This week on Instagram<span class="sp"></span><small>not connected</small></div><div class="cal">
-  ${[['Mon','t','Reel'],['Tue','','—'],['Wed','t2','Carousel'],['Thu','t','Reel'],['Fri','','—'],['Sat','t2','Case'],['Sun','t','Reel']].map(d=>`<div class="${d[1]}"><b style="position:absolute;top:3px;left:4px;font-size:8px;opacity:.8">${d[0]}</b>${d[2]}</div>`).join('')}</div>
-  <div class="row" style="margin-top:6px"><span class="sp">"Comment MAP" replies</span><span class="st">DM sent</span></div></div>`+ag('growth')},
+ {id:'brain',c:'#60a5fa',col:3,row:0,cap:'THE OS GETS BUILT.',html:()=>{const runs=(M&&M.runs)||[],os=(M&&M.os)||{},ph=os.phases||[],pc=os.tasks_all?Math.round(os.tasks_done/os.tasks_all*100):0;
+  return head('04','Assistaa OS',null,`<span class="cnt">${pc}% built</span>`)+
+  `<div class="box"><div class="bh"><span class="ic">OS</span>Task Shield<span class="sp"></span><small>${num(os.tasks_done)}/${num(os.tasks_all)} done</small></div>${ph.map(p=>`<div class="row"><span class="sp">${esc(p.p)}</span><span class="bar"><b style="width:${p.all?p.done/p.all*100:0}%"></b></span><span class="num" style="width:30px;text-align:right">${p.done}/${p.all}</span></div>`).join('')}${(os.next||[])[0]?`<div class="row"><span class="st mid">next</span><span class="sp">${esc(os.next[0].t)}</span></div>`:''}</div>
+  <div class="box" style="flex:1"><div class="bh"><span class="ic">AI</span>What the agents did<span class="sp"></span><small>runs log</small></div>${runs.length?runs.slice(0,3).map(r=>`<div class="row"><span class="st ${r.needs_atiq?'mid':'ok'}">${esc(r.agent)}</span><span class="sp">${esc(r.job)}</span><span class="num" ${mu}>${esc(r.at)}</span></div>`).join(''):`<div class="row"><span class="sp" ${mu}>No runs yet</span></div>`}</div>`}},
+ {id:'growth',c:'#f472b6',col:0,row:1,cap:'CONTENT GETS MADE.',html:()=>{const C=(M&&M.os&&M.os.content)||[],L={idea:'idea',approved:'to build',built:'built',ok:'ready',posted:'posted'},K={idea:'',approved:'mid',built:'ok',ok:'ok',posted:'ok'};
+  return head('05','Growth',[['Atiq']],`<span class="cnt">${C.filter(c=>c.st!=='approved'&&c.st!=='idea').length}/${C.length} built</span>`)+
+  `<div class="box"><div class="bh"><span class="ic">IG</span>Content this week<span class="sp"></span><small>posted by hand</small></div>${C.length?C.slice(0,4).map(c=>`<div class="row"><span class="num" style="width:26px" ${mu}>${esc(c.day)}</span><span class="sp">${esc(c.t)}</span><span class="st ${K[c.st]||''}">${esc(L[c.st]||c.st)}</span></div>`).join('')+(C.length>4?`<div class="row"><span class="sp" ${mu}>+ ${C.length-4} more this week</span></div>`:''):`<div class="row"><span class="sp" ${mu}>No posts planned. Run content research.</span></div>`}</div>`+ag('growth')}},
  {id:'sales',c:'#fb923c',col:3,row:1,cap:'LEADS COME IN.',html:()=>{const s=(M&&M.sales)||{};
   return head('06','Sales',[['Atiq']],'<span class="cnt">assistaa.com</span>')+
   `<div class="cols"><div class="box"><div class="bh"><span class="ic">XR</span>Store X-Ray</div><div class="big">${num(s.scans)}</div><small ${mu}>${num(s.scans_today)} today</small></div>
@@ -314,7 +316,7 @@ const P=[
   <div class="row"><span class="sp">Customer messages</span><span class="st ok">attached</span></div><div class="row"><span class="sp">Response drafted</span><span class="st mid">needs you</span></div></div>`+ag('disputes')},
  {id:'needs',c:'#ff6b7a',col:1,row:2,cap:'WHAT NEEDS YOU.',html:()=>{const N=needs();
   return head('!','Needs you',null,`<span class="cnt">${N.length} open</span>`)+
-  `<div class="box" style="flex:1">${N.length?N.slice(0,5).map(i=>`<div class="row" style="padding:6px 0"><span class="st ${i[0]}" style="width:70px;text-align:center">${esc(i[1])}</span><span class="sp" style="white-space:normal"><b style="font-weight:600">${esc(i[2])}</b><br><small ${mu}>${esc(i[3])}</small></span></div>`).join(''):`<div class="row"><span class="sp" ${mu}>${M?'Nothing needs you right now.':'Loading…'}</span></div>`}</div>`}},
+  `<div class="box" style="flex:1;overflow:hidden">${N.length?N.slice(0,5).map(i=>`<div class="row" style="padding:5px 0"><span class="st ${i[0]==='ask'?'mid':i[0]}" style="width:70px;text-align:center">${esc(i[1])}</span><span class="sp" style="white-space:normal"><b style="font-weight:600">${esc(i[2])}</b><br><small ${mu}>${esc(i[3])}</small></span>${i[4]?`<button class="askdone" data-ask="${esc(i[4])}" type="button" title="Mark done">✓</button>`:''}</div>`).join('')+(N.length>5?`<div class="row"><span class="sp" ${mu}>+ ${N.length-5} more</span></div>`:''):`<div class="row"><span class="sp" ${mu}>${M?'Nothing needs you right now.':'Loading…'}</span></div>`}</div>`}},
  {id:'money',c:'#facc15',col:2,row:2,cap:'MONEY GETS CHASED.',html:()=>head('08','Finance',[['Atiq']],`<span class="cnt">${num(M&&M.clients)} clients</span>`)+
   `<div class="box"><div class="bh"><span class="ic">$</span>Rate card<span class="sp"></span><small>pay per result</small></div>
   ${[['Support ticket','$0.40 → $0.22'],['Listing','$0.65 · premium $2'],['Dispute won','20% · $10–150'],['Creative','$5 · 20 for $79']].map(r=>`<div class="row"><span class="sp">${r[0]}</span><span class="num">${r[1]}</span></div>`).join('')}</div>`+ag('money')},
@@ -379,6 +381,7 @@ fit();addEventListener('resize',fit);
 const gate=$('gate'),pin=$('pin'),gmsg=$('gmsg'),gboot=$('gboot'),gf=$('gf'),gb=$('gb'),lockb=$('lock');
 let token=null,pollT=null;
 const store={get:()=>{try{return sessionStorage.getItem('am_t')}catch(e){return null}},set:v=>{try{v?sessionStorage.setItem('am_t',v):sessionStorage.removeItem('am_t')}catch(e){}}};
+document.addEventListener('click',async e=>{const b=e.target.closest('.askdone');if(!b||!token)return;b.disabled=true;try{const j=await call({token,action:'ask_done',id:Number(b.dataset.ask)});if(j.ok)show(j.data);else b.disabled=false}catch(_){b.disabled=false}});
 async function call(body){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return r.json()}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function boot(){const L=['PIN verified','Linking support desk','Linking listings and stores','Reading back office shifts','Counting agents','Map online'];gboot.textContent='';for(const l of L){gboot.textContent+='> '+l+'\n';await sleep(260)}}

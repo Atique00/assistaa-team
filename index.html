@@ -923,6 +923,28 @@ footer .glass-logo .logo-mark{width:26px;height:26px}
   .page *,header.nav{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
   header.nav{background:rgba(5,9,18,.94)}
 }
+
+.nav-act{display:flex;align-items:center;gap:10px;flex:none}
+.nav-act .btn,.nav-links a{white-space:nowrap}
+@media (max-width:1320px){.nav-links a{padding:9px 9px;font-size:15px}.nav-login svg{display:none}.nav-act .btn{padding:12px 16px}}
+@media (max-width:1120px){.nav-links a{padding:8px 7px;font-size:14px}}
+.nav-login{padding:12px 18px;font-weight:600;color:#DCE4EE;border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.04)}
+.nav-login:hover{color:#fff;border-color:#00AEEF;box-shadow:0 0 0 1px rgba(0,174,239,.35),0 8px 22px -10px rgba(0,174,239,.6)}
+@media (max-width:520px){.nav-act{gap:6px}.nav-act .btn{padding:9px 12px;font-size:13.5px}.nav-act .btn-primary .arrow{display:none}.nav-login svg{display:none}}
+@media (max-width:380px){.glass-logo .wq{display:none}}
+/* No sideways scrolling on any device (the globe canvas and wide strips stay inside the page) */
+html{overflow-x:clip}
+@supports not (overflow:clip){html,body{overflow-x:hidden}}
+.hero{overflow-x:clip}
+/* Smooth scrolling on every screen (Nov 2026): soft glows are drawn as gradients instead of live blur,
+   and only the top menu keeps a frosted-glass blur. Same look, far less work for the graphics card. */
+.bgfx .blob{filter:none!important;background:radial-gradient(closest-side,var(--bc),transparent 100%)!important}
+.bgfx .b1{--bc:var(--blob1)}.bgfx .b2{--bc:var(--blob2)}.bgfx .b3{--bc:var(--blob3)}
+.pfx i{filter:none!important}
+.pfx i:nth-child(odd){background:radial-gradient(closest-side,color-mix(in srgb,var(--c1) 60%,transparent),transparent 100%)!important}
+.pfx i:nth-child(even){background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 55%,transparent),transparent 100%)!important}
+.page *:not(header.nav):not(.nav-links){-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.marquee,.svc,.plan,.rev,.form,.band,.split,.founder,.status,.calc,.rc{background-color:color-mix(in srgb,#0b1220 86%,transparent)}
 </style>
 </head>
 <body>
@@ -940,7 +962,7 @@ footer .glass-logo .logo-mark{width:26px;height:26px}
 <a href="#pricing">Pricing</a>
 <a href="#about">About</a>
 </nav>
-<a class="btn btn-primary" href="#book">Book a call <span class="arrow">→</span></a>
+<div class="nav-act"><a class="btn btn-ghost nav-login" href="/app/login" aria-label="Log in to Assistaa (team and clients)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>Log in</a><a class="btn btn-primary" href="#book">Book a call <span class="arrow">→</span></a></div>
 </div>
 </header>
 <main id="view-home">

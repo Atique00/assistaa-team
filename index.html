@@ -953,6 +953,57 @@ html{overflow-x:clip}
 .pfx i:nth-child(even){background:radial-gradient(closest-side,color-mix(in srgb,var(--c2) 55%,transparent),transparent 100%)!important}
 .page *:not(header.nav):not(.nav-links){-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 .marquee,.svc,.plan,.rev,.form,.band,.split,.founder,.status,.calc,.rc{background-color:color-mix(in srgb,#0b1220 86%,transparent)}
+
+/* Store X-Ray homepage demo (X1) — transform/opacity only */
+.xr .xr-chips{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.xr .xr-chips li{font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;border:1px solid var(--con-line);background:color-mix(in srgb,var(--con-fg) 5%,transparent)}
+.xr-cta{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:26px}
+.xr-cta span{font-size:13px;color:var(--con-muted)}
+.xr-pow{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:12.5px;color:var(--con-muted)}
+.xr-flow{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:10px;margin-top:26px}
+.xr-fs{border:1px solid var(--con-line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--con-muted)}
+.xr-fs b{color:var(--con-fg);font:600 12px var(--f-mono);letter-spacing:.04em}
+.xr-fs.pd{border-color:color-mix(in srgb,var(--brand) 45%,var(--con-line));background:color-mix(in srgb,var(--brand) 8%,transparent)}
+.xr-fs.pd b{color:var(--accent)}
+.xr-arrow{align-self:center;width:22px;height:2px;background:var(--con-line);position:relative;overflow:hidden}
+.xr-arrow::after{content:"";position:absolute;inset:0;background:var(--accent);transform:translateX(-100%);animation:xrflow 1.8s linear infinite}
+@keyframes xrflow{to{transform:translateX(100%)}}
+@media (max-width:560px){.xr-flow{grid-template-columns:1fr}.xr-arrow{display:none}}
+.xr-con{background:color-mix(in srgb,var(--con-fg) 4%,transparent);border:1px solid var(--con-line);border-radius:18px;padding:20px;min-width:0;position:relative;overflow:hidden;align-self:center}
+.xr-h{display:flex;justify-content:space-between;gap:10px;font:500 12px var(--f-mono);color:var(--con-muted);padding-right:40px}
+.xr-live{display:flex;align-items:center;gap:6px;color:#8FF0BE}
+.xr-live i{width:7px;height:7px;border-radius:50%;background:#3CD58A;animation:xrpulse 1.4s ease-in-out infinite}
+.xr-live em{font-style:normal}
+@keyframes xrpulse{50%{opacity:.25;transform:scale(.7)}}
+.xr-bar{height:4px;border-radius:4px;background:var(--con-line);margin:14px 0 10px;overflow:hidden}
+.xr-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--signal));transform-origin:left;transform:scaleX(0)}
+.xr-think{font:500 12px var(--f-mono);color:var(--con-muted);min-height:18px;display:flex;align-items:center;gap:2px;white-space:nowrap;overflow:hidden}
+.xr-caret{display:inline-block;width:7px;height:13px;background:var(--accent);animation:xrcaret 1s steps(1) infinite}
+@keyframes xrcaret{50%{opacity:0}}
+.xr-steps{list-style:none;padding:0;margin:12px 0 0;display:flex;flex-direction:column;gap:8px;min-height:318px}
+.xr-steps li{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--con-line);font-size:13.5px;opacity:0;transform:translateY(8px);transition:opacity .45s,transform .45s}
+.xr-steps li.in{opacity:1;transform:none}
+.xr-steps li.scan{border-color:color-mix(in srgb,var(--accent) 55%,var(--con-line))}
+.xr-steps .n{font:500 11px var(--f-mono);color:var(--accent)}
+.xr-steps .t b{display:block;font-weight:600}
+.xr-steps .t span{color:var(--con-muted);font-size:12.5px}
+.xr-steps .sev{opacity:0;transform:scale(.6);transition:opacity .3s,transform .3s}
+.xr-steps li.done .sev{opacity:1;transform:none}
+.xr-steps .thumb{display:inline-block;width:22px;height:22px;border-radius:6px;vertical-align:middle;margin-right:8px;background:linear-gradient(135deg,#6b3a2c,#3a2a4a)}
+.xr-foot{display:flex;align-items:center;gap:16px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--con-line)}
+.xr-ring{position:relative;width:64px;height:64px;flex:none}
+.xr-ring svg{width:64px;height:64px;transform:rotate(-90deg)}
+.xr-ring circle{fill:none;stroke-width:6;stroke:var(--con-line)}
+.xr-ring #xrArc{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)}
+.xr-ring b{position:absolute;inset:0;display:grid;place-items:center;font:800 18px var(--f-display);font-variant-numeric:tabular-nums}
+.xr-nums{display:flex;flex-direction:column;gap:2px;min-width:0}
+.xr-nums small{font:500 10.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--con-muted)}
+.xr-nums strong{font:800 24px/1.1 var(--f-display);color:var(--signal);font-variant-numeric:tabular-nums}
+.xr-nums span{font:500 11.5px var(--f-mono);color:var(--con-muted);font-variant-numeric:tabular-nums}
+.xr-pd{display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--brand) 12%,transparent);border:1px solid color-mix(in srgb,var(--brand) 40%,transparent);font-size:13px;opacity:0;transform:translateY(6px);transition:opacity .5s,transform .5s}
+.xr-pd.in{opacity:1;transform:none}
+.xr-pd b{font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+@media (max-width:560px){.xr-steps{min-height:360px}.xr-h{flex-direction:column;gap:4px}}
 </style>
 </head>
 <body>
@@ -964,7 +1015,7 @@ html{overflow-x:clip}
 <nav class="nav-links" aria-label="Main">
 <a href="#services">Services</a>
 <a href="#how">How it works</a>
-<a href="#xray">Store X-Ray</a>
+<a href="/xray">Store X-Ray</a>
 <a href="#case">Case study</a>
 <a href="#reviews">Reviews</a>
 <a href="#pricing">Pricing</a>
@@ -987,7 +1038,7 @@ html{overflow-x:clip}
 </h1>
 <p class="lede">Customer support, disputes, product listings and creatives, handled by an experienced ecommerce team working alongside AI. One team, one dashboard, one monthly bill.</p>
 <div class="cta">
-<a class="btn btn-primary" href="#xray">Get a free Store X-Ray <span class="arrow">→</span></a>
+<a class="btn btn-primary" href="/xray">Get a free Store X-Ray <span class="arrow">→</span></a>
 <a class="btn btn-ghost" href="#book">Book a strategy call</a>
 </div>
 <div class="trust">
@@ -1103,41 +1154,31 @@ html{overflow-x:clip}
 </section>
 <section id="xray" style="padding-top:0">
 <div class="wrap">
-<div class="xray rv">
-<div>
+<div class="xray xr rv">
+<div class="xr-l">
 <span class="eyebrow">Store X-Ray</span>
-<h2>See what your store is quietly losing.</h2>
-<p class="sub">Missing size charts, vague refund policies and slow replies all cost money in returns, disputes and lost sales. Enter your store and we'll show you where.</p>
-<form class="xform" id="xform" novalidate>
-<label for="store" class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Your store URL</label>
-<input id="store" name="store" type="text" placeholder="yourstore.com" autocomplete="url">
-<button class="btn btn-primary" type="submit">Scan <span class="arrow">→</span></button>
-</form>
-<p class="xnote" id="xnote">Free. Checks only what your store shows the public, in about 10 seconds. Built for Shopify stores.</p>
+<h2>Watch a store get X-rayed.</h2>
+<p class="sub">We read the whole store the way a shopper, PayPal and Google do: policies, every product, titles, tags, size charts, offers. Then we show you where it leaks money.</p>
+<ul class="xr-chips" aria-label="What the X-Ray checks"><li>Policies &amp; trust</li><li>Size charts</li><li>Titles &amp; tags</li><li>Collections</li><li>Offers &amp; bundles</li><li>Google / Meta flags</li><li>Winner match</li></ul>
+<div class="xr-cta"><a class="btn btn-primary" href="/xray">Get your free X-Ray <span class="arrow">→</span></a><span>1 free full scan per store</span></div>
+<p class="xr-pow"><img src="/logo-mark.svg" alt="" width="16" height="16">Powered by Assistaa OS · built from 1M+ tickets and 300K+ listings</p>
+<div class="xr-flow" aria-label="From X-Ray to Product Doctor">
+<div class="xr-fs"><b>01 · Store X-Ray</b><span>Free. Finds what's leaking, in every product.</span></div>
+<i class="xr-arrow" aria-hidden="true"></i>
+<div class="xr-fs pd"><b>02 · Product Doctor</b><span>Connect your store and we fix it: tags, collections, size charts and titles, starting with the products you run ads on.</span></div>
 </div>
-<div class="report tilt" aria-live="polite">
-<span class="sample-tag">Sample</span>
-<div class="report-h"><span id="rep-store">example-store.com</span><span id="rep-state">Scan complete</span></div>
-<div class="scanbar"><i id="bar"></i></div>
-<div class="scanstep" id="scanstep">6 issues found across 48 pages</div>
-<ul class="finds" id="finds">
-<li><span class="sev hi">HIGH</span><span>Refund policy gives no timeframe, a common trigger for PayPal disputes</span></li>
-<li><span class="sev hi">HIGH</span><span>14 apparel products have no size chart</span></li>
-<li><span class="sev md">MED</span><span>Shipping emails don't include a tracking link</span></li>
-<li><span class="sev md">MED</span><span>Contact page shows no expected response time</span></li>
-<li><span class="sev md">MED</span><span>3 products share the same description</span></li>
-</ul>
-<div class="leak"><small id="leak-l">Estimated monthly leak</small><strong id="leak">$2,100 – $3,400</strong></div>
-          <div class="gmc" id="gmc" hidden><span>Google Merchant readiness</span><span class="gbar"><i id="gbar"></i></span><b id="gnum"></b></div>
-          <div class="xmore" id="xmore" hidden>
-            <p><b id="xmore-n">More issues</b> and the full list of what passed. Get the full report free:</p>
-            <form id="xunlock" novalidate>
-              <input id="xname" type="text" placeholder="Your name" autocomplete="name" aria-label="Your name">
-              <input id="xemail" type="email" placeholder="Work email" autocomplete="email" aria-label="Work email">
-              <button class="btn btn-primary" type="submit">Show full report</button>
-            </form>
-            <p id="xumsg" hidden></p>
-          </div>
+</div>
+<div class="xr-con" id="xrCon" aria-hidden="true">
+<span class="sample-tag">Demo</span>
+<div class="xr-h"><span id="xrDom">demo-fashion-store.com</span><span class="xr-live"><i></i><em id="xrState">scanning live</em></span></div>
+<div class="xr-bar"><i id="xrBar"></i></div>
+<div class="xr-think"><span id="xrThink">Reading the store…</span><b class="xr-caret"></b></div>
+<ol class="xr-steps" id="xrSteps"></ol>
+<div class="xr-foot">
+<div class="xr-ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="27"/><circle id="xrArc" cx="32" cy="32" r="27" pathLength="100"/></svg><b id="xrScore">0</b></div>
+<div class="xr-nums"><small>Store score · est. monthly leak</small><strong id="xrLeak">—</strong><span id="xrCount">0 products checked</span></div>
+</div>
+<div class="xr-pd" id="xrPd"><b>Product Doctor</b><span id="xrPdT">can fix 6 of these inside your store</span></div>
 </div>
 </div>
 </div>
@@ -1398,7 +1439,7 @@ Super customer service! Recommended</blockquote><figcaption><span class="rc-cc">
 <div class="wrap foot">
 <a class="logo glass-logo" href="#home" aria-label="Assistaa home"><img src="/mark.svg" alt="" width="28" height="28" class="logo-mark"><span class="wq">Assistaa</span></a>
 <nav aria-label="Footer">
-<a href="#services">Services</a><a href="#xray">Store X-Ray</a><a href="#pricing">Pricing</a><a href="#about">About</a><a href="#book">Contact</a>
+<a href="#services">Services</a><a href="/xray">Store X-Ray</a><a href="#pricing">Pricing</a><a href="#about">About</a><a href="#book">Contact</a>
 </nav>
 <span>© 2026 Assistaa · Based in Dhaka, serving stores worldwide · <a href="/privacy.html">Privacy</a></span>
 </div>
@@ -1521,75 +1562,58 @@ requestAnimationFrame(f); co.unobserve(el);
 );
 nums.forEach(n=>co.observe(n));
 }
-const xform = document.getElementById('xform');
-  const bar = document.getElementById('bar');
-  const step = document.getElementById('scanstep');
-  const state = document.getElementById('rep-state');
-  const repStore = document.getElementById('rep-store');
-  const findsUl = document.getElementById('finds');
-  const leak = document.getElementById('leak');
-  const leakL = document.getElementById('leak-l');
-  const xmore = document.getElementById('xmore');
-  const sampleTag = document.querySelector('.report .sample-tag');
-  const phases = ['Connecting to the store…','Reading public product data…','Checking refund, shipping and privacy policies…','Looking for chat, reviews and email tools…','Scoring the results…'];
-  const SEV = {hi:'HIGH', md:'MED', lo:'LOW'};
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const row = i => `<li><span class="sev ${i.sev}">${SEV[i.sev]}</span><span><b class="xarea">${esc(i.area)}</b>${esc(i.text)}</span></li>`;
-  let scanning = false, last = null;
-  function render(r, full){
-    if (sampleTag) sampleTag.hidden = true;
-    repStore.textContent = r.domain;
-    state.textContent = full ? 'Full report' : 'Scan complete';
-    const n = r.issues.length;
-    step.textContent = (n ? `${n} issue${n>1?'s':''} found` : 'No issues found') + (r.productsChecked ? ` · ${r.productsChecked} products checked` : '');
-    const list = full ? r.issues : r.issues.slice(0,3);
-    findsUl.innerHTML = list.map(row).join('') + (full && r.passed.length ? `<li><span class="sev ok">PASS</span><span>${r.passed.map(esc).join(' · ')}</span></li>` : '');
-    leakL.textContent = 'Store score';
-    leak.textContent = r.score + '/100';
-    leak.style.color = r.score >= 80 ? '#3CD58A' : r.score >= 50 ? '' : '#FF8A7A';
-    const gm = document.getElementById('gmc');
-    if (r.google && r.google.total) { gm.hidden = false; document.getElementById('gnum').textContent = `${r.google.passed}/${r.google.total}`; document.getElementById('gbar').style.transform = `scaleX(${r.google.passed / r.google.total})`; } else gm.hidden = true;
-    if (!full && (n > 3 || r.passed.length)) {
-      xmore.hidden = false;
-      document.getElementById('xmore-n').textContent = n > 3 ? `${n-3} more issue${n-3>1?'s':''}` : 'The details';
-    } else if (!full) xmore.hidden = true;
-  }
-  function fail(text){
-    state.textContent = 'Scan failed';
-    step.innerHTML = `<span class="xerr">${esc(text)}</span>`;
-    findsUl.innerHTML = '';
-    leak.textContent = '—'; leak.style.color = '';
-    xmore.hidden = true; document.getElementById('gmc').hidden = true;
-  }
-  xform.addEventListener('submit', e=>{
-    e.preventDefault();
-    if (scanning) return;
-    const v = document.getElementById('store').value.trim().replace(/^https?:\/\//i,'').replace(/[\/?#].*$/,'');
-    if (!v || !/\./.test(v)) { document.getElementById('store').focus(); step.innerHTML = '<span class="xerr">Enter your store address, like yourstore.com</span>'; return; }
-    scanning = true; last = null;
-    if (sampleTag) sampleTag.hidden = true;
-    repStore.textContent = v; state.textContent = 'Scanning…';
-    findsUl.querySelectorAll('li').forEach(f=>f.classList.add('dim'));
-    leak.textContent = '—'; leak.style.color = ''; xmore.hidden = true;
-    bar.style.transition = 'none'; bar.style.transform = 'scaleX(0)';
-    void bar.offsetWidth;
-    bar.style.transition = reduce ? 'none' : 'transform 9s cubic-bezier(.2,.6,.3,1)';
-    bar.style.transform = 'scaleX(.92)';
-    let p = 0; step.textContent = phases[0];
-    const iv = setInterval(()=>{ p = Math.min(p+1, phases.length-1); step.textContent = phases[p]; }, reduce ? 0 : 1600);
-    const started = Date.now();
-    fetch('/api/xray?store=' + encodeURIComponent(v))
-      .then(r => r.json().catch(()=>({error:'Live scans run on assistaa.com.'})).then(j => ({ok:r.ok, j})))
-      .catch(() => ({ok:false, j:{error:'Live scans run on assistaa.com. Please try again in a moment.'}}))
-      .then(({ok, j}) => new Promise(res => setTimeout(()=>res({ok, j}), Math.max(0, 2200 - (Date.now()-started)))))
-      .then(({ok, j}) => {
-        clearInterval(iv);
-        bar.style.transition = 'transform .3s'; bar.style.transform = 'scaleX(1)';
-        if (!ok || j.error || !j.issues) fail(j.error || 'Something went wrong. Please try again.');
-        else { last = j; render(j, false); }
-        scanning = false;
+  /* Store X-Ray homepage demo: a sample scan that plays while in view */
+  (function(){
+    const con = document.getElementById('xrCon'); if (!con) return;
+    const $ = id => document.getElementById(id);
+    const STORES = [
+      {dom:'demo-fashion-store.com', n:2948, score:72, leak:'$2,100 – $3,400', fix:6, steps:[
+        ['Reading refund policy','No timeframe, a common PayPal dispute trigger','hi'],
+        ['Scanning 2,948 products','<i class="thumb"></i>412 apparel items have no size chart','md'],
+        ['Checking titles, tags and collections','61% of products have under 5 tags','md'],
+        ['Comparing offers and bundles','Bundle pricing in line with top stores','ok'],
+        ['Matching with winning products','We think we found your winner · 87% match','ok']]},
+      {dom:'demo-niche-store.com', n:640, score:58, leak:'$900 – $1,600', fix:5, steps:[
+        ['Reading shipping and returns','Returns page missing from the footer','hi'],
+        ['Scanning 640 products','<i class="thumb" style="background:linear-gradient(135deg,#1f5a4a,#203a5c)"></i>3 title styles mixed across the catalog','md'],
+        ['Checking Google / Meta readiness','118 products missing a GTIN or brand','hi'],
+        ['Checking collections','Men → Summer → Tops tree is incomplete','md'],
+        ['Matching with winning products','Top seller close to a known winner · 74% match','ok']]}];
+    const SEV = {hi:'HIGH', md:'MED', ok:'GOOD'};
+    const T = reduce ? 0 : 1;
+    let si = 0, timers = [], running = false, raf = 0;
+    const later = (fn, ms) => timers.push(setTimeout(fn, ms * T));
+    function stop(){ timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(raf); running = false; }
+    function count(el, to, ms, fmt){ if (!T) { el.textContent = fmt(to); return; } const t0 = performance.now(); const f = t => { const p = Math.min(1,(t-t0)/ms); el.textContent = fmt(Math.round(to*(1-Math.pow(1-p,3)))); if (p<1) raf = requestAnimationFrame(f); }; raf = requestAnimationFrame(f); }
+    function type(text){ const el = $('xrThink'); if (!T) { el.textContent = text; return; } let i = 0; el.textContent = ''; const step = () => { el.textContent = text.slice(0, ++i); if (i < text.length) later(step, 22); }; step(); }
+    function run(){
+      stop(); running = true;
+      const S = STORES[si++ % STORES.length], ul = $('xrSteps'), bar = $('xrBar');
+      $('xrDom').textContent = S.dom; $('xrState').textContent = 'scanning live';
+      $('xrScore').textContent = '0'; $('xrLeak').textContent = '—'; $('xrCount').textContent = '0 products checked';
+      $('xrArc').style.strokeDashoffset = 100; $('xrPd').classList.remove('in');
+      bar.style.transition = 'none'; bar.style.transform = 'scaleX(0)'; void bar.offsetWidth;
+      bar.style.transition = T ? 'transform 9.5s linear' : 'none'; bar.style.transform = 'scaleX(1)';
+      ul.innerHTML = S.steps.map((s,i) => `<li><span class="n">0${i+1}</span><span class="t"><b>${s[0]}</b><span>${s[1]}</span></span><span class="sev ${s[2]==='ok'?'ok':s[2]}">${SEV[s[2]]}</span></li>`).join('');
+      const lis = [...ul.children];
+      count($('xrCount'), S.n, 8000, v => v.toLocaleString('en-US') + ' products checked');
+      lis.forEach((li, i) => {
+        later(() => { type(S.steps[i][0] + '…'); li.classList.add('in','scan'); }, 300 + i*1800);
+        later(() => { li.classList.remove('scan'); li.classList.add('done'); }, 1500 + i*1800);
       });
-  });
+      const fin = 300 + lis.length*1800;
+      later(() => {
+        type('Report ready. Sent by email and WhatsApp.'); $('xrState').textContent = 'scan complete';
+        $('xrArc').style.strokeDashoffset = 100 - S.score; count($('xrScore'), S.score, 1400, v => v);
+        $('xrLeak').textContent = S.leak;
+        $('xrPdT').textContent = `can fix ${S.fix} of these inside your store`;
+      }, fin);
+      later(() => $('xrPd').classList.add('in'), fin + 900);
+      if (T) later(run, fin + 5200);
+    }
+    if (!('IntersectionObserver' in window) || !T) { run(); return; }
+    new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting && !running) run(); else if (!en.isIntersecting && running) stop(); }), {threshold:.3}).observe(con);
+  })();
   /* AI -> team hand-off loop in the split section */
   (function(){
     const sp = document.querySelector('.split'); if (!sp || reduce) return;
@@ -1769,31 +1793,6 @@ const xform = document.getElementById('xform');
     const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(en => { const a = map.get(en.target.id); if (a && en.isIntersecting) { links.forEach(l => l.classList.remove('is-on')); a.classList.add('is-on'); } }), {rootMargin: '-40% 0px -55% 0px'}) : null;
     if (io) map.forEach((a, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
   })();
-  document.getElementById('xunlock').addEventListener('submit', e=>{
-    e.preventDefault();
-    if (!last) return;
-    const name = document.getElementById('xname').value.trim();
-    const email = document.getElementById('xemail').value.trim();
-    const m = document.getElementById('xumsg');
-    m.hidden = false; m.className = '';
-    if (!name || !/^\S+@\S+\.\S+$/.test(email)) { m.className = 'xerr'; m.textContent = 'Add your name and a valid email.'; return; }
-    const btn = e.target.querySelector('button'); btn.disabled = true; m.textContent = 'One moment…';
-    fetch('https://zciuchdximmzwiisdkqu.supabase.co/rest/v1/website_leads', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':'sb_publishable_WMggW823F5JaQWI5tZUn3A_2RCcqKcA','Prefer':'return=minimal'},
-      body: JSON.stringify({ name: name.slice(0,120), email: email.slice(0,200), store_url: last.domain, need: 'Store X-Ray', note: `X-Ray score ${last.score}/100, ${last.issues.length} issues` })
-    }).then(r=>{
-      if (!r.ok) throw new Error(r.status);
-      render(last, true);
-      e.target.hidden = true;
-      document.querySelector('#xmore p').hidden = true;
-      m.innerHTML = 'Full report unlocked. Want us to fix these for you? <a href="#book">Book a free call →</a>';
-      const bs = document.getElementById('bstore'); if (bs && !bs.value) bs.value = last.domain;
-      const bn = document.getElementById('bname'); if (bn && !bn.value) bn.value = name;
-      const be = document.getElementById('bemail'); if (be && !be.value) be.value = email;
-    }).catch(()=>{ m.className = 'xerr'; m.textContent = 'That didn\'t go through. Please try again.'; })
-      .finally(()=>{ btn.disabled = false; });
-  });
 const cv = document.getElementById('globe');
 if (cv && cv.getContext){
 const ctx = cv.getContext('2d');

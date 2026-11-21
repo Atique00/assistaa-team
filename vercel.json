@@ -1,7 +1,20 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/app", "destination": "https://assistaa-app.vercel.app/app" },
-    { "source": "/app/:path*", "destination": "https://assistaa-app.vercel.app/app/:path*" }
+    {
+      "source": "/app",
+      "destination": "https://assistaa-app.vercel.app/app"
+    },
+    {
+      "source": "/app/:path*",
+      "destination": "https://assistaa-app.vercel.app/app/:path*"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/connect",
+      "destination": "https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/shopify-app/install",
+      "permanent": false
+    }
   ]
 }

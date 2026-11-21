@@ -960,7 +960,8 @@
         ${sp.dipon_tickets ? `<div class="item"><span class="dot"></span><div class="body"><div class="t">Dipon extra · ${esc(sp.dipon_tickets)} tickets a day</div><div class="s">On top of his share</div></div></div>` : ''}
         <div class="small muted" style="margin:8px 0">New tickets are split at 09:55, 12:55 and 15:55 (not Friday), oldest first.</div>
         ${(A.upcoming || []).length ? `<div class="label" style="margin:12px 0 6px">Planned</div>${A.upcoming.map((u) => `<div class="item"><span class="dot amber"></span><div class="body"><div class="t">From ${esc(u.from_date)}</div><div class="s">${esc(Object.entries(u.shares || {}).map(([n, v]) => n + ' ' + v + '%').join(' · '))}${u.dipon_tickets ? ' · Dipon extra ' + esc(u.dipon_tickets) : ''}${u.note ? ' · ' + esc(u.note) : ''}</div></div><button class="btn sm ghost" data-delsplit="${u.id}">Remove</button></div>`).join('')}` : ''}
-        <button class="btn ghost" id="aSplit" style="margin-top:10px">${I('refresh')} Change or plan split</button></div>` : ''}
+        <button class="btn ghost" id="aSplit" style="margin-top:10px">${I('refresh')} Change or plan split</button></div>
+      ${ticketRequestsCard()}` : ''}
       <div class="card"><h3>${I('team')} People <span class="cnt">${people.filter((p) => p.active).length}</span></h3>
         ${people.map((p) => `<div class="item"${p.active ? '' : ' style="opacity:.5"'}>${avatar(p.name, '', 34)}<div class="body"><div class="t">${esc(p.name)}${p.active ? '' : ' · access off'}</div><div class="s">${esc([p.title, p.rate != null && sup ? '৳' + p.rate + ' per message' : '', p.joined ? 'joined ' + p.joined : ''].filter(Boolean).join(' · '))}</div></div><button class="iconbtn" data-aperson="${esc(p.id)}" aria-label="Edit">${I('chev')}</button></div>`).join('')}
         <button class="btn" id="aAdd" style="margin-top:10px">${I('plus')} Add person</button></div>
@@ -991,6 +992,10 @@
     on('aFine', () => sheetAdminFine());
     on('aLeave', () => sheetAdminLeave());
     on('aSplit', () => sheetAdminSplit());
+    $$('[data-treq]').forEach((b) => b.onclick = () => sheetTicketRequest((A.requests || []).find((r) => r.id === Number(b.dataset.treq))));
+    $$('[data-delpreset]').forEach((b) => b.onclick = () => run(b, 'deletePreset', { preset: Number(b.dataset.delpreset) }, 'Preset turned off'));
+    on('aPresetToday', (b) => run(b, 'savePreset', { day: dhakaToday(), max: '' }, 'Everyone approved for today'));
+    on('aPreset', () => sheetPreset());
     on('aRecalc', (b) => run(b, 'recalc', {}, 'Fines and scores recalculated'));
   }
   function teamPeople() { return A.people.filter((p) => p.team === bossTeam && p.active); }
@@ -1057,6 +1062,60 @@
         setA(await adm('addLeave', { id: $('#lp', sh).value, from: $('#lf', sh).value, to: $('#lt', sh).value, reason: $('#lr', sh).value }));
         done('Leave saved');
       }).catch((e) => { $('#lerr', sh).textContent = e.message; });
+    });
+  }
+  /* ---------- Ticket requests: agents ask, Atiq approves (any number) or rejects; presets approve whole days ---------- */
+  const reqLeft = () => (A.requests || []).filter((r) => r.status === 'Approved').reduce((a, r) => a + (r.approved_amount || 0), 0);
+  function ticketRequestsCard() {
+    const reqs = A.requests || [], waiting = reqs.filter((r) => r.status === 'New'), inb = A.inbox;
+    const presets = A.presets || [], todayP = presets.find((p) => p.day === dhakaToday());
+    const st = { Approved: ['amber', (r) => 'Approved ' + r.approved_amount + ' · waiting for the next split'], Done: ['ok', (r) => r.note || 'Given'], Rejected: ['bad', (r) => r.note || 'Not approved'] };
+    return `<div class="card"><h3>${I('headset')} Ticket requests <span class="cnt">${waiting.length ? waiting.length + ' waiting' : 'today'}</span></h3>
+      <div class="small muted" style="margin-bottom:8px">${inb ? `Unassigned in Commslayer: <b>${esc(inb.unassigned)}</b> of ${esc(inb.open_total)} open · checked ${esc(inb.at)}` : 'Unassigned count shows after the next check.'}${reqLeft() ? ` · approved, not given yet: <b>${reqLeft()}</b>` : ''}</div>
+      ${waiting.map((r) => `<button class="item" data-treq="${r.id}" style="width:100%;text-align:left"><span class="dot amber"></span><div class="body"><div class="t">${esc(r.name)} asks for ${esc(r.amount)} tickets</div><div class="s">${esc(r.time)} · tap to approve or reject</div></div>${I('chev')}</button>`).join('')}
+      ${reqs.filter((r) => r.status !== 'New').map((r) => { const x = st[r.status] || ['', () => r.status]; return `<div class="item"><span class="dot ${x[0]}"></span><div class="body"><div class="t">${esc(r.name)} · asked ${esc(r.amount)} at ${esc(r.time)}</div><div class="s">${esc(x[1](r))}</div></div>${r.status === 'Approved' ? `<button class="btn sm ghost" data-treq="${r.id}">Change</button>` : ''}</div>`; }).join('')}
+      ${reqs.length ? '' : emptyBox('headset', 'No requests today.')}
+      <div class="label" style="margin:14px 0 6px">Presets</div>
+      ${presets.map((p) => `<div class="item"><span class="dot ok"></span><div class="body"><div class="t">${p.day === dhakaToday() ? 'Today' : esc(p.day)} · approve everyone</div><div class="s">${p.max_per_request ? 'Up to ' + esc(p.max_per_request) + ' per request' : 'Full amount asked'}${p.note ? ' · ' + esc(p.note) : ''}</div></div><button class="btn sm ghost" data-delpreset="${p.id}">Turn off</button></div>`).join('') || '<div class="small muted">No presets: every request waits for you.</div>'}
+      <div class="row" style="margin-top:10px">${todayP ? '' : `<button class="btn ghost" id="aPresetToday">${I('check')} Approve everyone today</button>`}<button class="btn ghost" id="aPreset">${I('plus')} Preset for a date</button></div>
+      <div class="small muted" style="margin-top:8px">Approved tickets are given at the next split (09:55, 12:55, 15:55), oldest tickets first. The person gets a notification.</div></div>`;
+  }
+  function sheetTicketRequest(r) {
+    if (!r) return;
+    const inb = A.inbox, free = inb ? Math.max(0, inb.unassigned - reqLeft() + (r.status === 'Approved' ? r.approved_amount || 0 : 0)) : null;
+    const start = r.status === 'Approved' ? r.approved_amount : free != null && free > 0 ? Math.min(r.amount, free) : r.amount;
+    const chips = [...new Set([r.amount, free, Math.ceil(r.amount / 2), 10].filter((n) => n > 0 && n <= 200))];
+    openSheet(`<h2>${esc(r.name)} asks for ${esc(r.amount)} tickets</h2>
+      <p class="lead">Asked at ${esc(r.time)}. ${free != null ? `About <b>${free}</b> unassigned tickets are free right now (checked ${esc(inb.at)}, minus ones already approved).` : 'The unassigned count is not known yet.'} If fewer are free at the split, ${esc(r.name)} gets all that are left.</p>
+      <label class="fl">How many to give</label><input class="field" id="tqn" type="number" inputmode="numeric" min="1" max="200" value="${esc(start)}">
+      <div class="quick" style="margin-top:6px">${chips.map((n) => `<button class="chip" data-tqn="${n}">${n === r.amount ? 'All ' + n : n === free ? 'Free ' + n : n}</button>`).join('')}</div>
+      <label class="fl">Note to ${esc(r.name)} (optional)</label><input class="field" id="tqnote" maxlength="200">
+      <div class="err" id="tqerr"></div>
+      <button class="btn" id="tqok">${I('check')} Approve</button>
+      <button class="btn ghost" id="tqno" style="margin-top:10px">Reject</button>`, (sh) => {
+      $$('[data-tqn]', sh).forEach((b) => b.onclick = () => { $('#tqn', sh).value = b.dataset.tqn; });
+      const go = (approve, btn) => busy(btn, async () => {
+        setA(await adm('decideRequest', { request: r.id, approve, amount: $('#tqn', sh).value, note: $('#tqnote', sh).value }));
+        done(approve ? 'Approved ' + $('#tqn', sh).value + ' tickets' : 'Request rejected', r.name + ' got a notification.');
+      }).catch((e) => { $('#tqerr', sh).textContent = e.message; });
+      $('#tqok', sh).onclick = () => go(true, $('#tqok', sh));
+      $('#tqno', sh).onclick = () => go(false, $('#tqno', sh));
+    });
+  }
+  function sheetPreset() {
+    const tomorrow = new Date(Date.now() + 30 * 36e5).toISOString().slice(0, 10);
+    openSheet(`<h2>Approve everyone on a date</h2><p class="lead">Every ticket request on that day is approved automatically. Leave the limit empty to give the full amount asked.</p>
+      <div class="row"><div><label class="fl">Date</label><input class="field" id="pday" type="date" min="${dhakaToday()}" value="${tomorrow}"></div>
+      <div><label class="fl">&nbsp;</label><div class="quick"><button class="chip" data-pday="${dhakaToday()}">Today</button><button class="chip" data-pday="${tomorrow}">Tomorrow</button></div></div></div>
+      <label class="fl">Max per request (optional)</label><input class="field" id="pmax" type="number" inputmode="numeric" min="1" max="200" placeholder="No limit">
+      <label class="fl">Note (optional)</label><input class="field" id="pnote" maxlength="200" placeholder="e.g. busy sale day">
+      <div class="err" id="perr"></div><button class="btn" id="pgo">${I('check')} Save preset</button>`, (sh) => {
+      $$('[data-pday]', sh).forEach((b) => b.onclick = () => { $('#pday', sh).value = b.dataset.pday; });
+      $('#pgo', sh).onclick = () => busy($('#pgo', sh), async () => {
+        const day = $('#pday', sh).value;
+        setA(await adm('savePreset', { day, max: $('#pmax', sh).value, note: $('#pnote', sh).value }));
+        done('Preset saved', day === dhakaToday() ? 'Requests waiting today were approved too.' : 'Starts on ' + day + '.');
+      }).catch((e) => { $('#perr', sh).textContent = e.message; });
     });
   }
   function sheetAdminSplit() {

@@ -197,7 +197,16 @@ async function teamTasks(teamId: number): Promise<Task[]> {
 }
 
 /* ---------------- today's state from work events ---------------- */
-type Ev = { event: string; at: Date; amount: number | null; status: string | null; note: string | null };
+type Ev = { event: string; at: Date; amount: number | null; status: string | null; note: string | null; approved_amount?: number | null };
+// what the team member sees for a ticket request (statuses: New -> Approved -> Done, or Rejected)
+function requestLabel(status: string | null, approved: number | null | undefined) {
+  switch (status || "New") {
+    case "New": return "Waiting for Atiq's approval";
+    case "Approved": return `Approved ${approved ?? ""} · coming at the next ticket split`.replace("  ", " ");
+    case "Rejected": return "Not approved";
+    default: return status || "";
+  }
+}
 function stateOf(evs: Ev[]) {
   const t = { state: "off", start: "", done: "", breakStart: "", breakUsed: false, requests: [] as { time: string; amount: number | null; status: string; note: string }[] };
   for (const e of evs) {
@@ -205,14 +214,14 @@ function stateOf(evs: Ev[]) {
     else if (e.event === "break_start") { t.breakStart = hm(e.at); t.breakUsed = true; if (t.state === "working") t.state = "break"; }
     else if (e.event === "break_end") { if (t.state === "break") t.state = "working"; }
     else if (e.event === "done") { t.done = hm(e.at); t.state = "done"; }
-    else if (e.event === "request_tickets") t.requests.push({ time: hm(e.at), amount: e.amount, status: e.status || "New", note: e.note || "" });
+    else if (e.event === "request_tickets") t.requests.push({ time: hm(e.at), amount: e.amount, status: requestLabel(e.status, e.approved_amount), note: e.note || "" });
   }
   return t;
 }
 async function todayEvents(empIds: string[]) {
   const by: Record<string, Ev[]> = {};
   if (!empIds.length) return by;
-  const rows = await sql`select employee_id::text, event, at, amount, status, note from public.work_events
+  const rows = await sql`select employee_id::text, event, at, amount, status, note, approved_amount from public.work_events
     where employee_id in ${sql(empIds)} and at >= ${dayStart(ymd(new Date()))} order by at`;
   for (const e of rows) (by[e.employee_id] ??= []).push(e as unknown as Ev);
   return by;
@@ -384,8 +393,10 @@ async function act(team: Team, m: Emp, a: string, text: string, amount: unknown)
       const n = Math.round(Number(amount));
       if (!support) fail("Ticket requests are for the support team.");
       if (!(n >= 1 && n <= 200)) fail("Ask for 1 to 200 tickets.");
-      await ev("request_tickets", n, "New");
-      push([o.id], `${m.display_name} wants ${n} more tickets`, "", "/#team");
+      const [r] = await sql`insert into public.work_events (employee_id, event, amount, status) values (${m.id}, 'request_tickets', ${n}, 'New')
+        returning status, approved_amount`;
+      if (r.status === "Approved") push([o.id], `${m.display_name} asked for ${n} tickets`, `Approved ${r.approved_amount} automatically (preset).`, "/#badmin");
+      else push([o.id], `${m.display_name} wants ${n} more tickets`, "Approve or reject in Admin → Ticket requests.", "/#badmin");
       break;
     }
     case "message": {
@@ -477,7 +488,7 @@ const SETTING_KEYS = ["silent_until", "work_start", "missed_update_fine_tk", "cl
   "wait_fine_per_hour_after24", "wait_fine_max_per_ticket", "daily_fine_cap_tickets", "ticket_value_tk"];
 async function adminData() {
   const today = ymd(new Date()), month0 = today.slice(0, 8) + "01";
-  const [people, split, fines, leave, sets, scores, assigned, upcoming] = await Promise.all([
+  const [people, split, fines, leave, sets, scores, assigned, upcoming, requests, presets, inbox] = await Promise.all([
     sql`select e.id::text, e.display_name name, t.key team, e.job_title title, e.rate_per_unit::float8 rate, e.active, e.joined_on::text joined,
           (e.photo_data is not null) has_photo from public.employees e join public.teams t on t.id = e.team_id order by t.key, e.created_at`,
     sql`select from_date::text, shares, dipon_tickets, note from public.current_split`,
@@ -492,9 +503,17 @@ async function adminData() {
           where s.day >= ${addDays(today, -1)}::date order by s.day desc, e.display_name`,
     sql`select e.display_name name, count(*)::int n from public.ticket_assign_log a join public.employees e on e.id = a.employee_id where a.day = ${today}::date group by 1`,
     sql`select id::int, from_date::text, shares, dipon_tickets, coalesce(note, '') note from public.ticket_splits where from_date > ${today}::date order by from_date, id`,
+    sql`select w.id::int, e.display_name name, w.amount, w.approved_amount, coalesce(w.status, 'New') status, coalesce(w.note, '') note,
+          to_char(w.at at time zone 'Asia/Dhaka', 'HH24:MI') time
+          from public.work_events w join public.employees e on e.id = w.employee_id
+          where w.event = 'request_tickets' and w.at >= ${dayStart(today)} order by w.at`,
+    sql`select id::int, day::text, max_per_request, coalesce(note, '') note from public.ticket_request_presets
+          where active and day >= ${today}::date order by day, id`,
+    sql`select open_total, unassigned, to_char(at at time zone 'Asia/Dhaka', 'DD Mon HH24:MI') at, coalesce(source, '') source
+          from public.inbox_snapshots order by at desc limit 1`,
   ]);
   return {
-    people, split: split[0] ?? null, upcoming, fines, leave, scores, assigned,
+    people, split: split[0] ?? null, upcoming, fines, leave, scores, assigned, requests, presets, inbox: inbox[0] ?? null,
     settings: sets.map((r) => ({ scope: r.scope, key: r.key, value: typeof r.value === "string" ? r.value : JSON.stringify(r.value), meaning: r.meaning })),
     fineRules: { support: ["Idle too long", "Fake start (no work after start report)", "Refund promised but not done", "Refund done but not logged", "Promised follow-up missed (48 h)", "Said done, then kept working", "Other"],
                  store: ["Client not answered within 15 min", "Other"] },
@@ -630,6 +649,45 @@ async function admin(o: Emp, b: Record<string, any>) {
       return { data: await adminData() };
     }
     case "recalc": { await recalc(today); return { data: await adminData() }; }
+    /* ticket requests: approve (any number) / reject; presets approve whole days automatically */
+    case "decideRequest": {
+      const id = Number(b.request) || 0, approve = b.approve === true;
+      const amount = Math.round(Number(b.amount));
+      if (approve && !(amount >= 1 && amount <= 200)) fail("Approve 1 to 200 tickets.");
+      const note = String(b.note || "").trim().slice(0, 200);
+      const [r] = await sql`update public.work_events set status = ${approve ? "Approved" : "Rejected"}, approved_amount = ${approve ? amount : null},
+          decided_by = ${o.id}, decided_at = now(), note = ${note || (approve ? null : "Not approved")}
+        where id = ${id} and event = 'request_tickets' and coalesce(status, 'New') in ('New', 'Approved')
+        returning employee_id::text, amount`;
+      if (!r) fail("That request was already handled.");
+      await sql`insert into public.audit_logs (actor_id, table_name, row_id, action, after) values (${o.id}, 'work_events', ${String(id)}, 'update', ${sql.json({ approve, amount: approve ? amount : null })})`;
+      push([r.employee_id], approve ? `Atiq approved ${amount} more tickets` : "Ticket request not approved",
+        approve ? `You asked for ${r.amount}. They come at the next ticket split.` : (note || "Atiq did not approve extra tickets this time."), "/#home");
+      return { data: await adminData() };
+    }
+    case "savePreset": {
+      const day = /^\d{4}-\d{2}-\d{2}$/.test(b.day || "") ? String(b.day) : today;
+      if (day < today) fail("Pick today or a later date.");
+      if (day > addDays(today, 90)) fail("Pick a date within the next 90 days.");
+      const max = b.max === "" || b.max == null ? null : Math.round(Number(b.max));
+      if (max !== null && !(max >= 1 && max <= 200)) fail("Max per request must be 1 to 200, or empty for no limit.");
+      const note = String(b.note || "").trim().slice(0, 200) || null;
+      await sql`update public.ticket_request_presets set active = false where active and day = ${day}::date`;
+      await sql`insert into public.ticket_request_presets (day, max_per_request, note, created_by) values (${day}::date, ${max}, ${note}, ${o.id})`;
+      // a preset for today also approves the requests already waiting
+      if (day === today && b.applyWaiting !== false) {
+        const done = await sql`update public.work_events set status = 'Approved', approved_amount = least(amount, coalesce(${max}::int, amount)),
+            decided_by = ${o.id}, decided_at = now(), note = 'Approved by preset'
+          where event = 'request_tickets' and coalesce(status, 'New') = 'New' and at >= ${dayStart(today)} returning employee_id::text, approved_amount`;
+        for (const d of done) push([d.employee_id], `Atiq approved ${d.approved_amount} more tickets`, "They come at the next ticket split.", "/#home");
+      }
+      return { data: await adminData() };
+    }
+    case "deletePreset": {
+      const del = await sql`update public.ticket_request_presets set active = false where id = ${Number(b.preset) || 0} and active returning id`;
+      if (!del.length) fail("That preset is already off.");
+      return { data: await adminData() };
+    }
     default: fail("Unknown admin action.");
   }
 }

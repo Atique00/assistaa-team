@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Store X-Ray · Assistaa</title>
+<meta name="description" content="Your whole Shopify store, X-rayed in a minute: every product, policy and offer checked. Free, one scan per store. Report by email.">
+<meta property="og:title" content="Free Store X-Ray · Assistaa"><meta property="og:description" content="See what your store is quietly losing. Every product checked, report by email."><meta property="og:url" content="https://assistaa.com/xray">
+<meta name="theme-color" content="#050912">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="/mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#050912;--surface:#0C1422;--ink:#F3F6FA;--muted:#AEB9C9;--dim:#7C889B;--line:#1B2638;--accent:#2CC0FF;--brand:#00AEEF;--signal:#FFC14A;--good:#3CD58A;--bad:#FF7A6B;
+--f-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;--f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
+*{box-sizing:border-box}
+html{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(700px 500px at 0% 0%,rgba(0,174,239,.16),transparent 65%),radial-gradient(600px 500px at 100% 100%,rgba(124,92,255,.12),transparent 65%);z-index:-1}
+a{color:var(--accent)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 20px;border-radius:12px;font:600 15px var(--f-body);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,background .2s,opacity .2s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(90deg,var(--brand),#7c5cff);color:#fff}
+.btn-primary[disabled]{opacity:.55;cursor:wait}
+.btn-ghost{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--ink)}
+.btn:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header.top{display:flex;justify-content:space-between;align-items:center;padding:22px 0}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo img:first-child{height:32px}.logo img:last-child{height:15px}
+.top nav{display:flex;align-items:center;gap:10px}
+.top nav a.lnk{color:var(--muted);text-decoration:none;font-size:14px;padding:0 8px}
+@media (max-width:720px){.top nav a.lnk,.top nav .btn-ghost{display:none}.top .btn{height:40px;padding:0 14px}}
+.eyebrow{font:500 12.5px var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(36px,5vw,58px)/1.03 var(--f-display);letter-spacing:-.03em;margin:12px 0 0}
+.sub{color:var(--muted);font-size:17px;max-width:500px;margin:14px 0 0}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:52px;align-items:start;padding:18px 0 40px}
+@media (max-width:960px){.grid{grid-template-columns:1fr;gap:28px}}
+.card{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:20px}
+.form{padding:22px;margin-top:24px;max-width:500px;display:flex;flex-direction:column;gap:14px}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:13px;font-weight:600}
+.fld input{height:48px;border-radius:12px;border:1px solid #243149;background:rgba(5,9,18,.6);color:var(--ink);font:500 15px var(--f-body);padding:0 14px;width:100%}
+.fld input::placeholder{color:#5D6880}
+.fld input[aria-invalid=true]{border-color:var(--bad)}
+.hint{font-size:12.5px;color:var(--dim)}
+.msg{font-size:14px;border-radius:12px;padding:10px 12px;display:none}
+.msg.on{display:block}
+.msg.err{background:rgba(255,122,107,.1);border:1px solid rgba(255,122,107,.35);color:#FFB3A8}
+.msg.ok{background:rgba(60,213,138,.08);border:1px solid rgba(60,213,138,.3);color:#9EF2C6}
+.codes{display:flex;gap:8px}
+.codes input{width:52px;height:60px;text-align:center;font:700 26px var(--f-mono);border-radius:12px;border:1px solid #243149;background:rgba(5,9,18,.6);color:var(--ink);padding:0}
+@media (max-width:420px){.codes input{width:42px;height:52px;font-size:22px}}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.linkbtn{background:none;border:0;color:var(--accent);font:600 13.5px var(--f-body);cursor:pointer;padding:0}
+.linkbtn[disabled]{color:var(--dim);cursor:default}
+.pow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--dim);margin-top:14px}
+/* console */
+.con{padding:20px;position:relative;overflow:hidden}
+.con-h{display:flex;justify-content:space-between;gap:10px;font:500 12.5px var(--f-mono);color:var(--muted);padding-right:44px}
+.live{display:flex;align-items:center;gap:6px;color:#8FF0BE;white-space:nowrap}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--good);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25;transform:scale(.7)}}
+.bar{height:4px;border-radius:4px;background:var(--line);margin:14px 0 10px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--signal));transform-origin:left;transform:scaleX(0);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.think{font:500 12.5px var(--f-mono);color:var(--muted);min-height:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.think b{display:inline-block;width:7px;height:13px;background:var(--accent);vertical-align:-2px;margin-left:2px;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.steps{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;min-height:250px}
+.steps li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.02);font-size:14px;animation:in .45s cubic-bezier(.2,.8,.2,1) both}
+.steps li.run{border-color:rgba(44,192,255,.5)}
+.steps li .n{font:500 11px var(--f-mono);color:var(--accent)}
+.steps li b{display:block;font-weight:600}
+.steps li span.t{color:var(--muted);font-size:12.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.steps li img,.steps li .ph{width:30px;height:30px;border-radius:7px;object-fit:cover;background:linear-gradient(135deg,#2a3550,#141b2b);float:left;margin-right:10px}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(44,192,255,.25);border-top-color:var(--accent);animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.sev{font:700 10.5px var(--f-mono);padding:3px 7px;border-radius:6px;white-space:nowrap}
+.sev.hi{background:rgba(255,107,90,.18);color:#FFA79C}.sev.md{background:rgba(255,193,74,.16);color:#FFD27A}.sev.ok{background:rgba(60,213,138,.16);color:#8FF0BE}.sev.lo{background:rgba(255,255,255,.08);color:var(--muted)}
+.foot{display:flex;align-items:center;gap:16px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.ring{position:relative;width:70px;height:70px;flex:none}
+.ring svg{width:70px;height:70px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:6;stroke:var(--line)}
+.ring .arc{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:800 20px var(--f-display)}
+.nums small{display:block;font:500 10.5px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.nums strong{display:block;font:800 26px/1.15 var(--f-display);font-variant-numeric:tabular-nums}
+.nums span{font:500 12px var(--f-mono);color:var(--muted)}
+.tag{position:absolute;top:14px;right:-36px;transform:rotate(35deg);background:var(--signal);color:#1A1405;font:700 10px/1 var(--f-mono);letter-spacing:.12em;padding:5px 40px;text-transform:uppercase}
+.pd{display:flex;gap:12px;align-items:center;padding:14px 16px;border-radius:14px;border:1px solid rgba(0,174,239,.4);background:rgba(0,174,239,.08);margin-top:14px;font-size:14px;color:#cfd6ff}
+.pd b{font:700 11.5px var(--f-mono);letter-spacing:.08em;color:var(--accent);white-space:nowrap}
+@media (max-width:560px){.pd{flex-direction:column;align-items:flex-start;gap:4px}}
+.gets{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:10px 0 60px}
+@media (max-width:860px){.gets{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.gets{grid-template-columns:1fr}}
+.gets div{padding:16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.gets b{display:block;margin-top:6px}
+.gets p{margin:4px 0 0;color:var(--muted);font-size:13.5px}
+.hidden{display:none!important}
+/* report */
+.rep{padding:10px 0 70px}
+.rep-h{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.rep-h h1{font-size:clamp(30px,4vw,46px)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+@media (max-width:860px){.tiles{grid-template-columns:1fr 1fr}}
+.tile{padding:16px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);animation:in .5s both}
+.tile small{color:var(--dim);font-size:12.5px}
+.tile strong{display:block;font:800 28px/1.15 var(--f-display);margin-top:2px}
+.tile span{color:var(--muted);font-size:12.5px}
+.sec{margin-top:34px}
+.sec h2{font:700 22px var(--f-display);margin:0 0 12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.two{grid-template-columns:1fr}}
+.bars{padding:18px;display:flex;flex-direction:column;gap:10px}
+.bars .l{display:flex;justify-content:space-between;font-size:13.5px}
+.bars .t{height:8px;border-radius:5px;background:var(--line);overflow:hidden}
+.bars .t i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#7c5cff);transform-origin:left;animation:grow 1.1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.issues{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.issues li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.02);font-size:14.5px}
+.issues .area{font:600 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:2px}
+.passed{display:flex;flex-wrap:wrap;gap:8px}
+.passed span{font-size:13px;padding:6px 10px;border-radius:999px;background:rgba(60,213,138,.08);border:1px solid rgba(60,213,138,.25);color:#9EF2C6}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+footer{border-top:1px solid var(--line);padding:26px 0;color:var(--dim);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer a{color:var(--muted);text-decoration:none}
+@media print{body{background:#fff;color:#111}body::before,header.top,footer,.cta,.no-print{display:none!important}.card,.tile,.issues li{border-color:#ddd;background:#fff}.tile strong,h1,h2{color:#111}.sub,.tile span,.issues li{color:#333}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <a class="logo" href="/" aria-label="Assistaa home"><img src="/logo-mark.svg" alt="" width="32" height="32"><img src="/logo-word.svg" alt="Assistaa" height="15"></a>
+  <nav aria-label="Main"><a class="lnk" href="/#services">Services</a><a class="lnk" href="/xray" aria-current="page" style="color:#fff">Store X-Ray</a><a class="lnk" href="/#pricing">Pricing</a><a class="btn btn-ghost" href="/app/login">Log in</a><a class="btn btn-primary" href="/#book">Book a call →</a></nav>
+</header>
+
+<!-- ===== Scan flow ===== -->
+<main id="flow">
+<div class="grid">
+  <section>
+    <div class="eyebrow">Free Store X-Ray</div>
+    <h1 id="h1">Your whole store, X-rayed in a minute.</h1>
+    <p class="sub" id="sub">Every product, policy and offer checked, the way shoppers, PayPal and Google see your store. No app to install, no access needed.</p>
+
+    <!-- step 1: details -->
+    <form class="card form" id="fStart" novalidate>
+      <div class="fld"><label for="store">Store link</label><input id="store" name="store" placeholder="yourstore.com" autocomplete="url" inputmode="url" required></div>
+      <div class="fld"><label for="email">Email</label><input id="email" name="email" type="email" placeholder="you@yourstore.com" autocomplete="email" required></div>
+      <div class="fld"><label for="wa">WhatsApp number</label><input id="wa" name="wa" type="tel" placeholder="+1 555 123 4567" autocomplete="tel" required><span class="hint">Include your country code. We send your code by email; the report goes to your email and WhatsApp.</span></div>
+      <div class="msg err" id="m1" role="alert"></div>
+      <button class="btn btn-primary" id="b1" type="submit" style="height:52px;font-size:16px">Send my code →</button>
+      <p class="hint" style="text-align:center;margin:0">1 free full scan per store and per person · we only read what your store shows the public</p>
+    </form>
+
+    <!-- step 2: code -->
+    <form class="card form hidden" id="fCode" novalidate>
+      <b style="font-size:20px">Enter the 6-digit code</b>
+      <p class="hint" style="font-size:14px;margin:0" id="sentTo">We sent it to your email.</p>
+      <div class="codes" id="codes" role="group" aria-label="6-digit code">
+        <input inputmode="numeric" maxlength="1" aria-label="Digit 1" autocomplete="one-time-code"><input inputmode="numeric" maxlength="1" aria-label="Digit 2"><input inputmode="numeric" maxlength="1" aria-label="Digit 3"><input inputmode="numeric" maxlength="1" aria-label="Digit 4"><input inputmode="numeric" maxlength="1" aria-label="Digit 5"><input inputmode="numeric" maxlength="1" aria-label="Digit 6">
+      </div>
+      <div class="msg" id="m2" role="alert"></div>
+      <button class="btn btn-primary" id="b2" type="submit" style="height:52px;font-size:16px">Verify and start scan →</button>
+      <div class="row hint"><button type="button" class="linkbtn" id="resend" disabled>Send a new code</button><span id="rs"></span><span>·</span><button type="button" class="linkbtn" id="edit">Change details</button></div>
+      <p class="hint" style="margin:0">Can't find it? Check spam or promotions.</p>
+    </form>
+
+    <!-- step 3/4: scanning + done (left side) -->
+    <div class="card form hidden" id="side" aria-live="polite">
+      <b style="font-size:20px" id="sideT">Thank you. Your X-Ray is running.</b>
+      <p class="hint" style="font-size:14px;margin:0" id="sideP">Keep this page open. We're reading your whole store now; your report also goes to your email when it's done.</p>
+      <div id="sideDone" class="hidden" style="display:flex;flex-direction:column;gap:10px">
+        <a class="btn btn-primary" id="openRep" href="#" style="height:52px;font-size:16px">Open my full report →</a>
+        <a class="btn btn-ghost" href="/#book">Book a 15-min call to go through it</a>
+      </div>
+    </div>
+    <div class="pow"><img src="/logo-mark.svg" alt="" width="15" height="15">Powered by Assistaa OS · built from 1M+ tickets and 300K+ listings</div>
+  </section>
+
+  <section>
+    <div class="card con" id="con">
+      <span class="tag" id="tag">Sample</span>
+      <div class="con-h"><span id="cDom">yourstore.com</span><span class="live"><i></i><em id="cState" style="font-style:normal">sample report</em></span></div>
+      <div class="bar"><i id="cBar"></i></div>
+      <div class="think" id="cThink">Waiting for your store<b></b></div>
+      <ol class="steps" id="cSteps"></ol>
+      <div class="foot">
+        <div class="ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="27"/><circle class="arc" id="cArc" cx="32" cy="32" r="27" pathLength="100"/></svg><b id="cScore">–</b></div>
+        <div class="nums"><small id="cLbl">Store score</small><strong id="cBig">–</strong><span id="cCount">0 products checked</span></div>
+      </div>
+    </div>
+    <div class="pd"><b>NEXT · PRODUCT DOCTOR</b><span>Connect your store and we fix what the X-Ray finds: tags, collections, size charts and titles, starting with the products you run ads on.</span></div>
+  </section>
+</div>
+
+<div class="eyebrow" style="color:var(--dim)">What you get</div>
+<div class="gets">
+  <div>📦<b>Full catalog breakdown</b><p>Every product counted: men, women, unisex, seasons and categories.</p></div>
+  <div>🏷<b>Titles, tags, collections</b><p>Which products fall short, and the pattern top stores use.</p></div>
+  <div>📏<b>Size charts & details</b><p>Exact count of products missing size charts, material and care.</p></div>
+  <div>🛡<b>Policies & ad readiness</b><p>Refund wording, trust signals, Google and Meta issues.</p></div>
+  <div>🎁<b>Offers & bundles</b><p>How your offers compare with what lifts order value.</p></div>
+  <div>✅<b>Fixes in order</b><p>What to fix first, so you know where the money is.</p></div>
+</div>
+</main>
+
+<!-- ===== Full report (?r=token) ===== -->
+<main id="report" class="rep hidden" aria-live="polite">
+  <div id="repBody"><p class="hint">Loading your report…</p></div>
+</main>
+</div>
+
+<footer><div class="wrap"><span>© Assistaa · Store X-Ray reads only public store pages.</span><span><a href="/privacy">Privacy</a> · <a href="/">Home</a></span></div></footer>
+
+<script>
+(function(){
+const FN = 'https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/xray';
+const KEY = 'sb_publishable_WMggW823F5JaQWI5tZUn3A_2RCcqKcA';
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Number(n || 0).toLocaleString('en-US');
+const SEV = {hi:'HIGH', md:'MED', lo:'LOW', ok:'GOOD'};
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const api = (body) => fetch(FN, {method:'POST', headers:{'content-type':'application/json', apikey: KEY}, body: JSON.stringify(body)});
+let device = ''; try { device = localStorage.getItem('xr_dev') || ''; if (!device) { device = crypto.getRandomValues(new Uint32Array(4)).join('-'); localStorage.setItem('xr_dev', device); } } catch {}
+const msg = (el, text, kind) => { el.textContent = text || ''; el.className = 'msg ' + (kind || 'err') + (text ? ' on' : ''); };
+
+/* ---------- Sample console (before a real scan) ---------- */
+const SAMPLE = [['Reading refund policy','No timeframe, a common PayPal dispute trigger','hi'],['Scanning 2,948 products','412 apparel items have no size chart','md'],['Checking titles, tags and collections','61% of products have under 5 tags','md'],['Comparing offers and bundles','No bundles or quantity breaks found','md'],['Checking Google / Meta readiness','10 of 12 checks passed','ok']];
+let sampleTimers = [], live = false;
+function sampleRun(){
+  if (live) return;
+  sampleTimers.forEach(clearTimeout); sampleTimers = [];
+  const ul = $('cSteps'); ul.innerHTML = ''; $('cArc').style.strokeDashoffset = 100; $('cScore').textContent = '–'; $('cBig').textContent = '–'; $('cCount').textContent = '0 products checked';
+  bar(0);
+  SAMPLE.forEach((s, i) => sampleTimers.push(setTimeout(() => { if (live) return; think(s[0] + '…'); ul.insertAdjacentHTML('beforeend', `<li><span class="n">0${i+1}</span><span><b>${s[0]}</b><span class="t">${s[1]}</span></span><span class="sev ${s[2]}">${SEV[s[2]]}</span></li>`); bar((i+1)/SAMPLE.length); }, 400 + i * 1500)));
+  sampleTimers.push(setTimeout(() => { if (live) return; $('cArc').style.strokeDashoffset = 100 - 64; $('cScore').textContent = '64'; $('cBig').textContent = '64 / 100'; $('cCount').textContent = '2,948 products checked'; think('Sample report ready'); }, 400 + SAMPLE.length * 1500));
+  if (!reduce) sampleTimers.push(setTimeout(sampleRun, 400 + SAMPLE.length * 1500 + 5000));
+}
+function bar(p){ $('cBar').style.transform = `scaleX(${Math.max(0, Math.min(1, p))})`; }
+function think(t){ $('cThink').innerHTML = esc(t) + '<b></b>'; }
+
+/* ---------- Step 1: start ---------- */
+let reqId = null, resendAt = 0, rsTimer = null;
+$('store').addEventListener('input', e => { const v = e.target.value.trim().replace(/^https?:\/\//i,'').replace(/\/.*$/,''); if (!live) $('cDom').textContent = v || 'yourstore.com'; });
+$('fStart').addEventListener('submit', async e => {
+  e.preventDefault();
+  const store = $('store').value.trim(), email = $('email').value.trim(), wa = $('wa').value.trim();
+  [['store', !/\./.test(store)], ['email', !/^\S+@\S+\.\S+$/.test(email)], ['wa', wa.replace(/\D/g,'').length < 8]].forEach(([id, bad]) => $(id).setAttribute('aria-invalid', bad));
+  if (!/\./.test(store)) return msg($('m1'), 'Enter your store address, like yourstore.com'), $('store').focus();
+  if (!/^\S+@\S+\.\S+$/.test(email)) return msg($('m1'), 'Enter the email where we should send your code.'), $('email').focus();
+  if (wa.replace(/\D/g,'').length < 8) return msg($('m1'), 'Add your WhatsApp number with country code.'), $('wa').focus();
+  msg($('m1'), ''); const b = $('b1'); b.disabled = true; b.textContent = 'Checking your store…';
+  try {
+    const r = await api({action:'start', store, email, whatsapp: wa, device, source: new URLSearchParams(location.search).get('src') || document.referrer.slice(0, 60)});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.id) {
+      const book = ['store_used','person_used','blocked','send_failed'].includes(j.error);
+      msg($('m1'), j.message || 'Something went wrong. Please try again.');
+      if (book) $('m1').insertAdjacentHTML('beforeend', ' <a href="/#book">Book a call →</a>');
+      return;
+    }
+    reqId = j.id; $('sentTo').textContent = `We sent it to ${j.sentTo}.`;
+    $('fStart').classList.add('hidden'); $('fCode').classList.remove('hidden');
+    startResendTimer(); const first = $('codes').querySelector('input'); first.focus();
+  } catch { msg($('m1'), 'We could not reach the scanner. Check your connection and try again.'); }
+  finally { b.disabled = false; b.textContent = 'Send my code →'; }
+});
+function startResendTimer(){
+  resendAt = Date.now() + 45000; $('resend').disabled = true; clearInterval(rsTimer);
+  rsTimer = setInterval(() => { const s = Math.ceil((resendAt - Date.now()) / 1000); if (s <= 0) { clearInterval(rsTimer); $('rs').textContent = ''; $('resend').disabled = false; } else $('rs').textContent = `in 0:${String(s).padStart(2,'0')}`; }, 500);
+}
+$('edit').addEventListener('click', () => { $('fCode').classList.add('hidden'); $('fStart').classList.remove('hidden'); msg($('m2'), ''); });
+$('resend').addEventListener('click', async () => {
+  $('resend').disabled = true;
+  const r = await api({action:'resend', id: reqId}); const j = await r.json().catch(() => ({}));
+  if (r.ok) { msg($('m2'), `New code sent to ${j.sentTo}.`, 'ok'); startResendTimer(); } else { msg($('m2'), j.message || 'Could not send a new code.'); $('resend').disabled = false; }
+});
+/* code boxes */
+const boxes = [...$('codes').querySelectorAll('input')];
+boxes.forEach((inp, i) => {
+  inp.addEventListener('input', () => { inp.value = inp.value.replace(/\D/g,'').slice(-1); if (inp.value && boxes[i+1]) boxes[i+1].focus(); if (boxes.every(x => x.value)) $('fCode').requestSubmit(); });
+  inp.addEventListener('keydown', e => { if (e.key === 'Backspace' && !inp.value && boxes[i-1]) boxes[i-1].focus(); });
+  inp.addEventListener('paste', e => { const d = (e.clipboardData.getData('text') || '').replace(/\D/g,'').slice(0,6); if (d.length) { e.preventDefault(); d.split('').forEach((c, k) => boxes[k] && (boxes[k].value = c)); (boxes[d.length] || boxes[5]).focus(); if (d.length === 6) $('fCode').requestSubmit(); } });
+});
+
+/* ---------- Step 2: verify ---------- */
+$('fCode').addEventListener('submit', async e => {
+  e.preventDefault();
+  const code = boxes.map(x => x.value).join('');
+  if (code.length !== 6) return msg($('m2'), 'Enter all 6 digits.');
+  const b = $('b2'); b.disabled = true; b.textContent = 'Checking…'; msg($('m2'), '');
+  try {
+    const r = await api({action:'verify', id: reqId, code}); const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.scanToken) { msg($('m2'), j.message || 'That code did not work.'); boxes.forEach(x => x.value = ''); boxes[0].focus(); return; }
+    runScan(j.scanToken);
+  } catch { msg($('m2'), 'We could not reach the scanner. Try again.'); }
+  finally { b.disabled = false; b.textContent = 'Verify and start scan →'; }
+});
+
+/* ---------- Step 3: live scan (streamed) ---------- */
+async function runScan(token){
+  live = true; sampleTimers.forEach(clearTimeout);
+  $('fCode').classList.add('hidden'); $('side').classList.remove('hidden');
+  $('h1').textContent = 'Your X-Ray is running.'; $('sub').textContent = 'We\'re reading every product, policy and offer in your store right now.';
+  $('tag').classList.add('hidden'); $('cState').textContent = 'scanning live';
+  const ul = $('cSteps'); ul.innerHTML = ''; $('cArc').style.strokeDashoffset = 100; $('cScore').textContent = '–'; $('cBig').textContent = '…'; $('cLbl').textContent = 'Store score';
+  bar(.03); think('Starting your X-Ray…');
+  if (innerWidth < 960) $('con').scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'});
+  const rows = {}; let k = 0, total = 0;
+  const STEPS = ['home','policies','catalog','titles','listings','offers','trust'];
+  const handle = ev => {
+    if (ev.type === 'hello') $('cDom').textContent = ev.domain;
+    if (ev.type === 'step' && ev.state === 'run') {
+      think(ev.label + '…'); k++;
+      ul.insertAdjacentHTML('beforeend', `<li class="run" id="s-${ev.key}"><span class="n">${String(k).padStart(2,'0')}</span><span><b>${esc(ev.label)}</b><span class="t">Working…</span></span><span class="spin" aria-hidden="true"></span></li>`);
+      rows[ev.key] = $('s-' + ev.key); bar((STEPS.indexOf(ev.key) + .4) / STEPS.length);
+    }
+    if (ev.type === 'step' && ev.state === 'done' && rows[ev.key]) {
+      const li = rows[ev.key]; li.classList.remove('run');
+      li.querySelector('.t').textContent = ev.note || ''; li.lastElementChild.outerHTML = `<span class="sev ${ev.sev}">${SEV[ev.sev] || ''}</span>`;
+      bar((STEPS.indexOf(ev.key) + 1) / STEPS.length);
+    }
+    if (ev.type === 'count') { total = ev.n; $('cCount').textContent = `${fmt(ev.n)} products found`; think(`Reading your catalog · ${fmt(ev.n)} products so far…`); }
+    if (ev.type === 'progress') { $('cCount').textContent = `${fmt(ev.n)} / ${fmt(ev.total)} products checked`; }
+    if (ev.type === 'product') {
+      ul.insertAdjacentHTML('beforeend', `<li><span class="n">↳</span><span>${ev.image ? `<img src="${esc(ev.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<i class="ph"></i>'}<b>${esc(ev.title)}</b><span class="t">Product checked</span></span><span class="sev ${ev.sev}">${esc(ev.verdict)}</span></li>`);
+      while (ul.children.length > 9) ul.removeChild(ul.firstElementChild);
+    }
+    if (ev.type === 'breakdown' && ev.breakdown) { $('cDom').textContent += ' · ' + ev.breakdown.label.toLowerCase(); }
+    if (ev.type === 'error') { think('Scan stopped'); $('cState').textContent = 'stopped'; $('sideT').textContent = 'We couldn\'t finish this scan.'; $('sideP').innerHTML = esc(ev.message) + ' <a href="/#book">Book a call →</a>'; }
+    if (ev.type === 'done') finish(ev);
+  };
+  try {
+    const r = await api({action:'scan', id: reqId, scanToken: token});
+    if (!r.ok || !r.body) { const j = await r.json().catch(() => ({})); return handle({type:'error', message: j.message || 'The scan could not start.'}); }
+    const rd = r.body.getReader(), dec = new TextDecoder(); let buf = '';
+    for (;;) {
+      const {done, value} = await rd.read(); if (done) break;
+      buf += dec.decode(value, {stream: true});
+      let i; while ((i = buf.indexOf('\n')) >= 0) { const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (line) { try { handle(JSON.parse(line)); } catch {} } }
+    }
+  } catch { handle({type:'error', message:'The connection dropped. Your report will still arrive by email.'}); }
+}
+function finish(ev){
+  const r = ev.result || {}; bar(1);
+  think('Report ready. Sent to your email.'); $('cState').textContent = 'scan complete';
+  $('cArc').style.strokeDashoffset = 100 - (r.score || 0);
+  let s = 0; const t = setInterval(() => { s = Math.min(r.score, s + 3); $('cScore').textContent = s; if (s >= r.score) clearInterval(t); }, reduce ? 0 : 30);
+  const hi = (r.issues || []).filter(i => i.sev === 'hi').length, all = (r.issues || []).length;
+  $('cLbl').textContent = 'Fixes found'; $('cBig').textContent = `${all} fixes · ${hi} urgent`; $('cCount').textContent = `${fmt(r.productsChecked)} products checked`;
+  $('h1').textContent = 'Your X-Ray is ready.'; $('sub').textContent = `${r.storeName || r.domain} · ${r.label}. We sent the full report to your email too.`;
+  $('sideT').textContent = `Score ${r.score}/100 · ${all} fixes found`; $('sideP').textContent = 'Open the full report to see every finding, the catalog breakdown and what to fix first.';
+  $('openRep').href = '/xray?r=' + ev.report; $('sideDone').classList.remove('hidden');
+}
+
+/* ---------- Report view ---------- */
+function bars(obj, total){
+  const e = Object.entries(obj).filter(([,v]) => v > 0); if (!e.length) return '<p class="hint">Not enough tags to tell.</p>';
+  return e.map(([k, v], i) => `<div><div class="l"><span>${esc(k)}</span><b>${fmt(v)} · ${Math.round(v / (total || 1) * 100)}%</b></div><div class="t"><i style="width:${Math.max(2, v / (total || 1) * 100)}%;animation-delay:${i * .08}s"></i></div></div>`).join('');
+}
+async function showReport(token){
+  $('flow').classList.add('hidden'); $('report').classList.remove('hidden'); document.title = 'Your Store X-Ray · Assistaa';
+  let j = {};
+  try { const r = await api({action:'report', token}); j = await r.json(); } catch {}
+  const R = j.result;
+  if (!R) { $('repBody').innerHTML = '<h1 style="font-size:34px">We couldn\'t find this report.</h1><p class="sub">The link may be wrong or expired. <a href="/xray">Run a Store X-Ray</a> or <a href="/#book">book a call</a>.</p>'; return; }
+  const B = R.breakdown || {}, M = R.metrics || {}, L = M.listings || {}, T = M.tags || {}, C = M.collections || {}, Ti = M.titles || {}, O = M.offers || {};
+  const n = R.productsChecked || 0, hi = R.issues.filter(i => i.sev === 'hi'), rest = R.issues.filter(i => i.sev !== 'hi');
+  const sc = L.sizeProducts ? (L.sizingApp ? 'App' : Math.round((L.sizeProducts - L.sizeMissing) / L.sizeProducts * 100) + '%') : '—';
+  const li = i => `<li><span class="sev ${i.sev}">${SEV[i.sev]}</span><span><span class="area">${esc(i.area)}</span>${esc(i.text)}</span></li>`;
+  $('repBody').innerHTML = `
+  <div class="rep-h"><div><div class="eyebrow">Store X-Ray report</div><h1>${esc(R.storeName || R.domain)}</h1><p class="sub">${esc(R.domain)} · ${esc(R.label)} · scanned ${new Date(R.scannedAt).toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'})}</p></div>
+  <div class="foot" style="border:0;margin:0;padding:0"><div class="ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="27"/><circle class="arc" id="rArc" cx="32" cy="32" r="27" pathLength="100"/></svg><b>${R.score}</b></div><div class="nums"><small>Store score</small><strong>${R.score} / 100</strong><span>${R.issues.length} fixes · ${hi.length} urgent</span></div></div></div>
+  <div class="tiles">
+    <div class="tile"><small>Products checked</small><strong>${fmt(n)}</strong><span>${n ? 'whole catalog' : 'catalog not public'}</span></div>
+    <div class="tile" style="animation-delay:.05s"><small>Size charts</small><strong>${sc}</strong><span>${L.sizeProducts ? (L.sizingApp ? 'size chart app found' : `${fmt(L.sizeMissing)} sized products missing one`) : 'no sized products'}</span></div>
+    <div class="tile" style="animation-delay:.1s"><small>Tags per product</small><strong>${T.avg ?? '—'}</strong><span>${T.under5 != null ? `${fmt(T.under5)} products under 5 tags` : ''}</span></div>
+    <div class="tile" style="animation-delay:.15s"><small>Title style</small><strong>${esc(Ti.style || '—')}</strong><span>${Ti.formats ? `${Ti.formats} format${Ti.formats > 1 ? 's' : ''} found` : ''}</span></div>
+    <div class="tile" style="animation-delay:.2s"><small>Collections</small><strong>${C.count != null ? fmt(C.count) + (C.count >= 250 ? '+' : '') : '—'}</strong><span>${C.count != null ? `${C.gender ? 'has' : 'no'} Men / Women · ${C.season ? 'has' : 'no'} seasons` : ''}</span></div>
+    <div class="tile" style="animation-delay:.25s"><small>Google / Meta readiness</small><strong>${R.google.passed} / ${R.google.total}</strong><span>checks passed</span></div>
+    <div class="tile" style="animation-delay:.3s"><small>Offers & bundles</small><strong>${O.bundles ? 'Found' : n ? 'None' : '—'}</strong><span>${O.onSalePct != null ? `${O.onSalePct}% of products on sale` : ''}</span></div>
+    <div class="tile" style="animation-delay:.35s"><small>Descriptions</small><strong>${L.thin != null ? fmt(n - L.thin) : '—'}</strong><span>${L.thin != null ? `of ${fmt(n)} have 40+ words` : ''}</span></div>
+  </div>
+  ${hi.length ? `<div class="sec"><h2>Fix these first</h2><ul class="issues">${hi.map(li).join('')}</ul></div>` : ''}
+  ${rest.length ? `<div class="sec"><h2>${hi.length ? 'Then these' : 'What to fix'}</h2><ul class="issues">${rest.map(li).join('')}</ul></div>` : ''}
+  ${n ? `<div class="sec"><h2>Your catalog</h2><div class="two">
+    <div class="card bars"><b>By gender</b>${bars({Men: B.gender?.men, Women: B.gender?.women, Unisex: B.gender?.unisex, 'Not marked': B.gender?.unknown}, n)}</div>
+    <div class="card bars"><b>By category</b>${bars(Object.fromEntries((B.categories || []).slice(0, 6).map(c => [c.name, c.count])), n)}</div>
+    <div class="card bars"><b>By season</b>${bars(B.seasons || {}, n)}${Object.values(B.seasons || {}).every(v => !v) ? '' : ''}</div>
+    <div class="card bars"><b>Product details</b>${bars({'Missing material': L.noMaterial, 'Missing care info': L.noCare, 'Under 3 images': L.fewImg, 'Same text as another': L.dupes}, n)}</div>
+  </div></div>` : ''}
+  <div class="sec"><h2>Winner match</h2><div class="card" style="padding:18px;color:var(--muted)">We compare your best products with proven winners in your niche (${esc(R.label.toLowerCase())}). Our team adds this to your follow-up, together with a fix plan.</div></div>
+  ${R.passed.length ? `<div class="sec"><h2>What's already good</h2><div class="passed">${R.passed.map(p => `<span>✓ ${esc(p)}</span>`).join('')}</div></div>` : ''}
+  <div class="sec"><div class="pd" style="margin:0"><b>NEXT · PRODUCT DOCTOR</b><span>Connect your store and we fix what this X-Ray found: tags, collections, size charts and titles, starting with the products you run ads on.</span></div>
+  <div class="cta"><a class="btn btn-primary" href="/#book">Book a 15-min call →</a><button class="btn btn-ghost no-print" onclick="print()">Save as PDF</button></div></div>
+  <p class="pow" style="margin-top:28px"><img src="/logo-mark.svg" alt="" width="15" height="15">Powered by Assistaa OS · built from 1M+ tickets and 300K+ listings</p>`;
+  requestAnimationFrame(() => { const a = $('rArc'); if (a) a.style.strokeDashoffset = 100 - R.score; });
+}
+
+const tok = new URLSearchParams(location.search).get('r');
+if (tok) showReport(tok); else { sampleRun(); }
+})();
+</script>
+</body>
+</html>

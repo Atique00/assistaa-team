@@ -1917,7 +1917,7 @@ if(!shown){ document.documentElement.classList.add('has-cursor'); shown=true; rx
 dot.style.transform='translate('+x+'px,'+y+'px)';
 const tgt=e.target.closest && e.target.closest('a,button,summary,.svc,.plan,.console,.report');
 const fld=e.target.closest('input,textarea,select'), cta=!fld && e.target.closest('.btn-primary'), lnk=!fld && !cta && e.target.closest('a,button,summary,.nm,.who-chip');
-      ring.classList.toggle('hover',!fld && !!(tgt||cta||lnk)); ring.classList.toggle('cart',!!lnk); ring.classList.toggle('bag',!!cta); dot.classList.toggle('off',!!(cta||lnk));
+      ring.classList.toggle('hover',!fld && !!(tgt||cta||lnk)); // simple dot + circle (no cart/bag shapes)
 }
 ,{passive:true}
 );
@@ -1925,7 +1925,7 @@ addEventListener('pointerdown',()=>ring.classList.add('down'));
 addEventListener('pointerup',()=>ring.classList.remove('down'));
 document.addEventListener('pointerleave',()=>{ document.documentElement.classList.remove('has-cursor'); shown=false; }
 );
-(function loop(){ const k=reduce?1:.18; rx+=(x-rx)*k; ry+=(y-ry)*k; ring.style.transform='translate('+rx+'px,'+ry+'px)'; requestAnimationFrame(loop); }
+(function loop(){ const k=reduce?1:.38; rx+=(x-rx)*k; ry+=(y-ry)*k; ring.style.transform='translate('+rx+'px,'+ry+'px)'; requestAnimationFrame(loop); }
 )();
 }
 const bf = document.getElementById('bookform');

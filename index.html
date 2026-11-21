@@ -932,6 +932,13 @@ footer .glass-logo .logo-mark{width:26px;height:26px}
 .nav-login:hover{color:#fff;border-color:#00AEEF;box-shadow:0 0 0 1px rgba(0,174,239,.35),0 8px 22px -10px rgba(0,174,239,.6)}
 @media (max-width:520px){.nav-act{gap:6px}.nav-act .btn{padding:9px 12px;font-size:13.5px}.nav-act .btn-primary .arrow{display:none}.nav-login svg{display:none}}
 @media (max-width:380px){.glass-logo .wq{display:none}}
+/* Calm, reliable scrolling everywhere: sections no longer stack/slide over each other (that overlapped on some
+   screens), review quotes appear whole instead of word by word, and the founder card only opens when you hover or tap. */
+.page{position:relative!important;top:auto!important;transform:none!important}
+.page::after{display:none!important}
+.spot-q .w{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}
+.spot-q{animation:qfade .45s ease both}
+@keyframes qfade{from{opacity:0}to{opacity:1}}
 /* No sideways scrolling on any device (the globe canvas and wide strips stay inside the page) */
 html{overflow-x:clip}
 @supports not (overflow:clip){html,body{overflow-x:hidden}}
@@ -1611,7 +1618,7 @@ const xform = document.getElementById('xform');
     const words = h => h.replace(/(<mark>|<\/mark>)|([^\s<]+)/g, (m, tag, w) => tag ? tag : `<span class="w">${w}</span>`);
     function show(i, user){
       const r = DATA[i]; cur = i;
-      q.innerHTML = reduce ? r.q : words(r.q);
+      q.innerHTML = r.q; q.style.animation = 'none'; void q.offsetWidth; q.style.animation = '';
       if (!reduce) q.querySelectorAll('.w').forEach((w, k) => w.style.animationDelay = (k * 0.028) + 's');
       who.innerHTML = `<span class="rc-cc">${r.cc}</span>${r.c} · ${r.yr}` + (r.n > 1 ? ` · <b>${r.n}× five-star</b>` : '');
       [...dots.children].forEach((d, k) => d.classList.toggle('on', SPOT[k] === i));
@@ -1751,7 +1758,7 @@ const xform = document.getElementById('xform');
     // Spotlight: wrap names in each new quote and pop up on its own a couple of times per visit.
     const q = document.getElementById('spotQ'); let seen = false, autos = 0;
     if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(en => { seen = en.isIntersecting; if (seen) maybeAuto(); }), {threshold: .5}).observe(q);
-    function maybeAuto(){ const n = q.querySelector('.nm'); if (!n || !seen || autos >= 2 || anchor) return; autos++; setTimeout(() => { if (seen && q.contains(n)) open(n, true); }, 1500); }
+    function maybeAuto(){ const n = q.querySelector('.nm'); if (!n || !seen || autos >= 0 || anchor) return; autos++; setTimeout(() => { if (seen && q.contains(n)) open(n, true); }, 1500); }
     new MutationObserver(() => { if (anchor && !document.body.contains(anchor)) close(); wrap(q); maybeAuto(); }).observe(q, {childList: true});
   })();
   /* Menu: mark the section in view */
@@ -1872,7 +1879,7 @@ pg.prepend(tag);
 function pinTops(){ pages.forEach(pg=>{ pg.style.top = Math.min(0, innerHeight - pg.offsetHeight) + 'px'; }
 ); }
 function stack(){
-if (reduce || home.hidden) return;
+if (true || reduce || home.hidden) return; // stacking turned off (Nov 2026)
 if (innerWidth <= 860) { pages.forEach(pg => { pg.style.transform = ''; pg.style.setProperty('--dim', 0); }); return; }
 const vh=innerHeight;
 for (let k=0;k<pages.length;k++){

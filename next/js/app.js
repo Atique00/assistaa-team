@@ -955,6 +955,9 @@
     const scores = (A.scores || []).filter((s) => s.day === scoreDay && people.some((p) => p.name === s.name));
     const sets = (A.settings || []).filter((s) => s.scope === bossTeam || s.scope === 'global');
     return `
+      <div class="card"><h3>${I('spark')} Voice mode <span class="cnt">not set up</span></h3>
+        <div class="small muted" style="margin-bottom:10px">"Hey OS": ask for reports and give commands by voice. Being built step by step; for now you can test your microphone.</div>
+        <button class="btn ghost" id="aVoice">${I('spark')} Set up voice mode</button></div>
       ${sup ? `<div class="card"><h3>${I('headset')} Ticket split <span class="cnt">from ${esc(sp.from_date || '—')}</span></h3>
         ${Object.entries(sp.shares || {}).map(([n, v]) => `<div class="item"><span class="dot ok"></span><div class="body"><div class="t">${esc(n)} · ${esc(v)}</div><div class="s">≈ ${Math.round(v / shareSum * 100)}% of new tickets${given[n] != null ? ' · ' + given[n] + ' given today' : ''}</div></div></div>`).join('')}
         ${sp.dipon_tickets ? `<div class="item"><span class="dot"></span><div class="body"><div class="t">Dipon extra · ${esc(sp.dipon_tickets)} tickets a day</div><div class="s">On top of his share</div></div></div>` : ''}
@@ -992,6 +995,7 @@
     on('aFine', () => sheetAdminFine());
     on('aLeave', () => sheetAdminLeave());
     on('aSplit', () => sheetAdminSplit());
+    on('aVoice', () => sheetVoice());
     $$('[data-treq]').forEach((b) => b.onclick = () => sheetTicketRequest((A.requests || []).find((r) => r.id === Number(b.dataset.treq))));
     $$('[data-delpreset]').forEach((b) => b.onclick = () => run(b, 'deletePreset', { preset: Number(b.dataset.delpreset) }, 'Preset turned off'));
     on('aPresetToday', (b) => run(b, 'savePreset', { day: dhakaToday(), max: '' }, 'Everyone approved for today'));
@@ -1064,6 +1068,43 @@
       }).catch((e) => { $('#lerr', sh).textContent = e.message; });
     });
   }
+  /* ---------- Voice mode ("Hey OS"), phase 0: setup screen + microphone test only ----------
+     Plan: the "Hey OS" white paper (Claude Docs, 21 Nov 2026). Voice may only run actions from VOICE_ACTIONS, and every
+     action there is an existing owner-console admin op, so anything new in the console becomes something you can say.
+     kind: 'ask' = answer only · 'do' = safe, read back then do · 'critical' = "Yo Boss, should I …?" + your yes + fresh check. */
+  const VOICE_ACTIONS = [
+    { say: 'Approve <name>\'s tickets / give <name> <n> tickets', op: 'decideRequest', kind: 'do' },
+    { say: 'Reject <name>\'s request', op: 'decideRequest', kind: 'do' },
+    { say: 'Approve everyone today / on <date>', op: 'savePreset', kind: 'do' },
+    { say: 'Change the ticket split', op: 'saveSplit', kind: 'do' },
+    { say: 'Add leave for <name>', op: 'addLeave', kind: 'do' },
+    { say: 'Add a fine / waive a fine', op: 'addFine', kind: 'critical' },
+    { say: 'Reset <name>\'s PIN / turn off access', op: 'resetPin', kind: 'critical' },
+  ];
+  function sheetVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const steps = [['Ticket approvals and presets (voice-ready actions)', true], ['Owner passkey, secret code and passphrase checks', false], ['Push-to-talk: reports with charts and safe actions', false], ['"Hey OS" wake word and voice match', false], ['WhatsApp Business, Commslayer, ads and meetings', false], ['Heirs, emergency access and secret folder', false]];
+    openSheet(`<h2>Voice mode</h2><p class="lead">"Hey OS" will answer report questions out loud with charts and run console actions. It asks "Yo Boss, should I …?" before anything critical, and only answers you. It is built in steps; nothing here acts on your business yet.</p>
+      ${steps.map(([t, ok], i) => `<div class="item"><span class="dot ${ok ? 'ok' : ''}"></span><div class="body"><div class="t">Step ${i + 1}</div><div class="s">${esc(t)}${ok ? ' · done' : ''}</div></div></div>`).join('')}
+      <div class="label" style="margin:14px 0 6px">Microphone test</div>
+      ${SR ? `<p class="small muted">Tap, say one sentence (for example "show me today's tickets"), and see what the phone heard. Nothing is saved or sent anywhere.</p>
+        <button class="btn" id="vtest">${I('play')} Test microphone</button><div id="vout" class="reply" style="margin-top:10px;display:none"></div>`
+        : '<p class="small muted">This browser has no speech recognition. Try Chrome or Safari on your phone.</p>'}
+      <div class="label" style="margin:14px 0 6px">Actions voice will be allowed to use</div>
+      ${VOICE_ACTIONS.map((a) => `<div class="item"><span class="dot ${a.kind === 'critical' ? 'bad' : 'amber'}"></span><div class="body"><div class="t">${esc(a.say)}</div><div class="s">${a.kind === 'critical' ? 'asks you first + identity check' : 'reads back, then does it'}</div></div></div>`).join('')}`, (sh) => {
+      const b = $('#vtest', sh); if (!b || !SR) return;
+      b.onclick = () => {
+        const out = $('#vout', sh), r = new SR();
+        r.lang = 'en-US'; r.interimResults = true; r.maxAlternatives = 1;
+        out.style.display = 'block'; out.textContent = 'Listening…'; b.disabled = true;
+        r.onresult = (e) => { out.textContent = Array.from(e.results).map((x) => x[0].transcript).join(' '); };
+        r.onerror = (e) => { out.textContent = e.error === 'not-allowed' ? 'Microphone blocked. Allow it in the browser settings and try again.' : 'Could not hear: ' + e.error; };
+        r.onend = () => { b.disabled = false; if (out.textContent === 'Listening…') out.textContent = 'Heard nothing. Try again a bit closer.'; };
+        try { r.start(); } catch (_) { b.disabled = false; }
+      };
+    });
+  }
+
   /* ---------- Ticket requests: agents ask, Atiq approves (any number) or rejects; presets approve whole days ---------- */
   const reqLeft = () => (A.requests || []).filter((r) => r.status === 'Approved').reduce((a, r) => a + (r.approved_amount || 0), 0);
   function ticketRequestsCard() {

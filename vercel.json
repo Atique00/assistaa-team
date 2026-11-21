@@ -1,3 +1,7 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/app", "destination": "https://assistaa-app.vercel.app/app" },
+    { "source": "/app/:path*", "destination": "https://assistaa-app.vercel.app/app/:path*" }
+  ]
 }

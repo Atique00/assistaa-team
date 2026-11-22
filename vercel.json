@@ -12,6 +12,11 @@
   ],
   "redirects": [
     {
+      "source": "/app/",
+      "destination": "/app",
+      "permanent": false
+    },
+    {
       "source": "/connect",
       "destination": "https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/shopify-app/install",
       "permanent": false

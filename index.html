@@ -271,6 +271,18 @@ section{padding-block:72px}
 @media (max-width:520px){.two{grid-template-columns:1fr}
 }
 .form-msg{font-size:14px;color:var(--good);font-weight:500}
+.slot-days{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.slot-days button,.slot-times button{flex:none;border:1px solid var(--line);background:color-mix(in srgb,var(--ink) 5%,transparent);color:var(--ink);border-radius:12px;font:inherit;cursor:pointer;transition:all .15s}
+.slot-days button{display:grid;gap:2px;justify-items:center;min-width:62px;padding:8px 10px}
+.slot-days button span{font-size:12px;opacity:.7}.slot-days button b{font-size:18px}
+.slot-times{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.slot-times button{padding:9px 8px;font-size:14px;font-weight:600}
+.slot-days button:hover,.slot-times button:hover{border-color:var(--accent)}
+.slot-days button[aria-checked=true],.slot-times button[aria-checked=true]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.slot-days button:focus-visible,.slot-times button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.slot-tz{margin:0;font-size:13px;color:var(--muted)}
+.slot-tz button{background:none;border:0;color:var(--accent);font:inherit;cursor:pointer;text-decoration:underline;padding:0}
+
 footer{border-top:1px solid var(--line);padding-block:40px;color:var(--muted);font-size:14px}
 .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px;align-items:center}
 .foot nav{display:flex;flex-wrap:wrap;gap:20px}
@@ -1370,7 +1382,14 @@ Super customer service! Recommended</blockquote><figcaption><span class="rc-cc">
 <select id="bneed" name="need"><option>Customer support</option><option>Disputes and chargebacks</option><option>Product listings</option><option>Creatives and content</option><option>The full back office</option></select>
 </div>
 <div class="field"><label for="bnote">Anything else?</label><textarea id="bnote" name="note" placeholder="Monthly orders, tools you use, what's not working"></textarea></div>
-<button class="btn btn-primary" type="submit" style="justify-content:center">Request my call <span class="arrow">→</span></button>
+<div class="field slot" id="slotwrap" hidden>
+<label id="slotlbl">Pick a time for your 30-minute call</label>
+<div class="slot-days" id="slotdays" role="radiogroup" aria-labelledby="slotlbl"></div>
+<div class="slot-times" id="slottimes" role="radiogroup" aria-label="Times"></div>
+<p class="slot-tz" id="slottz"></p>
+</div>
+<input type="text" name="website" id="bweb" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+<button class="btn btn-primary" type="submit" id="bsubmit" style="justify-content:center">Request my call <span class="arrow">→</span></button>
 <p class="form-msg" id="formmsg" hidden></p>
 </form>
 </div>
@@ -1929,6 +1948,46 @@ document.addEventListener('pointerleave',()=>{ document.documentElement.classLis
 }
 const bf = document.getElementById('bookform');
 const msg = document.getElementById('formmsg');
+// Book a call: free 30-minute slots from Atiq's calendar (Sat-Thu, 15:00-23:00 Dhaka), shown in the visitor's own time.
+const BOOK = 'https://zciuchdximmzwiisdkqu.supabase.co/functions/v1/book';
+const sw = document.getElementById('slotwrap'), sd = document.getElementById('slotdays'), st = document.getElementById('slottimes'), stz = document.getElementById('slottz'), bsub = document.getElementById('bsubmit');
+let slots = [], pickDay = null, pick = null, useSlots = true;
+const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'your time zone';
+const dKey = iso => new Date(iso).toLocaleDateString('en-CA');
+const label = () => { bsub.innerHTML = (pick && useSlots ? 'Book my call' : 'Request my call') + ' <span class="arrow">→</span>'; };
+function drawTimes(){
+  st.innerHTML = '';
+  slots.filter(t => dKey(t) === pickDay).forEach(t => {
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role','radio');
+    b.setAttribute('aria-checked', String(t === pick));
+    b.textContent = new Date(t).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    b.onclick = () => { pick = t; drawTimes(); label(); };
+    st.appendChild(b);
+  });
+}
+function drawDays(){
+  sd.innerHTML = '';
+  [...new Set(slots.map(dKey))].slice(0, 10).forEach(k => {
+    const first = slots.find(t => dKey(t) === k), d = new Date(first);
+    const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role','radio');
+    b.setAttribute('aria-checked', String(k === pickDay));
+    b.innerHTML = '<span>' + d.toLocaleDateString([], {weekday:'short'}) + '</span><b>' + d.getDate() + '</b><span>' + d.toLocaleDateString([], {month:'short'}) + '</span>';
+    b.onclick = () => { pickDay = k; pick = null; drawDays(); drawTimes(); label(); };
+    sd.appendChild(b);
+  });
+}
+function r409(d){ return /available|taken/i.test(d && d.error || ''); }
+function refreshSlots(){ fetch(BOOK + '/slots').then(r => r.json()).then(d => { slots = d.slots || []; pick = null; if (slots.length && !slots.some(t => dKey(t) === pickDay)) pickDay = dKey(slots[0]); drawDays(); drawTimes(); label(); }).catch(() => {}); }
+function noSlot(){ useSlots = false; pick = null; sw.hidden = true; label(); }
+fetch(BOOK + '/slots').then(r => r.json()).then(d => {
+  slots = d.slots || [];
+  if (!slots.length) return;
+  pickDay = dKey(slots[0]);
+  sw.hidden = false;
+  stz.innerHTML = 'Times are in your time zone (' + tz.replace(/_/g,' ') + '). <button type="button" id="noslot">None of these work? Just send the form</button>';
+  document.getElementById('noslot').onclick = noSlot;
+  drawDays(); drawTimes(); label();
+}).catch(() => {});
 bf.addEventListener('submit', e=>{
 e.preventDefault();
 const name = document.getElementById('bname').value.trim();
@@ -1940,7 +1999,25 @@ msg.textContent = 'Add your name and a valid work email so we can reach you.';
 return;
 }
 const btn = bf.querySelector('button[type=submit]');
+if (useSlots && slots.length && !pick){ msg.style.color = 'var(--signal)'; msg.textContent = 'Pick a time for your call, or choose "None of these work".'; return; }
 btn.disabled = true; msg.style.color = 'var(--muted)'; msg.textContent = 'Sending…';
+if (useSlots && pick){
+  fetch(BOOK + '/book', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({
+    name: name.slice(0,120), email: email.slice(0,200), start: pick,
+    store: document.getElementById('bstore').value.trim().slice(0,300), need: document.getElementById('bneed').value.slice(0,80),
+    note: document.getElementById('bnote').value.trim().slice(0,3000), website: document.getElementById('bweb').value }) })
+  .then(r => r.json().then(d => ({ ok: r.ok, d })))
+  .then(({ ok, d }) => {
+    if (!ok) { msg.style.color = 'var(--signal)'; msg.textContent = d.error || 'That didn\'t go through. Please try again.'; if (r409(d)) refreshSlots(); return; }
+    const when = new Date(d.start).toLocaleString([], {weekday:'long', day:'numeric', month:'long', hour:'numeric', minute:'2-digit'});
+    msg.style.color = 'var(--good)';
+    msg.textContent = 'You\'re booked, ' + name.split(' ')[0] + ': ' + when + ' (your time). The invite with the Google Meet link is on its way to ' + email + '.';
+    bf.reset(); slots = slots.filter(t => t !== pick); pick = null; drawDays(); drawTimes(); label();
+  })
+  .catch(() => { msg.style.color = 'var(--signal)'; msg.textContent = 'That didn\'t go through. Please try again in a minute.'; })
+  .finally(() => { btn.disabled = false; });
+  return;
+}
 fetch('https://zciuchdximmzwiisdkqu.supabase.co/rest/v1/website_leads', {
 method:'POST',
 headers:{'Content-Type':'application/json','apikey':'sb_publishable_WMggW823F5JaQWI5tZUn3A_2RCcqKcA','Prefer':'return=minimal'}
